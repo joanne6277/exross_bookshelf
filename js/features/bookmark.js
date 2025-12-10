@@ -1,5 +1,5 @@
 // Mock Data for bookmarks
-const BOOK_NOTES_DATA = [
+export const BOOK_NOTES_DATA = [
     {
         bookId: 'atomic',
         title: '原子習慣',

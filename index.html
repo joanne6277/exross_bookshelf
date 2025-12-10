@@ -179,59 +179,9 @@
                         </div>
                     </div>
                     <div id="all-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
-                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
-                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
-                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
-                            </div>
-                            <div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 5 天 10 小時</span></div>
-                            <div class="relative overflow-hidden aspect-[2/3]">
-                                <img src="https://placehold.co/300x450/629BC1/FFFFFF?text=System" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"><div class="h-full" style="width: 45%; background-color: var(--bg-accent);"></div></div>
-                                <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]">
-                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button>
-                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button>
-                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button>
-                                </div>
-                            </div>
-                            <div class="p-4 flex-1 flex flex-col relative">
-                                <h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">設計系統實戰</h3>
-                                <p class="text-sm text-text-secondary truncate">Author A</p>
-                            </div>
                         </div>
-                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
-                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
-                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
-                            </div>
-                            <div class="relative overflow-hidden aspect-[2/3]"><img src="https://placehold.co/300x450/F59E0B/FFFFFF?text=Habits" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"><div class="h-full" style="width: 80%; background-color: var(--bg-accent);"></div></div><div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]"><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button></div></div><div class="p-4 flex-1 flex flex-col relative"><h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">原子習慣</h3><p class="text-sm text-text-secondary truncate">James Clear</p></div></div>
-                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
-                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
-                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
-                            </div>
-                            <div class="relative overflow-hidden aspect-[2/3]"><img src="https://placehold.co/300x450/10B981/FFFFFF?text=UX" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]"><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button></div></div><div class="p-4 flex-1 flex flex-col relative"><h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">UX 領導力</h3><p class="text-sm text-text-secondary truncate">Author B</p></div></div>
-                    </div>
                     <div id="all-books-list" class="hidden space-y-4">
-                        <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all">
-                            <img src="https://placehold.co/80x120/629BC1/FFFFFF?text=System" alt="Cover" class="w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0">
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg text-text-primary mb-1">設計系統實戰</h3>
-                                <p class="text-sm text-text-secondary mb-1">Author A</p>
-                                <div class="text-xs text-red-500 font-medium">剩餘 5 天 10 小時</div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button class="p-2 rounded-full hover:bg-gray-100" data-modal-target="book-info-modal"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
-                            </div>
                         </div>
-                         <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all">
-                            <img src="https://placehold.co/80x120/F59E0B/FFFFFF?text=Habits" alt="Cover" class="w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0">
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg text-text-primary mb-1">原子習慣</h3>
-                                <p class="text-sm text-text-secondary">James Clear</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button class="p-2 rounded-full hover:bg-gray-100" data-modal-target="book-info-modal"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
-                            </div>
-                        </div>
-                    </div>
                     <!-- Batch Action Bar -->
                     <div id="batch-action-bar" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl p-4 z-50">
                         <div class="bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center justify-between p-4">
@@ -296,53 +246,69 @@
     </main>
 
     <!-- Book Info Modal -->
-    <div id="book-info-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4" data-modal-close="book-info-modal">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden modal-content" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-start p-6 border-b border-border-color bg-gray-50">
-                <div><h2 class="text-2xl font-bold text-text-primary mb-1">設計系統實戰</h2><a href="#" class="text-accent font-medium hover:underline" style="color: var(--bg-accent);">Author A</a></div>
-                <button data-modal-close="book-info-modal" class="text-text-secondary hover:text-text-primary p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+   <div id="book-info-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4" data-modal-close="book-info-modal">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden modal-content" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-start p-6 border-b border-border-color bg-gray-50">
+            <div>
+                <h2 id="modal-book-title" class="text-2xl font-bold text-text-primary mb-1">標題載入中...</h2>
+                <a href="#" id="modal-book-author" class="text-accent font-medium hover:underline">---</a>
             </div>
-            <div class="flex-1 overflow-y-auto p-6">
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="w-full md:w-1/3 flex-shrink-0 relative">
-                        <img src="https://placehold.co/300x450/629BC1/FFFFFF?text=System" alt="Book Cover" class="w-full rounded-lg shadow-md">
-                        <div class="absolute top-2 right-2 z-10"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">讀冊</span></div>
+            <button data-modal-close="book-info-modal" class="text-text-secondary hover:text-text-primary p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="w-full md:w-1/3 flex-shrink-0 relative">
+                    <img id="modal-book-cover" src="" alt="Book Cover" class="w-full rounded-lg shadow-md">
+                    <div class="absolute top-2 right-2 z-10">
+                        <span id="modal-book-source" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
                     </div>
-                    <div class="w-full md:w-2/3 flex flex-col">
-                        <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
-                            <div><span class="text-text-secondary block mb-1">出版社</span><span class="text-text-primary font-medium">O'Reilly Media</span></div>
-                            <div><span class="text-text-secondary block mb-1">出版日期</span><span class="text-text-primary font-medium">2024/05/20</span></div>
-                            <div><span class="text-text-secondary block mb-1">閱讀時數</span><span class="text-text-primary font-medium">12 小時 30 分</span></div>
-                            <div><span class="text-text-secondary block mb-1">上次閱讀</span><span class="text-text-primary font-medium">2025/11/19</span></div>
-                            <div><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span class="text-text-primary font-medium">2025/12/09 10:00</span></div>
-                        </div>
-                        <div class="flex gap-4 mb-8">
-                            <button class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
-                            <button data-modal-target="add-shelf-modal" class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
-                            <button class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
-                        </div>
-                        <div class="border-t border-border-color pt-4">
-                            <div class="mb-2">
-                                <button data-accordion-target="toc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
-                                <div id="toc-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
-                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">前言：為什麼需要設計系統？</a>
-                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第一章：基礎元件與原子設計</a>
-                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第二章：色彩與字型規範</a>
-                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第三章：元件庫的建置與維護</a>
-                                </div>
+                </div>
+
+                <div class="w-full md:w-2/3 flex flex-col">
+                    <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
+                        <div><span class="text-text-secondary block mb-1">出版社</span><span id="modal-book-publisher" class="text-text-primary font-medium">-</span></div>
+                        <div><span class="text-text-secondary block mb-1">出版日期</span><span id="modal-book-pubdate" class="text-text-primary font-medium">-</span></div>
+                        <div><span class="text-text-secondary block mb-1">閱讀時數</span><span id="modal-book-duration" class="text-text-primary font-medium">-</span></div>
+                        <div><span class="text-text-secondary block mb-1">上次閱讀</span><span id="modal-book-lastread" class="text-text-primary font-medium">-</span></div>
+                        <div id="modal-expiry-container"><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span id="modal-book-expiry" class="text-text-primary font-medium">-</span></div>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-8">
+                        <button class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
+                        <button data-modal-target="add-shelf-modal" class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
+                        <button class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
+                    </div>
+
+                    <div class="border-t border-border-color pt-4">
+                        <div class="mb-2">
+                            <button data-accordion-target="toc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+                            <div id="toc-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+                                <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">載入中...</a>
                             </div>
-                            <div>
-                                <button data-accordion-target="desc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
-                                <div id="desc-content" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
-                                    <p>本書深入淺出地介紹了如何從零開始建置一套完整的設計系統。適合設計師、工程師以及產品經理閱讀...</p>
-                                </div>
+                        </div>
+
+                        <div>
+                            <button data-accordion-target="desc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+                            <div id="desc-content" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
+                                <p id="modal-book-description">載入中...</p>
                             </div>
+                        </div>
+
+                        <div>
+                            <button data-accordion-target="notes-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors">
+                                <span>劃線筆記 (<span id="modal-notes-count">0</span>)</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                            </button>
+                            <div id="notes-content" class="hidden pl-2 pb-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
+                                </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Add to Shelf Modal -->
     <div id="add-shelf-modal" class="modal-overlay hidden fixed inset-0 z-[60] flex items-center justify-center p-4" data-modal-close="add-shelf-modal">
