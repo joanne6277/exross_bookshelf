@@ -1,25 +1,27 @@
+// js/router.js
 export function initRouter() {
     const navLinks = document.querySelectorAll('.nav-link');
     const views = document.querySelectorAll('.view-section');
 
-    // Add click listeners to nav items
+    // Add click listeners
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const viewName = link.dataset.view;
+            const target = e.currentTarget;
+            const viewName = target.dataset.view;
             switchView(viewName);
         });
     });
 
-    // Logo click reloads/resets to homepage
-    const logoBtn = document.getElementById('logo-reload-btn');
-    if (logoBtn) {
-        logoBtn.addEventListener('click', () => {
-            window.location.reload();
+    // Logo click reloads
+    const logoBtns = document.querySelectorAll('.logo-reload-btn');
+    logoBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            window.location.reload(); 
         });
-    }
+    });
 
-    // Initialize default view based on active class or default
+    // Initialize default view
     const activeLink = document.querySelector('.nav-link.active');
     if (activeLink) {
         switchView(activeLink.dataset.view);
@@ -30,7 +32,6 @@ export function initRouter() {
 
 function switchView(viewName) {
     const viewId = `view-${viewName}`;
-    const navId = `nav-${viewName}`;
 
     // Hide all views
     document.querySelectorAll('.view-section').forEach(view => {
@@ -41,11 +42,18 @@ function switchView(viewName) {
     const targetView = document.getElementById(viewId);
     if (targetView) targetView.classList.remove('hidden');
 
-    // Update nav state
+    // Sync Active States (Desktop & Mobile)
     document.querySelectorAll('.nav-link').forEach(nav => {
-        nav.classList.remove('active');
-        if (nav.id === navId) nav.classList.add('active');
+        if (nav.dataset.view === viewName) {
+            nav.classList.add('active');
+        } else {
+            nav.classList.remove('active');
+        }
     });
+    
+    // Scroll to top
+    const main = document.querySelector('main');
+    if(main) main.scrollTop = 0;
 
     console.log(`Switched to view: ${viewName}`);
 }

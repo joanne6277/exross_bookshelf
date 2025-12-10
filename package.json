@@ -12,5 +12,8 @@
     "@types/node": "^22.19.2",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.556.0"
   }
 }
