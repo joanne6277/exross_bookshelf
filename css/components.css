@@ -1,0 +1,116 @@
+/* Components: Buttons, Cards, Modals */
+
+/* Modals */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Buttons */
+.mask-btn {
+    background-color: white;
+    color: var(--bg-accent);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.mask-btn:hover {
+    background-color: var(--bg-accent-light);
+    transform: scale(1.05);
+}
+
+/* Filter Toggles */
+.filter-toggle-active {
+    background-color: var(--bg-accent-light);
+    color: var(--bg-accent);
+    border-color: var(--bg-accent);
+}
+
+/* Shelf Tags */
+.shelf-tag {
+    transition: all 0.2s ease;
+}
+.shelf-tag.selected {
+    background-color: var(--bg-accent);
+    color: white;
+    border-color: var(--bg-accent);
+}
+.shelf-tag:not(.selected) {
+    background-color: white;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+.shelf-tag:not(.selected):hover {
+    border-color: var(--bg-accent);
+    color: var(--bg-accent);
+}
+
+/* Store Cards */
+.store-card {
+    transition: all 0.2s;
+}
+.store-card.unlinked {
+    border-color: var(--border-color);
+    background-color: #ffffff;
+}
+.store-card.unlinked .status-text {
+    color: var(--text-secondary);
+}
+.store-card.unlinked .action-btn {
+    background-color: #F3F4F6;
+    color: var(--text-secondary);
+}
+.store-card.unlinked:hover {
+    border-color: var(--bg-accent);
+}
+.store-card.unlinked:hover .action-btn {
+    background-color: var(--bg-accent);
+    color: white;
+}
+
+.store-card.linked {
+    border-color: var(--success-color);
+    background-color: #F0FDF4;
+}
+.store-card.linked .status-text {
+    color: var(--success-color);
+    font-weight: 600;
+}
+.store-card.linked .action-btn {
+    background-color: transparent;
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+/* View switcher button styles */
+.view-btn {
+    padding: 0.5rem;
+    border-radius: 0.375rem; 
+    transition: all 0.2s ease-in-out;
+}
+.view-btn.active {
+    background-color: white;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    color: var(--bg-accent);
+}
+.view-btn:not(.active) {
+    color: var(--text-secondary);
+    background-color: transparent;
+    box-shadow: none;
+}
+.view-btn:not(.active):hover {
+    color: var(--text-primary);
+}
+
+/* Note filter button styles */
+.note-filter-btn {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+.note-filter-btn.active {
+    background-color: white;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}

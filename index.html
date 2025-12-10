@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>書櫃prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-primary text-text-primary h-screen flex flex-col">
+
+    <!-- 頂部導覽列 -->
+    <header class="app-header shadow-md border-b border-border-color flex items-center justify-between px-8 z-50 flex-shrink-0 h-16 sticky top-0">
+        <div class="flex items-center h-full gap-10">
+            <div class="flex items-center space-x-2 cursor-pointer hover:opacity-90 transition-opacity" id="logo-reload-btn">
+                <span class="rounded-lg p-1.5 bg-white/20 shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg></span>
+                <span class="text-xl font-bold tracking-wide">書紐eXross</span>
+            </div>
+            <nav class="flex h-full items-center space-x-1">
+                <a href="#" data-view="homepage" id="nav-homepage" class="nav-link active"><i data-lucide="home" class="w-4 h-4"></i><span>首頁</span></a>
+                <a href="#" data-view="books" id="nav-books" class="nav-link"><i data-lucide="book" class="w-4 h-4"></i><span>我的書櫃</span></a>
+                <a href="#" data-view="bookmark" id="nav-bookmark" class="nav-link"><i data-lucide="highlighter" class="w-4 h-4"></i><span>劃線筆記</span></a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-5">
+            <button class="p-1.5 rounded-full hover:bg-white/10 transition-colors relative"><i data-lucide="bell" class="w-5 h-5 text-white"></i><span class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
+            <div class="relative">
+                <button id="user-menu-btn" class="rounded-full w-9 h-9 bg-white/20 flex items-center justify-center overflow-hidden hover:bg-white/30 transition-all focus:ring-2 focus:ring-white/50 border border-white/10"><i data-lucide="user" class="w-5 h-5 text-white"></i></button>
+                <div id="user-dropdown" class="hidden absolute top-full right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
+                    <div class="p-5">
+                        <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">連結書店帳號</p>
+                        <div class="space-y-3">
+                             <div id="store-taaze" class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer" data-store-id="taaze" data-store-name="讀冊生活"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">T</div><div><p class="text-sm font-bold text-text-primary">讀冊生活</p><p class="text-xs status-text">未連結</p></div></div><button class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button></div>
+                             <div id="store-sanmin" class="store-card linked flex items-center justify-between p-3 rounded-lg border cursor-pointer" data-store-id="sanmin" data-store-name="三民書局"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600">S</div><div><p class="text-sm font-bold text-text-primary">三民書局</p><p class="text-xs status-text">已連結</p></div></div><button class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">管理</button></div>
+                             <div id="store-iread" class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer" data-store-id="iread" data-store-name="iRead 灰熊"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-xs font-bold text-yellow-600">i</div><div><p class="text-sm font-bold text-text-primary">iRead 灰熊</p><p class="text-xs status-text">未連結</p></div></div><button class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-1 overflow-y-auto bg-primary p-8 scroll-smooth w-full max-w-[1600px] mx-auto h-[calc(100vh-4rem)]">
+        
+        <!-- HOMEPAGE VIEW -->
+        <div id="view-homepage" class="view-section space-y-10">
+            <section>
+                <div class="flex items-center justify-between mb-6"><h2 class="text-2xl font-bold text-text-primary flex items-center gap-2"><i data-lucide="book-open" class="w-6 h-6 text-accent"></i>正在閱讀</h2></div>
+                <div class="flex overflow-x-auto space-x-6 pb-4 no-scrollbar">
+                    <div class="min-w-[220px] max-w-[220px] bg-secondary rounded-xl p-4 shadow-sm border border-border-color flex flex-col hover:shadow-md transition-shadow cursor-pointer relative group"><div class="absolute top-2.5 right-2.5 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 5 天 10 小時</span></div><div class="relative aspect-[2/3] mb-3"><img src="https://placehold.co/220x140/629BC1/FFFFFF?text=Design+System" alt="Cover" class="w-full h-full object-cover rounded-lg shadow-sm"><div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 40%; background-color: var(--bg-accent);"></div></div></div><h3 class="font-bold text-base text-text-primary truncate mb-0.5">設計系統實戰</h3><p class="text-xs text-text-secondary mb-2">作者 A</p><div class="mt-auto flex justify-between text-[10px] text-text-secondary font-medium"><span>40%</span><span>120/300頁</span></div></div>
+                    <div class="min-w-[220px] max-w-[220px] bg-secondary rounded-xl p-4 shadow-sm border border-border-color flex flex-col hover:shadow-md transition-shadow cursor-pointer"><div class="relative aspect-[2/3] mb-3"><img src="https://placehold.co/220x140/48C774/FFFFFF?text=UX+Leadership" alt="Cover" class="w-full h-full object-cover rounded-lg shadow-sm"><div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 10%; background-color: var(--bg-accent);"></div></div></div><h3 class="font-bold text-base text-text-primary truncate mb-0.5">UX 領導力</h3><p class="text-xs text-text-secondary mb-2">作者 B</p><div class="mt-auto flex justify-between text-[10px] text-text-secondary font-medium"><span>10%</span><span>45/450頁</span></div></div>
+                    <div class="min-w-[220px] max-w-[220px] bg-secondary rounded-xl p-4 shadow-sm border border-border-color flex flex-col hover:shadow-md transition-shadow cursor-pointer"><div class="relative aspect-[2/3] mb-3"><img src="https://placehold.co/220x140/F59E0B/FFFFFF?text=Atomic+Habits" alt="Cover" class="w-full h-full object-cover rounded-lg shadow-sm"><div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: 71%; background-color: var(--bg-accent);"></div></div></div><h3 class="font-bold text-base text-text-primary truncate mb-0.5">原子習慣</h3><p class="text-xs text-text-secondary mb-2">James Clear</p><div class="mt-auto flex justify-between text-[10px] text-text-secondary font-medium"><span>71%</span><span>200/280頁</span></div></div>
+                </div>
+            </section>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <section class="bg-secondary rounded-xl p-6 shadow-sm border border-border-color flex flex-col justify-between h-full"><div><h2 class="text-xl font-bold text-text-primary mb-2 flex items-center gap-2"><i data-lucide="target" class="w-5 h-5 text-accent"></i>今日閱讀目標</h2><p class="text-text-secondary text-sm mb-6">保持每日閱讀習慣，累積知識複利</p></div><div class="flex items-baseline space-x-2 mb-4"><span class="text-6xl font-bold tracking-tight" style="color: var(--bg-accent);">45</span><span class="text-xl text-text-secondary font-medium">/ 60 分鐘</span></div><div><div class="w-full bg-gray-100 rounded-full h-3 mb-3 overflow-hidden"><div class="h-3 rounded-full transition-all duration-1000" style="width: 75%; background-color: var(--bg-accent);"></div></div><p class="text-sm text-text-secondary text-right font-medium">已達成 75%</p></div></section>
+                <section class="xl:col-span-2"><h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-accent"></i>書城活動</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="h-48 rounded-xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-lg transition-all"><img src="https://placehold.co/600x300/3B82F6/FFFFFF?text=Summer+Sale" alt="Activity 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6"><div><span class="text-white text-xs font-bold px-2 py-1 rounded mb-2 inline-block" style="background-color: var(--bg-accent);">限時優惠</span><h3 class="text-white font-bold text-xl">夏日閱讀季：全館 5 折起</h3></div></div></div><div class="h-48 rounded-xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-lg transition-all"><img src="https://placehold.co/600x300/EC4899/FFFFFF?text=New+Arrivals" alt="Activity 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6"><div><span class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded mb-2 inline-block">新品上市</span><h3 class="text-white font-bold text-xl">本月新書上架</h3></div></div></div></div></section>
+            </div>
+        </div>
+
+        <!-- BOOKMARK VIEW -->
+        <div id="view-bookmark" class="view-section hidden h-full pb-4">
+            <div class="flex h-full rounded-2xl shadow-sm border border-border-color overflow-hidden bg-white">
+                <!-- Left Sidebar -->
+                <div class="w-1/3 min-w-[300px] max-w-[400px] border-r border-border-color flex flex-col bg-gray-50">
+                    <div class="p-5 border-b border-border-color bg-white z-10">
+                        <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-text-primary">劃線筆記</h1><span class="text-xs font-bold bg-accent-light text-accent px-2 py-1 rounded-full">共 5 本</span></div>
+                        <div class="relative mb-3"><input type="text" id="bookmark-search-input" placeholder="搜尋筆記內容..." class="w-full border border-border-color rounded-lg py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"><i data-lucide="search" class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i></div>
+                        <div class="flex gap-2"><select class="bg-white border border-border-color rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer flex-1"><option>書單: 全部</option><option>我的最愛</option><option>工作必讀</option><option>週末休閒</option></select></div>
+                    </div>
+                    <div class="p-2 border-b border-border-color">
+                        <div id="all-notes-btn" class="book-index-item flex gap-3 p-3 rounded-lg cursor-pointer border-l-4 group transition-all active" data-book-id="all">
+                            <div class="w-12 h-16 rounded bg-gray-200 flex items-center justify-center">
+                                <i data-lucide="inbox" class="w-6 h-6 text-gray-500"></i>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-center">
+                                <h3 class="text-sm font-bold text-text-primary mb-1">全部筆記</h3>
+                                <div class="flex items-center justify-between text-xs text-text-secondary"><span>共 39 則筆記</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="book-notes-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                        <!-- Book items injected by JS (bookmark.js) or static for now -->
+                        <div class="book-index-item flex gap-3 p-3 rounded-lg cursor-pointer border-l-4 border-transparent hover:bg-white hover:shadow-sm group transition-all" data-book-id="atomic"><img src="https://placehold.co/60x90/F59E0B/FFFFFF?text=Habits" class="w-12 h-16 object-cover rounded shadow-sm group-hover:opacity-90"><div class="flex-1 flex flex-col justify-center"><h3 class="text-sm font-bold text-text-primary mb-1 line-clamp-1">原子習慣</h3><div class="flex items-center justify-between text-xs text-text-secondary"><span>12 則筆記</span><span>剛剛</span></div></div></div>
+                        <div class="book-index-item flex gap-3 p-3 rounded-lg cursor-pointer border-l-4 border-transparent hover:bg-white hover:shadow-sm group transition-all" data-book-id="design"><img src="https://placehold.co/60x90/629BC1/FFFFFF?text=System" class="w-12 h-16 object-cover rounded shadow-sm group-hover:opacity-90"><div class="flex-1 flex flex-col justify-center"><h3 class="text-sm font-bold text-text-primary mb-1 line-clamp-1">設計系統實戰</h3><div class="flex items-center justify-between text-xs text-text-secondary"><span>5 則筆記</span><span>昨天</span></div></div></div>
+                        <div class="book-index-item flex gap-3 p-3 rounded-lg cursor-pointer border-l-4 border-transparent hover:bg-white hover:shadow-sm group transition-all" data-book-id="ux"><img src="https://placehold.co/60x90/48C774/FFFFFF?text=UX" class="w-12 h-16 object-cover rounded shadow-sm group-hover:opacity-90"><div class="flex-1 flex flex-col justify-center"><h3 class="text-sm font-bold text-text-primary mb-1 line-clamp-1">UX 領導力</h3><div class="flex items-center justify-between text-xs text-text-secondary"><span>22 則筆記</span><span>上週</span></div></div></div>
+                    </div>
+                </div>
+
+                <!-- Right Content -->
+                <div class="w-2/3 flex-1 flex flex-col bg-white relative">
+                    <div class="p-6 border-b border-border-color flex justify-between items-center bg-white z-10 sticky top-0">
+                        <div class="flex items-center gap-4"><div id="note-header-info"><h2 class="text-2xl font-bold text-text-primary mb-1">搜尋結果</h2><p class="text-sm text-text-secondary">共 3 本書，39 則筆記</p></div></div>
+                        <div class="flex items-center gap-4">
+                            <div id="note-filter-buttons" class="flex items-center gap-1 rounded-lg bg-gray-100 p-1">
+                                    <button class="note-filter-btn active px-3 py-1 text-sm" data-filter="all">全部</button>
+                                    <button class="note-filter-btn px-3 py-1 text-sm" data-filter="highlight">劃線</button>
+                                    <button class="note-filter-btn px-3 py-1 text-sm" data-filter="note">筆記</button>
+                            </div>
+                            <select id="notes-sort-select" class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer">
+                                <option>排序: 最近新增</option>
+                                <option>排序: 書名</option>
+                                <option>排序: 頁碼</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Note Cards Container - will be populated by JS -->
+                    <div class="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50/50" id="note-content-area">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- BOOKS VIEW -->
+        <div id="view-books" class="view-section hidden">
+            <div class="flex items-center justify-between mb-6"><h1 class="text-3xl font-bold text-text-primary">我的書櫃</h1><div class="flex items-center gap-4"><div class="relative w-64"><input type="text" placeholder="搜尋書名、作者..." class="w-full border border-border-color rounded-lg py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"><i data-lucide="search" class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i></div><div class="flex bg-gray-100 p-1 rounded-lg"><button id="grid-view-btn" class="view-btn active"><i data-lucide="layout-grid" class="w-5 h-5"></i></button><button id="list-view-btn" class="view-btn"><i data-lucide="list" class="w-5 h-5"></i></button></div></div></div>
+            <div class="border-b border-border-color mb-8 overflow-x-auto"><nav class="flex space-x-8 -mb-px min-w-max"><button data-tab-target="all-books" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all tab-active text-lg">全部書籍</button><button data-tab-target="collections" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all text-lg">自訂書單</button><button data-tab-target="archived" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all text-lg">封存區</button></nav></div>
+            <div id="tab-content">
+                <div id="all-books" class="tab-panel">
+                     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+                        <button id="batch-select-btn" class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600">批次選取</button>
+                        
+                        <div class="flex-1 flex justify-center items-center gap-4">
+                            <div class="flex items-center space-x-2"><span class="text-sm font-medium text-text-secondary">狀態:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部</option><option>未閱讀</option><option>閱讀中</option><option>已讀完</option></select></div>
+                            <div class="flex items-center space-x-2 border-l border-border-color pl-4"><span class="text-sm font-medium text-text-secondary">來源:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部來源</option><option>TAAZE 讀冊</option><option>三民書局</option><option>iRead 灰熊</option></select></div>
+                            <div class="flex items-center space-x-2 border-l border-border-color pl-4"><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">中文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">外文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">教科書</button></div>
+                        </div>
+
+                        <div class="relative" id="sort-menu-container">
+                            <div class="flex items-center">
+                                <button id="sort-menu-btn" class="flex items-center gap-2 bg-white border border-border-color rounded-lg px-4 py-2 text-sm text-text-primary font-medium hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <span id="sort-menu-label">排序: 最近閱讀</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </button>
+                                <button id="sort-direction-btn" class="ml-2 p-2 bg-white border border-border-color rounded-lg text-text-primary hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div id="sort-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
+                                <div class="p-2">
+                                    <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100" data-sort="recently-read">最近閱讀</button>
+                                    <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100" data-sort="purchase-date">最近購買</button>
+                                    <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100" data-sort="title">書名</button>
+                                    <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100" data-sort="publish-date">出版日期</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="all-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
+                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
+                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
+                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
+                            </div>
+                            <div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 5 天 10 小時</span></div>
+                            <div class="relative overflow-hidden aspect-[2/3]">
+                                <img src="https://placehold.co/300x450/629BC1/FFFFFF?text=System" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"><div class="h-full" style="width: 45%; background-color: var(--bg-accent);"></div></div>
+                                <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]">
+                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button>
+                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button>
+                                    <button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button>
+                                </div>
+                            </div>
+                            <div class="p-4 flex-1 flex flex-col relative">
+                                <h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">設計系統實戰</h3>
+                                <p class="text-sm text-text-secondary truncate">Author A</p>
+                            </div>
+                        </div>
+                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
+                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
+                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
+                            </div>
+                            <div class="relative overflow-hidden aspect-[2/3]"><img src="https://placehold.co/300x450/F59E0B/FFFFFF?text=Habits" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"><div class="h-full" style="width: 80%; background-color: var(--bg-accent);"></div></div><div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]"><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button></div></div><div class="p-4 flex-1 flex flex-col relative"><h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">原子習慣</h3><p class="text-sm text-text-secondary truncate">James Clear</p></div></div>
+                        <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
+                            <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
+                                <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
+                            </div>
+                            <div class="relative overflow-hidden aspect-[2/3]"><img src="https://placehold.co/300x450/10B981/FFFFFF?text=UX" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]"><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">立即閱讀</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="add-shelf-modal">加入書櫃</button><button class="mask-btn w-full py-2.5 rounded-lg shadow-md" data-modal-target="book-info-modal">更多資訊</button></div></div><div class="p-4 flex-1 flex flex-col relative"><h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer" data-modal-target="book-info-modal">UX 領導力</h3><p class="text-sm text-text-secondary truncate">Author B</p></div></div>
+                    </div>
+                    <div id="all-books-list" class="hidden space-y-4">
+                        <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all">
+                            <img src="https://placehold.co/80x120/629BC1/FFFFFF?text=System" alt="Cover" class="w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-text-primary mb-1">設計系統實戰</h3>
+                                <p class="text-sm text-text-secondary mb-1">Author A</p>
+                                <div class="text-xs text-red-500 font-medium">剩餘 5 天 10 小時</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 rounded-full hover:bg-gray-100" data-modal-target="book-info-modal"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
+                            </div>
+                        </div>
+                         <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all">
+                            <img src="https://placehold.co/80x120/F59E0B/FFFFFF?text=Habits" alt="Cover" class="w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-text-primary mb-1">原子習慣</h3>
+                                <p class="text-sm text-text-secondary">James Clear</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 rounded-full hover:bg-gray-100" data-modal-target="book-info-modal"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Batch Action Bar -->
+                    <div id="batch-action-bar" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl p-4 z-50">
+                        <div class="bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center justify-between p-4">
+                            <span id="selected-count" class="text-sm font-bold">已選取 0 本書</span>
+                            <div class="flex gap-4">
+                                <button id="batch-add-to-playlist-btn" class="px-4 py-2 bg-blue-100 text-black text-sm font-bold rounded-lg hover:bg-opacity-90">新增到自訂書單</button>
+                                <button id="batch-archive-btn" class="px-4 py-2 bg-gray-200 text-text-primary text-sm font-bold rounded-lg hover:bg-gray-300">移至封存區</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="collections" class="tab-panel hidden">
+                    <div id="collections-grid">
+                        <div id="playlist-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                            <button id="add-playlist-card-btn" class="bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col items-center justify-center border-2 border-dashed border-border-color hover:border-accent hover:shadow-lg transition-all group relative aspect-[2/3] text-text-secondary hover:text-accent">
+                                <i data-lucide="plus-circle" class="w-12 h-12 mb-2"></i>
+                                <span class="font-bold text-lg">新增書單</span>
+                            </button>
+                            <div class="playlist-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative">
+                                <div class="relative overflow-hidden aspect-[2/3]">
+                                    <img src="https://placehold.co/300x450/629BC1/FFFFFF?text=我的最愛" alt="我的最愛 Playlist Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <!-- Actions on hover -->
+                                    <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]">
+                                        <button class="rename-playlist-btn mask-btn w-full py-2.5 rounded-lg shadow-md">重新命名</button>
+                                        <button class="delete-playlist-btn mask-btn w-full py-2.5 rounded-lg shadow-md">刪除書單</button>
+                                    </div>
+                                </div>
+                                <div class="p-4 flex-1 flex flex-col relative">
+                                    <h3 class="playlist-name font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer">我的最愛</h3>
+                                    <p class="text-sm text-text-secondary">0 本書</p> <!-- Placeholder for book count -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="collections-list" class="hidden space-y-4">
+                        <button id="add-playlist-list-btn" class="bg-secondary rounded-xl shadow-sm border-2 border-dashed border-border-color p-4 flex items-center gap-6 hover:shadow-md hover:border-accent transition-all text-text-secondary hover:text-accent w-full">
+                            <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="plus" class="w-8 h-8"></i>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <h3 class="font-bold text-lg">新增書單</h3>
+                            </div>
+                        </button>
+                        <div class="playlist-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all">
+                            <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="list-music" class="w-8 h-8 text-gray-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-text-primary">我的最愛</h3>
+                                <p class="text-sm text-text-secondary">0 本書</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="rename-playlist-btn p-2 rounded-full hover:bg-gray-100"><i data-lucide="edit-3" class="w-5 h-5 text-text-primary"></i></button>
+                                <button class="delete-playlist-btn p-2 rounded-full hover:bg-gray-100"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="archived" class="tab-panel hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Book Info Modal -->
+    <div id="book-info-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4" data-modal-close="book-info-modal">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start p-6 border-b border-border-color bg-gray-50">
+                <div><h2 class="text-2xl font-bold text-text-primary mb-1">設計系統實戰</h2><a href="#" class="text-accent font-medium hover:underline" style="color: var(--bg-accent);">Author A</a></div>
+                <button data-modal-close="book-info-modal" class="text-text-secondary hover:text-text-primary p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3 flex-shrink-0 relative">
+                        <img src="https://placehold.co/300x450/629BC1/FFFFFF?text=System" alt="Book Cover" class="w-full rounded-lg shadow-md">
+                        <div class="absolute top-2 right-2 z-10"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">讀冊</span></div>
+                    </div>
+                    <div class="w-full md:w-2/3 flex flex-col">
+                        <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
+                            <div><span class="text-text-secondary block mb-1">出版社</span><span class="text-text-primary font-medium">O'Reilly Media</span></div>
+                            <div><span class="text-text-secondary block mb-1">出版日期</span><span class="text-text-primary font-medium">2024/05/20</span></div>
+                            <div><span class="text-text-secondary block mb-1">閱讀時數</span><span class="text-text-primary font-medium">12 小時 30 分</span></div>
+                            <div><span class="text-text-secondary block mb-1">上次閱讀</span><span class="text-text-primary font-medium">2025/11/19</span></div>
+                            <div><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span class="text-text-primary font-medium">2025/12/09 10:00</span></div>
+                        </div>
+                        <div class="flex gap-4 mb-8">
+                            <button class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
+                            <button data-modal-target="add-shelf-modal" class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
+                            <button class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
+                        </div>
+                        <div class="border-t border-border-color pt-4">
+                            <div class="mb-2">
+                                <button data-accordion-target="toc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+                                <div id="toc-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">前言：為什麼需要設計系統？</a>
+                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第一章：基礎元件與原子設計</a>
+                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第二章：色彩與字型規範</a>
+                                    <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">第三章：元件庫的建置與維護</a>
+                                </div>
+                            </div>
+                            <div>
+                                <button data-accordion-target="desc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+                                <div id="desc-content" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
+                                    <p>本書深入淺出地介紹了如何從零開始建置一套完整的設計系統。適合設計師、工程師以及產品經理閱讀...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Shelf Modal -->
+    <div id="add-shelf-modal" class="modal-overlay hidden fixed inset-0 z-[60] flex items-center justify-center p-4" data-modal-close="add-shelf-modal">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-4 border-b border-border-color bg-gray-50">
+                <h3 class="text-lg font-bold text-text-primary">加入自訂書單</h3>
+                <button data-modal-close="add-shelf-modal" class="text-text-secondary hover:text-text-primary"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <div class="flex flex-wrap gap-2" id="shelf-tags-container">
+                        <button class="shelf-tag px-3 py-1.5 rounded-full border text-sm font-medium shadow-sm flex items-center gap-1" data-selected="false"><i data-lucide="heart" class="w-3 h-3"></i> 我的最愛</button>
+                        <button class="shelf-tag selected px-3 py-1.5 rounded-full border text-sm font-medium shadow-sm" data-selected="true">工作必讀</button>
+                        <button class="shelf-tag px-3 py-1.5 rounded-full border text-sm font-medium shadow-sm" data-selected="false">週末休閒</button>
+                        <button class="shelf-tag px-3 py-1.5 rounded-full border text-sm font-medium shadow-sm" data-selected="false">待讀清單</button>
+                        <button class="shelf-tag px-3 py-1.5 rounded-full border text-sm font-medium shadow-sm" data-selected="false">設計靈感</button>
+                        <button class="px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-text-secondary text-sm hover:border-accent hover:text-accent transition-colors flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i> 新增</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-color bg-gray-50 flex justify-end">
+                <button data-modal-close="add-shelf-modal" class="px-6 py-2 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity" style="background-color: var(--bg-accent);">完成</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="js/main.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

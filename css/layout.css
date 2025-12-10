@@ -1,0 +1,68 @@
+/* App Layout & Navigation Styles */
+
+.app-header {
+    background-color: var(--bg-header);
+    color: var(--text-on-header);
+}
+.app-header input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Top Navigation Active State */
+.nav-link {
+    color: rgba(255,255,255,0.85);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link.active {
+    color: var(--bg-accent);
+    background-color: white;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.nav-link.active i {
+    stroke-width: 2.5px;
+}
+
+.tab-active {
+    border-bottom-color: var(--bg-accent) !important;
+    color: var(--bg-accent) !important;
+    font-weight: 700;
+}
+
+#user-dropdown {
+    color: var(--text-primary);
+}
+#user-dropdown .text-text-secondary {
+    color: var(--text-secondary);
+}
+
+/* Bookmark Sidebar Layout */
+.book-index-item {
+    transition: all 0.2s;
+}
+.book-index-item:hover {
+    background-color: var(--bg-primary);
+}
+.book-index-item.active {
+    background-color: #FFFFFF;
+    border-left-color: var(--bg-accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.book-index-item:not(.active) {
+    border-left-color: transparent;
+    background-color: transparent;
+}
