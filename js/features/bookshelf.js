@@ -275,6 +275,86 @@ export function initBookshelfFeature() {
     if (window.lucide) window.lucide.createIcons();
     initSortDropdown();
 }
+    // 5. 排序下拉選單
+    // --- Mobile Filter Modal Logic ---
+    const mobileFilterTrigger = document.getElementById('mobile-filter-trigger');
+    
+    if (mobileFilterTrigger) {
+        mobileFilterTrigger.addEventListener('click', () => {
+            openModal('mobile-filter-modal');
+        });
+    }
+
+    // 處理 Filter Chips (單選邏輯: 閱讀狀態)
+    document.querySelectorAll('.mobile-filter-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            const group = e.target.dataset.group;
+            // 移除同組其他按鈕的 active 樣式
+            document.querySelectorAll(`.mobile-filter-chip[data-group="${group}"]`).forEach(c => {
+                c.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'active');
+                c.classList.add('text-text-secondary');
+            });
+            // 加上自己的 active 樣式
+            e.target.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'active');
+            e.target.classList.remove('text-text-secondary');
+        });
+    });
+
+    // 處理 Toggle Buttons (多選邏輯: 類型)
+    document.querySelectorAll('.mobile-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const button = e.currentTarget;
+            button.classList.toggle('active');
+            
+            if (button.classList.contains('active')) {
+                button.classList.add('bg-accent', 'text-white', 'border-accent');
+                button.classList.remove('bg-white', 'text-text-secondary', 'hover:text-accent');
+            } else {
+                button.classList.remove('bg-accent', 'text-white', 'border-accent');
+                button.classList.add('bg-white', 'text-text-secondary', 'hover:text-accent');
+            }
+        });
+    });
+
+    // 處理重設按鈕
+    const resetBtn = document.getElementById('mobile-filter-reset');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            // 重設 Radio
+            const defaultSort = document.querySelector('input[name="mobile-sort"][value="recently-read"]');
+            if(defaultSort) defaultSort.checked = true;
+            
+            const defaultSource = document.querySelector('input[name="mobile-source"][value="all"]');
+            if(defaultSource) defaultSource.checked = true;
+
+            // 重設 Chips
+            document.querySelectorAll('.mobile-filter-chip').forEach(c => {
+                c.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'active');
+                c.classList.add('text-text-secondary');
+            });
+            const defaultStatus = document.querySelector('.mobile-filter-chip[data-value="all"]');
+            if(defaultStatus) defaultStatus.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'active');
+
+            // 重設 Toggles
+            document.querySelectorAll('.mobile-toggle-btn').forEach(b => {
+                b.classList.remove('active', 'bg-accent', 'text-white', 'border-accent');
+                b.classList.add('bg-white', 'text-text-secondary');
+            });
+        });
+    }
+
+    // 處理套用按鈕
+    const applyBtn = document.getElementById('mobile-filter-apply');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+            // 這裡可以加入實際的篩選邏輯，目前先關閉視窗
+            const modal = document.getElementById('mobile-filter-modal');
+            if(modal) modal.classList.add('hidden');
+            
+            // 可選：顯示一個 Toast 或 Console 訊息
+            console.log("Filters applied!");
+        });
+    }
 
 function initSortDropdown() {
     const btn = document.getElementById('sort-menu-btn');
