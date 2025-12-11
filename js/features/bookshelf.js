@@ -7,6 +7,7 @@ const BOOKS_DATA = [
         id: 'design',
         title: '設計系統實戰',
         author: 'Author A',
+        type: '教科書',
         cover: 'https://placehold.co/300x450/629BC1/FFFFFF?text=System',
         progress: 45,
         remainingTime: '5 天 10 小時',
@@ -15,6 +16,16 @@ const BOOKS_DATA = [
         source: '讀冊',
         description: '本書深入淺出地介紹了如何從零開始建置一套完整的設計系統，適合設計師與工程師閱讀。',
         expiryDate: '2025/12/09 10:00',
+        teachingResources: {
+            attachments: [
+                { name: '課程大綱.pdf', size: '1.2 MB', url: '#' },
+                { name: '補充教材.zip', size: '15 MB', url: '#' }
+            ],
+            links: [
+                { title: '官方 Figma 設計稿', url: '#' },
+                { title: '參考範例網站', url: '#' }
+            ]
+        },
         duration: '12 小時 30 分',
         lastRead: '2025/11/19'
     },
@@ -22,6 +33,7 @@ const BOOKS_DATA = [
         id: 'atomic',
         title: '原子習慣',
         author: 'James Clear',
+        type: '中文書',
         cover: 'https://placehold.co/300x450/F59E0B/FFFFFF?text=Habits',
         progress: 71,
         remainingTime: '',
@@ -37,6 +49,7 @@ const BOOKS_DATA = [
         id: 'ux',
         title: 'UX 領導力',
         author: 'Author B',
+        type: '外文書',
         cover: 'https://placehold.co/300x450/10B981/FFFFFF?text=UX',
         progress: 10,
         remainingTime: '',
@@ -52,38 +65,40 @@ const BOOKS_DATA = [
 
 // 2. 生成 HTML 模板
 function createBookCardHTML(book) {
-    const remainingTag = book.remainingTime 
+    const isTextbook = book.type === '教科書';
+    const remainingTag = isTextbook && book.remainingTime 
         ? `<div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 ${book.remainingTime}</span></div>` 
         : '';
 
     const progressWidth = `${book.progress}%`;
     
     return `
-    <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color hover:shadow-lg transition-all group relative" data-book-id="${book.id}">
+    <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color md:hover:shadow-lg transition-all group relative" data-book-id="${book.id}">
         <div class="absolute top-2 left-2 z-20 batch-checkbox hidden">
             <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent">
         </div>
         ${remainingTag}
-        <div class="relative overflow-hidden aspect-[2/3]">
-            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+        <div class="relative overflow-hidden aspect-[2/3] info-trigger cursor-pointer">
+            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover transition-transform duration-500 md:group-hover:scale-110">
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
                 <div class="h-full" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
             </div>
-            <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]">
+            <div class="absolute inset-0 bg-black/70 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px]">
                 <button class="mask-btn w-full py-2.5 rounded-lg shadow-md read-btn">立即閱讀</button>
                 <button class="mask-btn w-full py-2.5 rounded-lg shadow-md shelf-btn">加入書櫃</button>
                 <button class="mask-btn w-full py-2.5 rounded-lg shadow-md info-btn">更多資訊</button>
             </div>
         </div>
         <div class="p-4 flex-1 flex flex-col relative">
-            <h3 class="font-bold text-text-primary truncate mb-1 group-hover:text-accent cursor-pointer info-trigger">${book.title}</h3>
+            <h3 class="font-bold text-text-primary truncate mb-1 md:group-hover:text-accent cursor-pointer info-trigger">${book.title}</h3>
             <p class="text-sm text-text-secondary truncate">${book.author}</p>
         </div>
     </div>`;
 }
 
 function createBookListItemHTML(book) {
-    const remainingText = book.remainingTime 
+    const isTextbook = book.type === '教科書';
+    const remainingText = isTextbook && book.remainingTime 
         ? `<div class="text-xs text-red-500 font-medium">剩餘 ${book.remainingTime}</div>` 
         : '';
     
@@ -109,52 +124,76 @@ function showBookDetails(bookId) {
     const book = BOOKS_DATA.find(b => b.id === bookId);
     if (!book) return;
 
-    // 基本資訊
+    const authorText = book.publisher && book.publisher !== '-'
+        ? `${book.author}, ${book.publisher}`
+        : book.author;
+
+    // --- Update elements for both mobile and desktop ---
+
+    // Title and Author are shared
     document.getElementById('modal-book-title').textContent = book.title;
-    document.getElementById('modal-book-author').textContent = book.author;
+    document.getElementById('modal-book-author').textContent = authorText;
+
+    // Cover image
     document.getElementById('modal-book-cover').src = book.cover;
+    document.getElementById('modal-book-cover-mobile').src = book.cover;
+    
+    // Source badge
     document.getElementById('modal-book-source').textContent = book.source;
-    document.getElementById('modal-book-publisher').textContent = book.publisher || '-';
+    document.getElementById('modal-book-source-mobile').textContent = book.source;
+
+    // Bibliographic info
     document.getElementById('modal-book-pubdate').textContent = book.publishDate || '-';
+    document.getElementById('modal-book-pubdate-mobile').textContent = book.publishDate || '-';
     document.getElementById('modal-book-duration').textContent = book.duration || '-';
+    document.getElementById('modal-book-duration-mobile').textContent = book.duration || '-';
     document.getElementById('modal-book-lastread').textContent = book.lastRead || '-';
+    document.getElementById('modal-book-lastread-mobile').textContent = book.lastRead || '-';
+    
+    // Description
     document.getElementById('modal-book-description').textContent = book.description;
+    document.getElementById('modal-book-description-mobile').textContent = book.description;
 
-    // 到期日
-    const expiryEl = document.getElementById('modal-book-expiry');
-    const expiryContainer = document.getElementById('modal-expiry-container');
-    if (book.expiryDate) {
-        expiryEl.textContent = book.expiryDate;
-        expiryContainer.classList.remove('hidden');
-    } else {
-        expiryContainer.classList.add('hidden');
-    }
+    // --- Textbook-specific logic ---
+    const isTextbook = book.type === '教科書';
 
-    // 劃線筆記
-    const notesContainer = document.getElementById('notes-content');
-    const notesCountSpan = document.getElementById('modal-notes-count');
-    const bookNotes = BOOK_NOTES_DATA.find(b => b.bookId === bookId);
+    // Helper to toggle visibility for desktop and mobile containers
+    const toggleVisibility = (selector, visible) => {
+        document.getElementById(selector)?.classList.toggle('hidden', !visible);
+        document.getElementById(`${selector}-mobile`)?.classList.toggle('hidden', !visible);
+    };
 
-    if (bookNotes && bookNotes.notes.length > 0) {
-        notesCountSpan.textContent = bookNotes.notes.length;
-        notesContainer.innerHTML = bookNotes.notes.map(note => {
-            const isNote = note.type === 'note';
-            const badgeClass = isNote ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
-            const label = isNote ? '筆記' : '劃線';
-            return `
-            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm hover:bg-gray-100 transition-colors">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="${badgeClass} text-xs font-bold px-1.5 py-0.5 rounded">${label}</span>
-                    <span class="text-text-secondary text-xs">Page ${note.page}</span>
-                    <span class="text-text-secondary text-xs ml-auto">${note.date.split(' ')[0]}</span>
-                </div>
-                <blockquote class="text-text-primary font-medium mb-2 border-l-2 border-gray-300 pl-2 leading-relaxed">"${note.quote}"</blockquote>
-                ${isNote && note.comment ? `<div class="text-xs text-text-secondary bg-white p-2 rounded border border-gray-100 flex gap-2"><i data-lucide="message-square" class="w-3 h-3 flex-shrink-0"></i><span>${note.comment}</span></div>` : ''}
-            </div>`;
-        }).join('');
-    } else {
-        notesCountSpan.textContent = '0';
-        notesContainer.innerHTML = '<div class="text-center py-4 text-text-secondary text-sm">此書尚無劃線筆記</div>';
+    toggleVisibility('modal-expiry-container', isTextbook);
+    toggleVisibility('teaching-resources-container', isTextbook);
+
+    if (isTextbook) {
+        document.getElementById('modal-book-expiry').textContent = book.expiryDate;
+        document.getElementById('modal-book-expiry-mobile').textContent = book.expiryDate;
+
+        const resources = book.teachingResources;
+        let contentHTML = '';
+        if (resources) {
+            if (resources.attachments && resources.attachments.length > 0) {
+                contentHTML += '<h4 class="text-sm font-bold text-text-secondary mb-2 uppercase">附件</h4><div class="space-y-2">';
+                resources.attachments.forEach(file => {
+                    contentHTML += `<a href="${file.url}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><div class="flex items-center gap-3"><i data-lucide="file-text" class="w-5 h-5 text-text-secondary"></i><div><div class="font-medium text-text-primary">${file.name}</div><div class="text-xs text-text-secondary">${file.size}</div></div></div><i data-lucide="download" class="w-5 h-5 text-text-secondary"></i></a>`;
+                });
+                contentHTML += '</div>';
+            }
+            if (resources.links && resources.links.length > 0) {
+                contentHTML += '<h4 class="text-sm font-bold text-text-secondary mt-4 mb-2 uppercase">參考連結</h4><div class="space-y-2">';
+                resources.links.forEach(link => {
+                    contentHTML += `<a href="${link.url}" target="_blank" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><i data-lucide="link" class="w-5 h-5 text-text-secondary"></i><span class="font-medium text-text-primary">${link.title}</span><i data-lucide="arrow-up-right" class="w-4 h-4 text-text-secondary ml-auto"></i></a>`;
+                });
+                contentHTML += '</div>';
+            }
+        }
+        
+        const desktopContent = document.getElementById('teaching-resources-content');
+        const mobileContent = document.getElementById('teaching-resources-content-mobile');
+        const finalHTML = contentHTML || '<p>無可用資源。</p>';
+        if (desktopContent) desktopContent.innerHTML = finalHTML;
+        if (mobileContent) mobileContent.innerHTML = finalHTML;
     }
 
     if(window.lucide) window.lucide.createIcons();

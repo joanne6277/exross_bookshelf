@@ -145,22 +145,50 @@
         
         <!-- BOOKS VIEW -->
         <div id="view-books" class="view-section hidden">
-            <div class="flex items-center justify-between mb-6"><h1 class="text-3xl font-bold text-text-primary">我的書櫃</h1><div class="flex items-center gap-4"><div class="relative w-64"><input type="text" placeholder="搜尋書名、作者..." class="w-full border border-border-color rounded-lg py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"><i data-lucide="search" class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i></div><div class="flex bg-gray-100 p-1 rounded-lg"><button id="grid-view-btn" class="view-btn active"><i data-lucide="layout-grid" class="w-5 h-5"></i></button><button id="list-view-btn" class="view-btn"><i data-lucide="list" class="w-5 h-5"></i></button></div></div></div>
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-bold text-text-primary">我的書櫃</h1>
+                <div class="flex items-center gap-4">
+                    <div class="relative w-64">
+                        <input type="text" placeholder="搜尋書名、作者..." class="w-full border border-border-color rounded-lg py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow">
+                        <i data-lucide="search" class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    </div>
+                </div>
+            </div>
             <div class="border-b border-border-color mb-8 overflow-x-auto"><nav class="flex space-x-8 -mb-px min-w-max"><button data-tab-target="all-books" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all tab-active text-lg">全部書籍</button><button data-tab-target="collections" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all text-lg">自訂書單</button><button data-tab-target="archived" class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all text-lg">封存區</button></nav></div>
             <div id="tab-content">
                 <div id="all-books" class="tab-panel">
-                     <div class="flex flex-wrap items-center justify-between gap-4 mb-4 md:mb-8">
-                        <button id="batch-select-btn" class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600">批次選取</button>
-
-                        <div id="desktop-filters" class="md:flex flex-1 justify-center items-center gap-4">
-                            <div class="flex items-center space-x-2"><span class="text-sm font-medium text-text-secondary">狀態:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部</option><option>未閱讀</option><option>閱讀中</option><option>已讀完</option></select></div>
-                            <div class="flex items-center space-x-2 border-l border-border-color pl-4"><span class="text-sm font-medium text-text-secondary">來源:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部來源</option><option>TAAZE 讀冊</option><option>三民書局</option><option>iRead 灰熊</option></select></div>
-                            <div class="flex items-center space-x-2 border-l border-border-color pl-4"><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">中文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">外文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">教科書</button></div>
+                    <div class="flex items-center gap-3 mb-4 md:mb-8 overflow-x-auto no-scrollbar w-full pb-2">
+                        <button id="batch-select-btn" class="flex-shrink-0 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">批次選取</button>
+                        
+                        <div class="flex items-center space-x-2 flex-shrink-0 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg">
+                            <span class="text-sm font-medium text-text-secondary whitespace-nowrap pl-2 md:pl-0">狀態:</span>
+                            <select class="bg-transparent md:bg-white border-none md:border md:border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                                <option>全部</option>
+                                <option>未閱讀</option>
+                                <option>閱讀中</option>
+                                <option>已讀完</option>
+                            </select>
                         </div>
 
-                        <div class="md:block relative" id="sort-menu-container">
+                        <div class="flex items-center space-x-2 flex-shrink-0 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg md:border-l md:border-border-color md:pl-4">
+                            <span class="text-sm font-medium text-text-secondary whitespace-nowrap pl-2 md:pl-0">來源:</span>
+                            <select class="bg-transparent md:bg-white border-none md:border md:border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                                <option>全部來源</option>
+                                <option>TAAZE 讀冊</option>
+                                <option>三民書局</option>
+                                <option>iRead 灰熊</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center space-x-2 flex-shrink-0 md:border-l md:border-border-color md:pl-4">
+                            <button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">中文書</button>
+                            <button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">外文書</button>
+                            <button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">教科書</button>
+                        </div>
+
+                        <div class="relative flex-shrink-0 md:border-l md:border-border-color md:pl-4" id="sort-menu-container">
                             <div class="flex items-center">
-                                <button id="sort-menu-btn" class="flex items-center gap-2 bg-white border border-border-color rounded-lg px-4 py-2 text-sm text-text-primary font-medium hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                <button id="sort-menu-btn" class="flex items-center gap-2 bg-white border border-border-color rounded-lg px-4 py-2 text-sm text-text-primary font-medium hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300 whitespace-nowrap">
                                     <span id="sort-menu-label">排序: 最近閱讀</span>
                                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                                 </button>
@@ -177,11 +205,18 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="flex-1"></div>
+                        <div class="flex bg-gray-100 p-1 rounded-lg">
+                            <button id="grid-view-btn" class="view-btn active"><i data-lucide="layout-grid" class="w-5 h-5"></i></button>
+                            <button id="list-view-btn" class="view-btn"><i data-lucide="list" class="w-5 h-5"></i></button>
+                        </div>
                     </div>
+
                     <div id="all-books-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
-                        </div>
+                    </div>
                     <div id="all-books-list" class="hidden space-y-4">
-                        </div>
+                    </div>
+
                     <!-- Batch Action Bar -->
                     <div id="batch-action-bar" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl p-4 z-50">
                         <div class="bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center justify-between p-4">
@@ -256,57 +291,191 @@
             <button data-modal-close="book-info-modal" class="text-text-secondary hover:text-text-primary p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         
-        <div class="flex-1 overflow-y-auto p-6">
-            <div class="flex flex-col md:flex-row gap-8">
-                <div class="w-full md:w-1/3 flex-shrink-0 relative">
-                    <img id="modal-book-cover" src="" alt="Book Cover" class="w-full rounded-lg shadow-md">
-                    <div class="absolute top-2 right-2 z-10">
-                        <span id="modal-book-source" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
-                    </div>
-                </div>
-
-                <div class="w-full md:w-2/3 flex flex-col">
-                    <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
-                        <div><span class="text-text-secondary block mb-1">出版社</span><span id="modal-book-publisher" class="text-text-primary font-medium">-</span></div>
-                        <div><span class="text-text-secondary block mb-1">出版日期</span><span id="modal-book-pubdate" class="text-text-primary font-medium">-</span></div>
-                        <div><span class="text-text-secondary block mb-1">閱讀時數</span><span id="modal-book-duration" class="text-text-primary font-medium">-</span></div>
-                        <div><span class="text-text-secondary block mb-1">上次閱讀</span><span id="modal-book-lastread" class="text-text-primary font-medium">-</span></div>
-                        <div id="modal-expiry-container"><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span id="modal-book-expiry" class="text-text-primary font-medium">-</span></div>
-                    </div>
-                    
-                    <div class="flex gap-4 mb-8">
-                        <button class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
-                        <button data-modal-target="add-shelf-modal" class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
-                        <button class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
-                    </div>
-
-                    <div class="border-t border-border-color pt-4">
-                        <div class="mb-2">
-                            <button data-accordion-target="toc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
-                            <div id="toc-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
-                                <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">載入中...</a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button data-accordion-target="desc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
-                            <div id="desc-content" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
-                                <p id="modal-book-description">載入中...</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button data-accordion-target="notes-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors">
-                                <span>劃線筆記 (<span id="modal-notes-count">0</span>)</span>
-                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
-                            </button>
-                            <div id="notes-content" class="hidden pl-2 pb-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
+                <div class="flex-1 overflow-y-auto p-6">
+        
+                    <div class="flex flex-col gap-y-6">
+        
+        
+        
+                        <!-- Mobile-only Top Section -->
+        
+                        <div class="flex md:hidden flex-row gap-4">
+        
+                            <div class="w-3/5 flex-shrink-0 relative">
+        
+                                <img id="modal-book-cover-mobile" src="" alt="Book Cover" class="w-full rounded-lg shadow-md">
+        
+                                <div class="absolute top-2 right-2 z-10">
+        
+                                    <span id="modal-book-source-mobile" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
+        
                                 </div>
+        
+                            </div>
+        
+                            <div class="grid grid-rows-[60px_60px_60px] gap-4 content-start">
+        
+                                <button class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
+        
+                                <button data-modal-target="add-shelf-modal" class="flex-1 py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
+        
+                                <button class="flex-1 py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
+        
+                            </div>
+        
                         </div>
+        
+                        
+        
+                        <!-- Desktop-only Layout -->
+        
+                        <div class="hidden md:flex flex-row gap-8">
+        
+                            <div class="w-full md:w-1/3 flex-shrink-0 relative">
+        
+                                <img id="modal-book-cover" src="" alt="Book Cover" class="w-full rounded-lg shadow-md">
+        
+                                <div class="absolute top-2 right-2 z-10">
+        
+                                    <span id="modal-book-source" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
+        
+                                </div>
+        
+                            </div>
+        
+                            <div class="w-full md:w-2/3 flex flex-col">
+        
+                                <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
+        
+                                    <div><span class="text-text-secondary block mb-1">出版日期</span><span id="modal-book-pubdate" class="text-text-primary font-medium">-</span></div>
+        
+                                    <div><span class="text-text-secondary block mb-1">閱讀時數</span><span id="modal-book-duration" class="text-text-primary font-medium">-</span></div>
+        
+                                    <div><span class="text-text-secondary block mb-1">上次閱讀</span><span id="modal-book-lastread" class="text-text-primary font-medium">-</span></div>
+        
+                                    <div id="modal-expiry-container"><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span id="modal-book-expiry" class="text-text-primary font-medium">-</span></div>
+        
+                                </div>
+        
+                                <div class="flex gap-4 mb-8">
+        
+                                    <button class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style="background-color: var(--bg-accent);"><i data-lucide="book-open" class="w-5 h-5"></i> 立即閱讀</button>
+        
+                                    <button data-modal-target="add-shelf-modal" class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i data-lucide="plus" class="w-5 h-5"></i> 加入書櫃</button>
+        
+                                    <button class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i data-lucide="archive" class="w-5 h-5"></i> 封存</button>
+        
+                                </div>
+        
+                                <div class="border-t border-border-color pt-4">
+        
+                                    <div id="teaching-resources-container" class="hidden">
+        
+                                        <button data-accordion-target="teaching-resources-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>教學資源</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                        <div id="teaching-resources-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+        
+                                            <p>教學資源內容待補</p>
+        
+                                        </div>
+        
+                                    </div>
+        
+                                    <div class="mb-2">
+        
+                                        <button data-accordion-target="toc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                        <div id="toc-content" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+        
+                                            <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">載入中...</a>
+        
+                                        </div>
+        
+                                    </div>
+        
+            
+        
+                                    <div>
+        
+                                        <button data-accordion-target="desc-content" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                        <div id="desc-content" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
+        
+                                            <p id="modal-book-description">載入中...</p>
+        
+                                        </div>
+        
+                                    </div>
+        
+                                </div>
+        
+                            </div>
+        
+                        </div>
+        
+        
+        
+                        <!-- Common Info for Mobile -->
+        
+                        <div class="md:hidden">
+        
+                            <div class="grid grid-cols-2 gap-y-4 text-sm mb-8">
+        
+                                <div><span class="text-text-secondary block mb-1">出版日期</span><span id="modal-book-pubdate-mobile" class="text-text-primary font-medium">-</span></div>
+        
+                                <div><span class="text-text-secondary block mb-1">閱讀時數</span><span id="modal-book-duration-mobile" class="text-text-primary font-medium">-</span></div>
+        
+                                <div><span class="text-text-secondary block mb-1">上次閱讀</span><span id="modal-book-lastread-mobile" class="text-text-primary font-medium">-</span></div>
+        
+                                <div id="modal-expiry-container-mobile"><span class="text-text-secondary block mb-1 text-red-500 font-bold">到期日</span><span id="modal-book-expiry-mobile" class="text-text-primary font-medium">-</span></div>
+        
+                            </div>
+        
+                            <div class="border-t border-border-color pt-4">
+        
+                                <div id="teaching-resources-container-mobile" class="hidden">
+        
+                                    <button data-accordion-target="teaching-resources-content-mobile" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>教學資源</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                    <div id="teaching-resources-content-mobile" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+        
+                                        <p>教學資源內容待補</p>
+        
+                                    </div>
+        
+                                </div>
+        
+                                <div class="mb-2">
+        
+                                    <button data-accordion-target="toc-content-mobile" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>目錄 (Table of Contents)</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                    <div id="toc-content-mobile" class="hidden pl-2 text-sm text-text-secondary space-y-2 pb-4">
+        
+                                        <a href="#" class="block hover:text-accent py-1 border-b border-dashed border-gray-200">載入中...</a>
+        
+                                    </div>
+        
+                                </div>
+        
+                                <div>
+        
+                                    <button data-accordion-target="desc-content-mobile" class="w-full flex justify-between items-center py-3 text-text-primary font-bold hover:text-accent transition-colors"><span>內容簡介</span><i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i></button>
+        
+                                    <div id="desc-content-mobile" class="hidden pl-2 text-sm text-text-secondary leading-relaxed pb-4">
+        
+                                        <p id="modal-book-description-mobile">載入中...</p>
+        
+                                    </div>
+        
+                                </div>
+        
+                            </div>
+        
+                        </div>
+        
                     </div>
+        
                 </div>
-            </div>
-        </div>
     </div>
 </div>
 
