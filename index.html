@@ -151,17 +151,14 @@
                 <div id="all-books" class="tab-panel">
                      <div class="flex flex-wrap items-center justify-between gap-4 mb-4 md:mb-8">
                         <button id="batch-select-btn" class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600">批次選取</button>
-                        <button id="mobile-filter-trigger" class="md:hidden px-4 py-2 bg-white border border-border-color rounded-lg flex items-center gap-2 text-sm font-medium">
-                            <i data-lucide="filter"></i> 篩選與排序
-                        </button>
 
-                        <div id="desktop-filters" class="hidden md:flex flex-1 justify-center items-center gap-4">
+                        <div id="desktop-filters" class="md:flex flex-1 justify-center items-center gap-4">
                             <div class="flex items-center space-x-2"><span class="text-sm font-medium text-text-secondary">狀態:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部</option><option>未閱讀</option><option>閱讀中</option><option>已讀完</option></select></div>
                             <div class="flex items-center space-x-2 border-l border-border-color pl-4"><span class="text-sm font-medium text-text-secondary">來源:</span><select class="bg-white border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:border-accent transition-colors"><option>全部來源</option><option>TAAZE 讀冊</option><option>三民書局</option><option>iRead 灰熊</option></select></div>
                             <div class="flex items-center space-x-2 border-l border-border-color pl-4"><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">中文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">外文書</button><button class="filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all">教科書</button></div>
                         </div>
 
-                        <div class="hidden md:block relative" id="sort-menu-container">
+                        <div class="md:block relative" id="sort-menu-container">
                             <div class="flex items-center">
                                 <button id="sort-menu-btn" class="flex items-center gap-2 bg-white border border-border-color rounded-lg px-4 py-2 text-sm text-text-primary font-medium hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300">
                                     <span id="sort-menu-label">排序: 最近閱讀</span>
