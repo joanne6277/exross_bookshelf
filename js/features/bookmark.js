@@ -34,7 +34,7 @@ export function initBookmarkFeature() {
     const container = document.getElementById('note-content-area');
     const header = document.getElementById('note-header-info');
     const sidebarItems = document.querySelectorAll('.book-index-item');
-    const searchInputs = document.querySelectorAll('#bookmark-search-input, #bookmark-search-input-desktop');
+    const searchInputs = document.querySelectorAll('#bookmark-search-input, #mobile-bookmark-search');
     const filterButtons = document.querySelectorAll('.note-filter-btn');
 
     // 1. Initial Render (All notes)
@@ -53,32 +53,37 @@ export function initBookmarkFeature() {
     });
 
     // 3. Search Handler for both inputs
-    if (searchInputs.length > 0) {
-        const searchHandler = (e) => {
-            const term = e.target.value.toLowerCase().trim();
-            // Sync both input fields
-            searchInputs.forEach(input => {
-                if (input !== e.target) {
-                    input.value = e.target.value;
-                }
-            });
-            filterNotesBySearch(term);
-        };
-        searchInputs.forEach(input => {
-            input.addEventListener('input', searchHandler);
+    searchInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase().trim();
+                    
+                    // [關鍵] 同步另一個輸入框的值 (這樣切換視窗大小時才不會清空)
+                    searchInputs.forEach(otherInput => {
+                        if (otherInput !== input) otherInput.value = term;
+                    });
+
+                    filterNotesBySearch(term);
+                });
+            }
         });
-    }
-
-    // 4. Filter Buttons (Highlight vs Note)
+// 4. [修改] Filter Buttons Logic (狀態同步)
     filterButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const clickedBtn = e.currentTarget;
-            filterButtons.forEach(b => b.classList.remove('active'));
-            clickedBtn.classList.add('active');
-            
-            const filterType = clickedBtn.dataset.filter;
-            if (!filterType) return; // Ignore buttons without a data-filter attribute
+        btn.addEventListener('click', () => {
+            const filterType = btn.dataset.filter;
 
+            // [關鍵] 不只移除當前按鈕 active，而是移除所有按鈕的 active，再把「同類型」的按鈕都加上 active
+            filterButtons.forEach(b => b.classList.remove('active', 'bg-white', 'text-text-primary', 'shadow-sm'));
+            
+            // 找出所有相同 filter 類型的按鈕 (Mobile + Desktop) 並設為激活狀態
+            const sameTypeButtons = document.querySelectorAll(`.note-filter-btn[data-filter="${filterType}"]`);
+            sameTypeButtons.forEach(activeBtn => {
+                activeBtn.classList.add('active');
+                // 如果你的 CSS 依賴 utility classes 來做 active 樣式，這裡可能需要手動加回
+                // 參考 components.css 的 .active 定義
+            });
+            
+            // 執行篩選
             const cards = container.querySelectorAll('.note-card');
             cards.forEach(card => {
                 if (filterType === 'all' || card.dataset.type === filterType) {
@@ -89,7 +94,7 @@ export function initBookmarkFeature() {
             });
         });
     });
-
+    
     // --- Core Render Function ---
     function renderNotes(bookId) {
         if (!container) return;
