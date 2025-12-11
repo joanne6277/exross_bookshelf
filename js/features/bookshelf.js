@@ -88,18 +88,18 @@ function createBookListItemHTML(book) {
         : '';
     
     return `
-    <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-4 flex items-center gap-6 hover:shadow-md transition-all" data-book-id="${book.id}">
-        <img src="${book.cover}" alt="${book.title}" class="w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0 cursor-pointer info-trigger">
-        <div class="flex-1 cursor-pointer info-trigger">
-            <h3 class="font-bold text-lg text-text-primary mb-1 hover:text-accent">${book.title}</h3>
-            <p class="text-sm text-text-secondary mb-1">${book.author}</p>
+    <div class="book-list-item bg-secondary rounded-xl shadow-sm border border-border-color p-3 gap-3 md:p-4 md:gap-6 flex items-center gap-6 hover:shadow-md transition-all" data-book-id="${book.id}">
+        <img src="${book.cover}" alt="${book.title}" class="w-16 md:w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0 cursor-pointer info-trigger">
+        <div class="flex-1 min-w-0 cursor-pointer info-trigger">
+            <h3 class="font-bold text-base md:text-lg text-text-primary mb-1 hover:text-accent">${book.title}</h3>
+            <p class="text-xs md:text-sm text-text-secondary mb-1">${book.author}</p>
             ${remainingText}
-            <div class="w-full max-w-xs h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+            <div class="w-full max-w-xs h-1 md:h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
                 <div class="h-full bg-accent" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button class="p-2 rounded-full hover:bg-gray-100 info-btn"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
+            <button class="p-1.5 md:p-2 rounded-full hover:bg-gray-100 info-btn"><i data-lucide="more-horizontal" class="w-5 h-5 text-text-primary"></i></button>
         </div>
     </div>`;
 }
