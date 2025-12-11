@@ -34,7 +34,7 @@ export function initBookmarkFeature() {
     const container = document.getElementById('note-content-area');
     const header = document.getElementById('note-header-info');
     const sidebarItems = document.querySelectorAll('.book-index-item');
-    const searchInput = document.getElementById('bookmark-search-input');
+    const searchInputs = document.querySelectorAll('#bookmark-search-input, #bookmark-search-input-desktop');
     const filterButtons = document.querySelectorAll('.note-filter-btn');
 
     // 1. Initial Render (All notes)
@@ -52,21 +52,33 @@ export function initBookmarkFeature() {
         });
     });
 
-    // 3. Search Handler
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+    // 3. Search Handler for both inputs
+    if (searchInputs.length > 0) {
+        const searchHandler = (e) => {
             const term = e.target.value.toLowerCase().trim();
+            // Sync both input fields
+            searchInputs.forEach(input => {
+                if (input !== e.target) {
+                    input.value = e.target.value;
+                }
+            });
             filterNotesBySearch(term);
+        };
+        searchInputs.forEach(input => {
+            input.addEventListener('input', searchHandler);
         });
     }
 
     // 4. Filter Buttons (Highlight vs Note)
     filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            const clickedBtn = e.currentTarget;
             filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            clickedBtn.classList.add('active');
             
-            const filterType = btn.dataset.filter;
+            const filterType = clickedBtn.dataset.filter;
+            if (!filterType) return; // Ignore buttons without a data-filter attribute
+
             const cards = container.querySelectorAll('.note-card');
             cards.forEach(card => {
                 if (filterType === 'all' || card.dataset.type === filterType) {
@@ -84,30 +96,18 @@ export function initBookmarkFeature() {
         container.innerHTML = ''; // Clear current
 
         let displayNotes = [];
-        let headerTitle = '';
-        let headerSubtitle = '';
 
         if (bookId === 'all') {
-            // Flatten all notes
             BOOK_NOTES_DATA.forEach(book => {
                 book.notes.forEach(note => {
                     displayNotes.push({ ...note, bookTitle: book.title, bookId: book.bookId });
                 });
             });
-            headerTitle = '搜尋結果';
-            headerSubtitle = `共 ${BOOK_NOTES_DATA.length} 本書，${displayNotes.length} 則筆記`;
         } else {
             const book = BOOK_NOTES_DATA.find(b => b.bookId === bookId);
             if (book) {
                 displayNotes = book.notes.map(n => ({ ...n, bookTitle: book.title, bookId: book.bookId }));
-                headerTitle = book.title;
-                headerSubtitle = `${book.author} <span class="w-1 h-1 rounded-full bg-gray-300 inline-block mx-1"></span> ${book.totalNotes} 則筆記`;
             }
-        }
-
-        // Update Header
-        if (header) {
-            header.innerHTML = `<h2 class="text-2xl font-bold text-text-primary mb-1">${headerTitle}</h2><p class="text-sm text-text-secondary flex items-center gap-2">${headerSubtitle}</p>`;
         }
 
         // Render Cards
@@ -126,13 +126,14 @@ export function initBookmarkFeature() {
         const typeLabel = isNote ? '筆記' : '劃線';
         
         return `
-        <div class="note-card bg-white p-6 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all mb-6" data-type="${note.type}">
+        <div class="note-card bg-white p-4 md:p-6 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all mb-6" data-type="${note.type}">
             <div class="absolute top-2 right-2 z-10">
                 <span class="${badgeColor} text-xs font-bold px-2 py-1 rounded-full">${typeLabel}</span>
             </div>
             <div class="absolute left-0 top-6 bottom-6 w-1 bg-accent rounded-r-full"></div>
             <div class="pl-4">
-                <a href="#" class="text-sm font-bold text-accent hover:underline mb-2 block" data-book-link="${note.bookId}">${note.bookTitle}</a>
+                <div class="text-accent font-bold mb-2 block md:hidden">${note.bookTitle}</div>
+                <a href="#" class="text-sm font-bold text-accent hover:underline mb-2 block hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
                 <blockquote class="text-lg text-text-primary leading-relaxed mb-4 font-medium">"${note.quote}"</blockquote>
                 ${isNote && note.comment ? `
                 <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -148,18 +149,14 @@ export function initBookmarkFeature() {
 
     function filterNotesBySearch(term) {
         const cards = container.querySelectorAll('.note-card');
-        let visibleCount = 0;
         cards.forEach(card => {
             const textContent = card.innerText.toLowerCase();
             if (textContent.includes(term)) {
                 card.style.display = 'block';
-                visibleCount++;
             } else {
                 card.style.display = 'none';
             }
         });
-        if (term.length > 0 && header) {
-             header.innerHTML = `<h2 class="text-2xl font-bold text-text-primary mb-1">搜尋結果: "${term}"</h2><p class="text-sm text-text-secondary">找到 ${visibleCount} 則筆記</p>`;
-        }
+        // Do not update header on search for mobile-first design
     }
 }
