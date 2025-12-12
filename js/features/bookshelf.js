@@ -2,7 +2,7 @@ import { openModal } from '../utils.js';
 import { BOOK_NOTES_DATA } from './bookmark.js';
 
 // 1. 書籍資料庫 (模擬)
-const BOOKS_DATA = [
+export const BOOKS_DATA = [
     {
         id: 'design',
         title: '設計系統實戰',
@@ -64,7 +64,7 @@ const BOOKS_DATA = [
 ];
 
 // 2. 生成 HTML 模板
-function createBookCardHTML(book) {
+export function createBookCardHTML(book) {
     const isTextbook = book.type === '教科書';
     const remainingTag = isTextbook && book.remainingTime 
         ? `<div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 ${book.remainingTime}</span></div>` 
