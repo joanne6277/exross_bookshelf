@@ -31,3 +31,12 @@ select {
     -moz-appearance: none;
     appearance: none;
 }
+
+.activity-carousel-container {
+    overflow: hidden;
+    border-radius: 0.75rem; /* 12px */
+}
+
+.activity-carousel .swiper-slide {
+    height: 12rem; /* 192px */
+}
