@@ -1,7 +1,7 @@
 import { initRouter } from './router.js';
 import { initUtils } from './utils.js';
 import { initStoreFeature } from './features/store.js';
-import { initBookshelfFeature, BOOKS_DATA, createBookCardHTML } from './features/bookshelf.js';
+import { initBookshelfFeature, initFilterBar, BOOKS_DATA, createBookCardHTML } from './features/bookshelf.js';
 import { initBookmarkFeature } from './features/bookmark.js';
 import { initReadingGoal } from './features/readingGoal.js';
 import { initCollectionsFeature, getCollections, renameCollection, deleteCollection } from './features/collections.js';
@@ -19,9 +19,16 @@ export function renderBookshelfDetails(title) {
     // Function to set up the initial display state
     const setupDisplayState = (displayTitle) => {
         currentTitle = displayTitle;
+        // Use flex layout to position items
+        headerEl.className = 'flex items-center justify-between w-full';
         headerEl.innerHTML = `
-            <h1 id="bookshelf-title" class="text-3xl font-bold text-text-primary">${displayTitle}</h1>
-            <button id="edit-bookshelf-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-2">
+                <button id="back-from-details-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <h1 id="bookshelf-title" class="text-2xl md:text-3xl font-bold text-text-primary">${displayTitle}</h1>
+            </div>
+            <button id="edit-bookshelf-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors ml-auto">
                 <i data-lucide="settings-2" class="w-5 h-5 text-gray-600"></i>
             </button>
         `;
@@ -34,14 +41,16 @@ export function renderBookshelfDetails(title) {
 
     // Function to set up the editing state
     const setupEditState = (titleToEdit) => {
+        headerEl.className = 'flex items-center justify-between w-full gap-2';
         headerEl.innerHTML = `
-            <input type="text" id="bookshelf-title-input" class="text-3xl font-bold text-text-primary bg-transparent border-b-2 border-accent focus:outline-none" value="${titleToEdit}">
-            <button id="save-bookshelf-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <i data-lucide="check" class="w-5 h-5 text-green-600"></i>
+            <button id="cancel-edit-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
             </button>
-            <button id="delete-bookshelf-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
-            </button>
+            <input type="text" id="bookshelf-title-input" class="text-xl font-bold text-text-primary bg-transparent border-b-2 border-accent focus:outline-none w-1/2 md:w-auto flex-grow" value="${titleToEdit}">
+            <div class="flex items-center gap-2">
+                <button id="save-bookshelf-btn" class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600">送出</button>
+                <button id="delete-bookshelf-btn" class="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-lg hover:bg-red-600">刪除書單</button>
+            </div>
         `;
         if (window.lucide) window.lucide.createIcons();
         document.getElementById('bookshelf-title-input').focus();
@@ -64,11 +73,26 @@ export function renderBookshelfDetails(title) {
     // 3. Set initial content and render books
     setupDisplayState(currentTitle);
     renderBooks();
+    initFilterBar('details-', 'bookshelf-books-grid', 'bookshelf-books-list');
 
-    // 4. Use event delegation for save/delete actions
+    // 4. Use event delegation for actions
     headerEl.addEventListener('click', (e) => {
         const saveBtn = e.target.closest('#save-bookshelf-btn');
         const deleteBtn = e.target.closest('#delete-bookshelf-btn');
+        const cancelBtn = e.target.closest('#cancel-edit-btn');
+        const backBtn = e.target.closest('#back-from-details-btn');
+
+        if (backBtn) {
+            bookshelfDetailsView.classList.add('hidden');
+            document.getElementById('view-books').classList.remove('hidden');
+            document.querySelector('.tab-btn[data-tab-target="collections"]').click();
+            return;
+        }
+
+        if (cancelBtn) {
+            setupDisplayState(currentTitle);
+            return;
+        }
 
         if (saveBtn) {
             const newTitle = document.getElementById('bookshelf-title-input').value.trim();

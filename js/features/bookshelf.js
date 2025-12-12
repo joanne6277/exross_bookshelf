@@ -200,6 +200,93 @@ function showBookDetails(bookId) {
     openModal('book-info-modal');
 }
 
+export function initFilterBar(prefix, gridViewId, listViewId) {
+    // 視圖切換 (Grid/List)
+    const gridBtn = document.getElementById(`${prefix}grid-view-btn`);
+    const listBtn = document.getElementById(`${prefix}list-view-btn`);
+    const gridView = document.getElementById(gridViewId);
+    const listView = document.getElementById(listViewId);
+
+    if (gridBtn && listBtn && gridView && listView) {
+        gridBtn.addEventListener('click', () => {
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+        });
+
+        listBtn.addEventListener('click', () => {
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+        });
+    }
+
+    // 批次選取 (簡易版：僅支援 Grid)
+    const batchBtn = document.getElementById(`${prefix}batch-select-btn`);
+    const batchBar = document.getElementById('batch-action-bar'); // Note: batch bar is global
+    const countSpan = document.getElementById('selected-count');
+    let isBatchMode = false;
+    let selectedCount = 0;
+
+    if (batchBtn && gridView) {
+        batchBtn.addEventListener('click', () => {
+            isBatchMode = !isBatchMode;
+            batchBar.classList.toggle('hidden');
+            
+            const checkboxes = gridView.querySelectorAll('.batch-checkbox');
+            checkboxes.forEach(cb => cb.classList.toggle('hidden'));
+
+            if (isBatchMode) {
+                batchBtn.textContent = '完成';
+                batchBtn.classList.replace('bg-blue-500', 'bg-gray-500');
+            } else {
+                batchBtn.textContent = '批次選取';
+                batchBtn.classList.replace('bg-gray-500', 'bg-blue-500');
+                // 重置
+                gridView.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.book-item').classList.remove('ring-2', 'ring-accent');
+                });
+                selectedCount = 0;
+                if(countSpan) countSpan.textContent = `已選取 0 本書`;
+            }
+        });
+
+        gridView.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const item = e.target.closest('.book-item');
+                if (e.target.checked) {
+                    item.classList.add('ring-2', 'ring-accent');
+                    selectedCount++;
+                } else {
+                    item.classList.remove('ring-2', 'ring-accent');
+                    selectedCount--;
+                }
+                if(countSpan) countSpan.textContent = `已選取 ${selectedCount} 本書`;
+            }
+        });
+    }
+
+    // 排序下拉選單
+    const sortBtn = document.getElementById(`${prefix}sort-menu-btn`);
+    const sortDropdown = document.getElementById(`${prefix}sort-dropdown`);
+    if (sortBtn && sortDropdown) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sortDropdown.classList.toggle('hidden');
+        });
+        // A global click listener is tricky here. If we add one for each filter bar, we'll have multiple.
+        // For simplicity, this might need a more robust solution later, but for now, we'll add it.
+        window.addEventListener('click', (e) => {
+            if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
+                sortDropdown.classList.add('hidden');
+            }
+        });
+    }
+}
+
 // 4. 初始化功能
 export function initBookshelfFeature() {
     // 渲染書籍
@@ -242,79 +329,12 @@ export function initBookshelfFeature() {
         });
     });
 
-    // 視圖切換 (Grid/List)
-    const gridBtn = document.getElementById('grid-view-btn');
-    const listBtn = document.getElementById('list-view-btn');
-    const gridView = document.getElementById('all-books-grid');
-    const listView = document.getElementById('all-books-list');
-
-    if (gridBtn && listBtn) {
-        gridBtn.addEventListener('click', () => {
-            gridBtn.classList.add('active');
-            listBtn.classList.remove('active');
-            gridView?.classList.remove('hidden');
-            listView?.classList.add('hidden');
-        });
-
-        listBtn.addEventListener('click', () => {
-            listBtn.classList.add('active');
-            gridBtn.classList.remove('active');
-            gridView?.classList.add('hidden');
-            listView?.classList.remove('hidden');
-        });
-    }
-
-    // 批次選取 (簡易版：僅支援 Grid)
-    const batchBtn = document.getElementById('batch-select-btn');
-    const batchBar = document.getElementById('batch-action-bar');
-    const countSpan = document.getElementById('selected-count');
-    let isBatchMode = false;
-    let selectedCount = 0;
-
-    if (batchBtn && gridContainer) {
-        batchBtn.addEventListener('click', () => {
-            isBatchMode = !isBatchMode;
-            batchBar.classList.toggle('hidden');
-            
-            const checkboxes = gridContainer.querySelectorAll('.batch-checkbox');
-            checkboxes.forEach(cb => cb.classList.toggle('hidden'));
-
-            if (isBatchMode) {
-                batchBtn.textContent = '完成';
-                batchBtn.classList.replace('bg-blue-500', 'bg-gray-500');
-            } else {
-                batchBtn.textContent = '批次選取';
-                batchBtn.classList.replace('bg-gray-500', 'bg-blue-500');
-                // 重置
-                gridContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.book-item').classList.remove('ring-2', 'ring-accent');
-                });
-                selectedCount = 0;
-                if(countSpan) countSpan.textContent = `已選取 0 本書`;
-            }
-        });
-
-        gridContainer.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox') {
-                const item = e.target.closest('.book-item');
-                if (e.target.checked) {
-                    item.classList.add('ring-2', 'ring-accent');
-                    selectedCount++;
-                } else {
-                    item.classList.remove('ring-2', 'ring-accent');
-                    selectedCount--;
-                }
-                if(countSpan) countSpan.textContent = `已選取 ${selectedCount} 本書`;
-            }
-        });
-    }
+    // 設定 All Books 篩選列功能
+    initFilterBar('', 'all-books-grid', 'all-books-list');
 
     // 初始化圖示
     if (window.lucide) window.lucide.createIcons();
-    initSortDropdown();
-}
-    // 5. 排序下拉選單
+    
     // --- Mobile Filter Modal Logic ---
     const mobileFilterTrigger = document.getElementById('mobile-filter-trigger');
     
@@ -384,27 +404,14 @@ export function initBookshelfFeature() {
 
     // 處理套用按鈕
     const applyBtn = document.getElementById('mobile-filter-apply');
-    if (applyBtn) {
-        applyBtn.addEventListener('click', () => {
-            // 這裡可以加入實際的篩選邏輯，目前先關閉視窗
-            const modal = document.getElementById('mobile-filter-modal');
-            if(modal) modal.classList.add('hidden');
-            
-            // 可選：顯示一個 Toast 或 Console 訊息
-            console.log("Filters applied!");
-        });
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                // 這裡可以加入實際的篩選邏輯，目前先關閉視窗
+                const modal = document.getElementById('mobile-filter-modal');
+                if(modal) modal.classList.add('hidden');
+                
+                // 可選：顯示一個 Toast 或 Console 訊息
+                console.log("Filters applied!");
+            });
+        }
     }
-
-function initSortDropdown() {
-    const btn = document.getElementById('sort-menu-btn');
-    const dropdown = document.getElementById('sort-dropdown');
-    if (btn && dropdown) {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('hidden');
-        });
-        window.addEventListener('click', (e) => {
-            if (!btn.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.add('hidden');
-        });
-    }
-}
