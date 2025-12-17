@@ -1,167 +1,385 @@
-// Mock Data for bookmarks
-export const BOOK_NOTES_DATA = [
-    {
-        bookId: 'atomic',
-        title: '原子習慣',
-        author: 'James Clear',
-        totalNotes: 12,
-        notes: [
-            { id: 1, type: 'note', page: 45, date: '2025/11/10 14:30', quote: '你採取的每一個行動，都是投票給你想要成為的那個人。你不必變得完美，但每一次的投票都是在強化你的身分認同。', comment: '這句話提醒我，每天的小選擇都會累積成未來的自己。要更注意自己的習慣。' },
-            { id: 2, type: 'highlight', page: 112, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。' }
-        ]
-    },
-    {
-        bookId: 'design',
-        title: '設計系統實戰',
-        author: 'Author A',
-        totalNotes: 5,
-        notes: [
-            { id: 3, type: 'highlight', page: 23, date: '2025/11/09 09:15', quote: '目標是關於你想要達到的結果，系統是關於導致這些結果的過程。' }
-        ]
-    },
-    {
-        bookId: 'ux',
-        title: 'UX 領導力',
-        author: 'Author B',
-        totalNotes: 22,
-        notes: [
-            { id: 4, type: 'note', page: 88, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。' }
-        ]
-    }
-];
+import { BOOKS_DATA } from '../data/books.js';
 
 export function initBookmarkFeature() {
     const container = document.getElementById('note-content-area');
-    const header = document.getElementById('note-header-info');
-    const sidebarItems = document.querySelectorAll('.book-index-item');
-    const searchInputs = document.querySelectorAll('#bookmark-search-input, #mobile-bookmark-search');
-    const filterButtons = document.querySelectorAll('.note-filter-btn');
+    const sidebarList = document.getElementById('book-notes-list');
+    const allNotesBtn = document.getElementById('all-notes-btn');
+    const searchInputs = document.querySelectorAll('#bookmark-search-input-desktop');
+    const typeFilterButtons = document.querySelectorAll('.note-filter-btn');
+    const colorFilterButtons = document.querySelectorAll('.color-filter-btn');
+    const sortSelect = document.getElementById('notes-sort-select');
 
-    // 1. Initial Render (All notes)
-    renderNotes('all');
+    // Filter books that actually have notes
+    const booksWithNotes = BOOKS_DATA.filter(book => book.notes && book.notes.length > 0);
 
-    // 2. Sidebar Click Handlers
-    sidebarItems.forEach(item => {
-        item.addEventListener('click', () => {
-            // Active State
-            sidebarItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
+    // State
+    let state = {
+        selectedBooks: new Set(), // Multi-select: Set of Strings (Book IDs)
+        selectedColors: new Set(), // Multi-select: Set of Strings (Colors)
+        searchTerm: '',
+        noteType: 'all',
+        sort: 'date_desc',
+    };
 
-            const bookId = item.dataset.bookId;
-            renderNotes(bookId);
+    // 1. Initial Render
+    renderSidebar(booksWithNotes);
+    renderContent();
+
+    // 2. Event Listeners
+
+    // Sidebar: Book Selection
+    if (sidebarList) {
+        sidebarList.removeEventListener('click', handleSidebarClick);
+        sidebarList.addEventListener('click', handleSidebarClick);
+    }
+
+    function handleSidebarClick(e) {
+        const item = e.target.closest('.book-index-item');
+        if (!item) return;
+
+        const bookId = item.dataset.bookId;
+        toggleBookSelection(bookId);
+    }
+
+    // Sidebar: "All Notes"
+    if (allNotesBtn) {
+        allNotesBtn.addEventListener('click', () => {
+            state.selectedBooks.clear();
+            updateSidebarActiveState();
+            renderContent();
         });
+    }
+
+    // Helper: Toggle Selection
+    function toggleBookSelection(bookId) {
+        if (state.selectedBooks.has(bookId)) {
+            state.selectedBooks.delete(bookId);
+        } else {
+            state.selectedBooks.add(bookId);
+        }
+        updateSidebarActiveState();
+        renderContent();
+    }
+
+    // Search Handlers
+    searchInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                state.searchTerm = term;
+                renderContent();
+            });
+        }
     });
 
-    // 3. Search Handler for both inputs
-    searchInputs.forEach(input => {
-            if (input) {
-                input.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase().trim();
-                    
-                    // [關鍵] 同步另一個輸入框的值 (這樣切換視窗大小時才不會清空)
-                    searchInputs.forEach(otherInput => {
-                        if (otherInput !== input) otherInput.value = term;
-                    });
-
-                    filterNotesBySearch(term);
-                });
-            }
-        });
-// 4. [修改] Filter Buttons Logic (狀態同步)
-    filterButtons.forEach(btn => {
+    // Type Filter
+    typeFilterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const filterType = btn.dataset.filter;
+            state.noteType = filterType;
 
-            // [關鍵] 不只移除當前按鈕 active，而是移除所有按鈕的 active，再把「同類型」的按鈕都加上 active
-            filterButtons.forEach(b => b.classList.remove('active', 'bg-white', 'text-text-primary', 'shadow-sm'));
-            
-            // 找出所有相同 filter 類型的按鈕 (Mobile + Desktop) 並設為激活狀態
+            // UI Update
+            typeFilterButtons.forEach(b => b.classList.remove('active', 'bg-white', 'text-text-primary', 'shadow-sm'));
+            typeFilterButtons.forEach(b => b.classList.add('text-text-secondary', 'hover:bg-gray-200'));
+
             const sameTypeButtons = document.querySelectorAll(`.note-filter-btn[data-filter="${filterType}"]`);
             sameTypeButtons.forEach(activeBtn => {
-                activeBtn.classList.add('active');
-                // 如果你的 CSS 依賴 utility classes 來做 active 樣式，這裡可能需要手動加回
-                // 參考 components.css 的 .active 定義
+                activeBtn.classList.add('active', 'bg-white', 'text-text-primary', 'shadow-sm');
+                activeBtn.classList.remove('text-text-secondary', 'hover:bg-gray-200');
             });
-            
-            // 執行篩選
-            const cards = container.querySelectorAll('.note-card');
-            cards.forEach(card => {
-                if (filterType === 'all' || card.dataset.type === filterType) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+
+            renderContent();
         });
     });
-    
-    // --- Core Render Function ---
-    function renderNotes(bookId) {
+
+    // Color Filter (Multi-select)
+    colorFilterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const color = btn.dataset.color;
+            if (!color || color === 'all') return; // Should not happen if 'all' button is removed, but safe check
+
+            if (state.selectedColors.has(color)) {
+                state.selectedColors.delete(color);
+            } else {
+                state.selectedColors.add(color);
+            }
+
+            // UI Update
+            updateColorFilterUI();
+
+            renderContent();
+        });
+    });
+
+    function updateColorFilterUI() {
+        colorFilterButtons.forEach(b => {
+            const c = b.dataset.color;
+            if (state.selectedColors.has(c)) {
+                b.classList.add('ring-2', 'ring-accent', 'ring-offset-1');
+                b.style.opacity = '1';
+            } else {
+                b.classList.remove('ring-2', 'ring-accent', 'ring-offset-1');
+                // Optional: Reduce opacity if others are selected? 
+                // Let's keep distinct opacity for unselected if set is not empty to guide user?
+                // Or just ring is enough. User didn't request dimming.
+                b.style.opacity = state.selectedColors.size > 0 ? '0.5' : '1';
+            }
+        });
+    }
+
+    // Sort Select
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            state.sort = e.target.value;
+            renderContent();
+        });
+    }
+
+    // --- Core Logic ---
+
+    function renderSidebar(booksToRender) {
+        if (!sidebarList) return;
+
+        if (booksToRender.length === 0) {
+            sidebarList.innerHTML = `<div class="p-3 text-xs text-text-secondary text-center">無相關書籍</div>`;
+            return;
+        }
+
+        sidebarList.innerHTML = booksToRender.map(book => `
+            <div class="book-index-item flex gap-3 p-3 rounded-lg cursor-pointer border-l-4 border-transparent hover:bg-white hover:shadow-sm group transition-all"
+                data-book-id="${book.id}">
+                <img src="${book.cover}" class="w-12 h-16 object-cover rounded shadow-sm group-hover:opacity-90">
+                <div class="flex-1 flex flex-col justify-center">
+                    <h3 class="text-sm font-bold text-text-primary mb-1 line-clamp-1 group-hover:text-accent transition-colors">${book.title}</h3>
+                    <div class="flex items-center justify-between text-xs text-text-secondary">
+                        <span>${book.notes.length} 則筆記</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        updateSidebarActiveState();
+    }
+
+    function updateSidebarActiveState() {
+        const allItems = document.querySelectorAll('.book-index-item');
+        // Reset Logic
+        allItems.forEach(item => {
+            item.classList.remove('active', 'bg-white', 'shadow-sm', 'border-accent');
+            item.classList.add('border-transparent');
+        });
+
+        // "All Notes" Active State
+        const allNotesBtnEl = document.getElementById('all-notes-btn');
+        if (state.selectedBooks.size === 0) {
+            allNotesBtnEl?.classList.add('active', 'bg-white', 'shadow-sm', 'border-accent');
+            allNotesBtnEl?.classList.remove('border-transparent');
+        } else {
+            // Individual Items Active State
+            state.selectedBooks.forEach(id => {
+                const el = sidebarList?.querySelector(`.book-index-item[data-book-id="${id}"]`);
+                if (el) {
+                    el.classList.add('active', 'bg-white', 'shadow-sm', 'border-accent');
+                    el.classList.remove('border-transparent');
+                }
+            });
+        }
+    }
+
+    function renderContent() {
         if (!container) return;
-        container.innerHTML = ''; // Clear current
+        container.innerHTML = '';
 
-        let displayNotes = [];
+        // 1. Data Preparation
+        let filteredBooks = [];
+        let sourceNotes = [];
 
-        if (bookId === 'all') {
-            BOOK_NOTES_DATA.forEach(book => {
+        // Calculate Filtered Books for Sidebar/Capsules (Search Context)
+        if (state.searchTerm) {
+            const term = state.searchTerm;
+            filteredBooks = booksWithNotes.filter(book => {
+                if (book.title.toLowerCase().includes(term)) return true;
+                const hasMatchingNote = book.notes.some(note =>
+                    note.quote.toLowerCase().includes(term) ||
+                    (note.comment && note.comment.toLowerCase().includes(term))
+                );
+                return hasMatchingNote;
+            });
+        } else {
+            filteredBooks = booksWithNotes;
+        }
+
+        // UPDATE SIDEBAR 
+        renderSidebar(filteredBooks);
+
+        // 2. Prepare Notes (Multi-select Logic)
+        if (state.selectedBooks.size === 0) {
+            // All Books
+            booksWithNotes.forEach(book => {
                 book.notes.forEach(note => {
-                    displayNotes.push({ ...note, bookTitle: book.title, bookId: book.bookId });
+                    sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id });
                 });
             });
         } else {
-            const book = BOOK_NOTES_DATA.find(b => b.bookId === bookId);
-            if (book) {
-                displayNotes = book.notes.map(n => ({ ...n, bookTitle: book.title, bookId: book.bookId }));
-            }
+            // Selected Books Only
+            booksWithNotes.forEach(book => {
+                if (state.selectedBooks.has(book.id)) {
+                    book.notes.forEach(note => {
+                        sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id });
+                    });
+                }
+            });
         }
 
-        // Render Cards
-        displayNotes.forEach(note => {
-            const cardHTML = createNoteCard(note);
-            container.innerHTML += cardHTML;
+        // 3. Filter Metrics
+        let resultNotes = sourceNotes.filter(note => {
+            // Type Filter
+            if (state.noteType !== 'all' && note.type !== state.noteType) return false;
+
+            // Color Filter (Multi-select)
+            if (state.selectedColors.size > 0) {
+                const noteColor = note.color || 'yellow';
+                if (!state.selectedColors.has(noteColor)) return false;
+            }
+
+            // Search Filter
+            if (state.searchTerm) {
+                const term = state.searchTerm;
+                const matchQuote = note.quote.toLowerCase().includes(term);
+                const matchComment = note.comment && note.comment.toLowerCase().includes(term);
+                const matchBookTitle = note.bookTitle.toLowerCase().includes(term);
+
+                if (!matchQuote && !matchComment && !matchBookTitle) return false;
+            }
+
+            return true;
         });
-        
-        // Re-init icons for new content
-        if(window.lucide) window.lucide.createIcons();
+
+        // 4. Sort
+        resultNotes.sort((a, b) => {
+            if (state.sort === 'page_asc') {
+                return a.page - b.page;
+            } else if (state.sort === 'date_asc') {
+                return new Date(a.date) - new Date(b.date);
+            } else {
+                return new Date(b.date) - new Date(a.date);
+            }
+        });
+
+        // 5. Render UI
+
+        // A. Mobile Search Capsules
+        if (state.searchTerm && filteredBooks.length > 0) {
+            const tagsContainer = document.createElement('div');
+            tagsContainer.className = 'flex gap-2 mb-6 overflow-x-auto pb-2 md:hidden no-scrollbar';
+
+            tagsContainer.innerHTML = filteredBooks.map(book => {
+                const isActive = state.selectedBooks.has(book.id);
+                // Styles
+                const bgClass = isActive ? 'bg-accent text-text-primary shadow-md ring-2 ring-accent ring-offset-1' : 'bg-white border border-border-color';
+                const textClass = 'text-text-primary';
+
+                return `
+                <div class="book-filter-tag-wrapper flex-shrink-0 py-1 px-0.5">
+                    <button class="book-filter-tag flex items-center gap-2 pl-1 pr-3 py-1 ${bgClass} rounded-full shadow-sm transition-all group" data-book-id="${book.id}">
+                        <div class="w-6 h-8 bg-gray-200 rounded overflow-hidden relative border border-white/20">
+                            <img src="${book.cover}" class="w-full h-full object-cover">
+                            ${!isActive ? '<div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>' : ''}
+                        </div>
+                        <span class="text-sm font-bold ${textClass}">${book.title}</span>
+                    </button>
+                </div>
+            `}).join('');
+
+            container.appendChild(tagsContainer);
+
+            const tagButtons = tagsContainer.querySelectorAll('.book-filter-tag');
+            tagButtons.forEach(tag => {
+                tag.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const targetBookId = tag.dataset.bookId;
+                    toggleBookSelection(targetBookId);
+                });
+            });
+        }
+
+        // B. Note Cards
+        if (resultNotes.length > 0) {
+            const notesHTML = resultNotes.map(note => createNoteCard(note, state.searchTerm)).join('');
+            container.insertAdjacentHTML('beforeend', notesHTML);
+        } else {
+            const emptyHTML = `
+                <div class="flex flex-col items-center justify-center py-12 text-text-secondary opacity-60">
+                    <i data-lucide="search-x" class="w-12 h-12 mb-2"></i>
+                    <p>沒有找到符合條件的筆記</p>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', emptyHTML);
+        }
+
+        if (window.lucide) window.lucide.createIcons();
     }
 
-    function createNoteCard(note) {
+    function highlightText(text, term) {
+        if (!term) return text;
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.replace(regex, '<mark class="bg-yellow-200 text-text-primary px-0.5 rounded">$1</mark>');
+    }
+
+    function createNoteCard(note, searchTerm) {
         const isNote = note.type === 'note';
-        const badgeColor = isNote ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+        const badgeColor = isNote ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800';
         const typeLabel = isNote ? '筆記' : '劃線';
-        
+
+        const colorMap = {
+            'yellow': { border: 'border-yellow-400', highlight: 'bg-yellow-100' },
+            'green': { border: 'border-green-400', highlight: 'bg-green-100' },
+            'blue': { border: 'border-blue-400', highlight: 'bg-blue-100' },
+            'red': { border: 'border-red-400', highlight: 'bg-red-100' },
+            'purple': { border: 'border-purple-400', highlight: 'bg-purple-100' },
+        };
+        const noteColor = note.color || 'yellow';
+        const styles = colorMap[noteColor] || colorMap['yellow'];
+
+        const checkQuote = highlightText(note.quote, searchTerm);
+        const checkComment = isNote && note.comment ? highlightText(note.comment, searchTerm) : '';
+
         return `
-        <div class="note-card bg-white p-4 md:p-6 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all mb-6" data-type="${note.type}">
-            <div class="absolute top-2 right-2 z-10">
-                <span class="${badgeColor} text-xs font-bold px-2 py-1 rounded-full">${typeLabel}</span>
-            </div>
-            <div class="absolute left-0 top-6 bottom-6 w-1 bg-accent rounded-r-full"></div>
-            <div class="pl-4">
-                <div class="text-accent font-bold mb-2 block md:hidden">${note.bookTitle}</div>
-                <a href="#" class="text-sm font-bold text-accent hover:underline mb-2 block hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
-                <blockquote class="text-lg text-text-primary leading-relaxed mb-4 font-medium">"${note.quote}"</blockquote>
+        <div class="note-card bg-white p-5 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all">
+            <div class="absolute left-0 top-6 bottom-6 w-1.5 ${styles.border} rounded-r-full"></div>
+            
+            <div class="pl-5">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-text-secondary font-medium mb-0.5 block md:hidden">${note.bookTitle}</span> 
+                        <a href="#" class="text-xs font-bold text-text-secondary hover:text-accent hover:underline mb-0.5 hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
+                    </div>
+                    <span class="${badgeColor} text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">${typeLabel}</span>
+                </div>
+
+                <blockquote class="text-base text-text-primary leading-relaxed mb-3 font-medium relative">
+                    <span class="absolute -left-3 -top-1 text-2xl text-gray-300 font-serif">"</span>
+                    <span class="${styles.highlight} px-1 rounded box-decoration-clone leading-loose py-0.5">${checkQuote}</span>
+                </blockquote>
+
                 ${isNote && note.comment ? `
-                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p class="text-sm text-yellow-800">${note.comment}</p>
+                <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-transparent">
+                    <span class="block text-xs font-bold text-gray-500 mb-1">心得</span>
+                    <p class="text-sm text-gray-800">${checkComment}</p>
                 </div>` : ''}
-                <div class="flex items-center justify-between text-xs text-text-secondary mt-4 pt-4 border-t border-gray-50">
-                    <div class="flex items-center gap-2"><span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> Page ${note.page}</span><span>${note.date}</span></div>
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"><button class="hover:text-accent"><i data-lucide="share-2" class="w-4 h-4"></i></button><button class="hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+
+                <div class="flex items-center justify-between text-xs text-text-secondary mt-3 pt-3 border-t border-gray-50">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> P.${note.page}</span>
+                        <span>${note.date.split(' ')[0]}</span>
+                    </div>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="hover:text-accent p-1"><i data-lucide="share-2" class="w-4 h-4"></i></button>
+                        <button class="hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
                 </div>
             </div>
         </div>`;
-    }
-
-    function filterNotesBySearch(term) {
-        const cards = container.querySelectorAll('.note-card');
-        cards.forEach(card => {
-            const textContent = card.innerText.toLowerCase();
-            if (textContent.includes(term)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        // Do not update header on search for mobile-first design
     }
 }

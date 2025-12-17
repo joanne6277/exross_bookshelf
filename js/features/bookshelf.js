@@ -1,6 +1,6 @@
 import { openModal, closeModal } from '../utils.js';
 import { BOOKS_DATA } from '../data/books.js';
-import { BOOK_NOTES_DATA } from './bookmark.js';
+
 import { getCollections, toggleBookInCollection, addCollection } from './collections.js';
 
 let currentEditingBookIds = []; // Changed to array

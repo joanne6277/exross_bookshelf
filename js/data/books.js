@@ -26,7 +26,10 @@ export const BOOKS_DATA = [
         },
         duration: '12 小時 30 分',
         lastRead: '2025/11/19',
-        format: 'PDF'
+        format: 'PDF',
+        notes: [
+            { id: 3, type: 'highlight', page: 23, date: '2025/11/09 09:15', quote: '目標是關於你想要達到的結果，系統是關於導致這些結果的過程。', color: 'yellow' }
+        ]
     },
     {
         id: 'atomic',
@@ -44,7 +47,11 @@ export const BOOKS_DATA = [
         expiryDate: '',
         duration: '5 小時 20 分',
         lastRead: '2025/11/20',
-        format: 'EPUB'
+        format: 'EPUB',
+        notes: [
+            { id: 1, type: 'note', page: 45, date: '2025/11/10 14:30', quote: '你採取的每一個行動，都是投票給你想要成為的那個人。你不必變得完美，但每一次的投票都是在強化你的身分認同。', comment: '這句話提醒我，每天的小選擇都會累積成未來的自己。要更注意自己的習慣。', color: 'blue' },
+            { id: 2, type: 'highlight', page: 112, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。', color: 'green' }
+        ]
     },
     {
         id: 'ux',
@@ -62,6 +69,75 @@ export const BOOKS_DATA = [
         expiryDate: '',
         duration: '1 小時 05 分',
         lastRead: '2025/10/30',
-        format: 'EPUB'
+        format: 'EPUB',
+        notes: [
+            { id: 4, type: 'note', page: 88, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。', color: 'red' }
+        ]
+    },
+    {
+        id: 'lean',
+        title: '精實創業',
+        author: 'Eric Ries',
+        type: '商業',
+        category: '商業',
+        cover: 'https://placehold.co/300x450/E74C3C/FFFFFF?text=Lean',
+        progress: 0,
+        remainingTime: '6 小時',
+        publisher: "Business Books",
+        publishDate: "2011/09/13",
+        source: 'Kobo',
+        description: '如何利用創新來建立極具競爭力的成功企業。',
+        expiryDate: '',
+        duration: '6 小時 15 分',
+        lastRead: '-',
+        format: 'EPUB',
+        notes: [
+            { id: 5, type: 'highlight', page: 15, date: '2025/11/25 10:00', quote: '驗證式學習證明了我們的努力是有價值的。', color: 'yellow' },
+            { id: 6, type: 'note', page: 42, date: '2025/11/26 11:30', quote: 'MVP (最小可行性產品) 是為了用最少的力氣驗證假設。', comment: '不要過度設計，先求有再求好。', color: 'purple' }
+        ]
+    },
+    {
+        id: 'clean',
+        title: 'Clean Code',
+        author: 'Robert C. Martin',
+        type: '教科書',
+        category: '科技',
+        cover: 'https://placehold.co/300x450/3498DB/FFFFFF?text=Clean',
+        progress: 20,
+        remainingTime: '10 天',
+        publisher: "Prentice Hall",
+        publishDate: "2008/08/01",
+        source: 'Amazon',
+        description: '軟體工程師必讀經典，教你寫出乾淨、易維護的程式碼。',
+        expiryDate: '2026/01/01',
+        duration: '15 小時',
+        lastRead: '2025/11/01',
+        format: 'PDF',
+        notes: [
+            { id: 7, type: 'highlight', page: 10, date: '2025/11/12 09:00', quote: 'Clean code reads like well-written prose.', color: 'blue' },
+            { id: 8, type: 'note', page: 15, date: '2025/11/12 09:30', quote: 'Meaningful Names: Use intention-revealing names.', comment: '命名真的很重要，變數名稱應該解釋它是做什麼的。原子習慣', color: 'yellow' }
+        ]
+    },
+    {
+        id: 'thinking',
+        title: '快思慢想',
+        author: 'Daniel Kahneman',
+        type: '心理學',
+        category: '商業',
+        cover: 'https://placehold.co/300x450/9B59B6/FFFFFF?text=Thinking',
+        progress: 5,
+        remainingTime: '12 小時',
+        publisher: "Penguin",
+        publishDate: "2011/10/25",
+        source: 'Audible',
+        description: '諾貝爾經濟學獎得主康納曼探索人類理性與非理性的經典之作。',
+        expiryDate: '',
+        duration: '20 小時',
+        lastRead: '2025/11/05',
+        format: 'Audiobook',
+        notes: [
+            { id: 9, type: 'highlight', page: 55, date: '2025/11/18 14:00', quote: 'What you see is all there is (WYSIATI).原子習慣', color: 'red' },
+            { id: 10, type: 'note', page: 120, date: '2025/11/19 15:00', quote: 'System 1 operates automatically and quickly...', comment: '系統一主覺直覺，系統二主宰理性分析。', color: 'green' }
+        ]
     }
 ];
