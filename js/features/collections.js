@@ -19,7 +19,12 @@ function createCollectionCardHTML(title, bookCount, cover) {
             <img src="${cover}" alt="${title} Playlist Cover" class="w-full h-full object-cover transition-transform duration-500">
         </div>
         <div class="p-4 flex-1 flex flex-col relative">
-            <h3 class="playlist-name font-bold text-text-primary truncate mb-1">${title}</h3>
+            <div class="flex justify-between items-start mb-1">
+                <h3 class="playlist-name font-bold text-text-primary truncate flex-1 pr-2">${title}</h3>
+                <button class="p-1.5 rounded-full hover:bg-gray-100 text-text-secondary hover:text-text-primary collection-menu-btn -mt-1 -mr-1">
+                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                </button>
+            </div>
             <p class="text-sm text-text-secondary">${bookCount} 本書</p>
         </div>
     </div>`;
@@ -75,15 +80,46 @@ export function deleteCollection(title) {
     return false;
 }
 
+// Returns true if state changed
+export function toggleBookInCollection(title, bookId, shouldBeIn) {
+    const collection = collectionsData[title];
+    if (!collection) return false;
+
+    const index = collection.books.indexOf(bookId);
+    const isIn = index > -1;
+
+    if (shouldBeIn && !isIn) {
+        collection.books.push(bookId);
+        renderCollections();
+        return true;
+    } else if (!shouldBeIn && isIn) {
+        collection.books.splice(index, 1);
+        renderCollections();
+        return true;
+    }
+    return false;
+}
+
+export function removeBookFromCollection(title, bookId) {
+    return toggleBookInCollection(title, bookId, false);
+}
+
 // --- INITIALIZATION ---
 function initCollectionsFeature() {
     const addPlaylistBtn = document.getElementById('add-playlist-card-btn');
     const playlistList = document.getElementById('playlist-list');
     const saveCollectionBtn = document.getElementById('save-collection-btn');
     const collectionNameInput = document.getElementById('collection-name-input');
-    
+
     // Initial Render
     renderCollections();
+
+    // Edit Modal Elements
+    const editModalId = 'edit-collection-modal';
+    const editNameInput = document.getElementById('edit-collection-name-input');
+    const saveEditBtn = document.getElementById('save-edit-collection-btn');
+    const deleteCollectionBtn = document.getElementById('delete-collection-btn');
+    let currentEditingCollection = null;
 
     if (addPlaylistBtn && playlistList) {
         addPlaylistBtn.addEventListener('click', () => {
@@ -93,10 +129,57 @@ function initCollectionsFeature() {
         });
 
         playlistList.addEventListener('click', (e) => {
-            const playlistItem = e.target.closest('.playlist-item');
+            const target = e.target;
+            const playlistItem = target.closest('.playlist-item');
+
+            // Handle Menu Button Click
+            if (target.closest('.collection-menu-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!playlistItem) return;
+                const title = playlistItem.dataset.collectionName;
+                currentEditingCollection = title;
+
+                if (editNameInput) {
+                    editNameInput.value = title;
+                    openModal(editModalId);
+                }
+                return;
+            }
+
             if (playlistItem && !playlistItem.id.includes('add-playlist')) {
                 const title = playlistItem.dataset.collectionName;
                 renderBookshelfDetails(title);
+            }
+        });
+    }
+
+    // Edit Modal Actions
+    if (saveEditBtn && editNameInput) {
+        saveEditBtn.addEventListener('click', () => {
+            const newTitle = editNameInput.value.trim();
+            if (currentEditingCollection && newTitle && newTitle !== currentEditingCollection) {
+                if (renameCollection(currentEditingCollection, newTitle)) {
+                    closeModal(editModalId);
+                    currentEditingCollection = null;
+                } else {
+                    alert('名稱重複或無效！');
+                }
+            } else if (newTitle === currentEditingCollection) {
+                closeModal(editModalId);
+            }
+        });
+    }
+
+    if (deleteCollectionBtn) {
+        deleteCollectionBtn.addEventListener('click', () => {
+            if (currentEditingCollection) {
+                if (confirm(`確定要刪除「${currentEditingCollection}」嗎？此動作無法復原。`)) {
+                    deleteCollection(currentEditingCollection);
+                    closeModal(editModalId);
+                    currentEditingCollection = null;
+                }
             }
         });
     }
