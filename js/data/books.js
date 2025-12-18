@@ -28,7 +28,8 @@ export const BOOKS_DATA = [
         lastRead: '2025/11/19',
         format: 'PDF',
         notes: [
-            { id: 3, type: 'highlight', page: 23, date: '2025/11/09 09:15', quote: '目標是關於你想要達到的結果，系統是關於導致這些結果的過程。', color: 'yellow' }
+            { id: 3, type: 'highlight', page: 23, date: '2025/11/09 09:15', quote: '目標是關於你想要達到的結果，系統是關於導致這些結果的過程。', color: 'yellow' },
+            { id: 11, type: 'note', page: 45, date: '2025/11/12 10:30', quote: '', comment: '這張圖表清楚說明了設計系統的原子架構，對於理解元件與模板的關係很有幫助。', color: 'blue' }
         ]
     },
     {
@@ -42,7 +43,7 @@ export const BOOKS_DATA = [
         remainingTime: '',
         publisher: "Business Weekly",
         publishDate: "2019/06/01",
-        source: 'Kobo',
+        source: '金石堂',
         description: '每天都進步1%，一年後你會進步37倍。細微改變帶來巨大成就的實證法則。',
         expiryDate: '',
         duration: '5 小時 20 分',
@@ -50,7 +51,7 @@ export const BOOKS_DATA = [
         format: 'EPUB',
         notes: [
             { id: 1, type: 'note', page: 45, date: '2025/11/10 14:30', quote: '你採取的每一個行動，都是投票給你想要成為的那個人。你不必變得完美，但每一次的投票都是在強化你的身分認同。', comment: '這句話提醒我，每天的小選擇都會累積成未來的自己。要更注意自己的習慣。', color: 'blue' },
-            { id: 2, type: 'highlight', page: 112, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。', color: 'green' }
+            { id: 2, type: 'highlight', page: 82, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。', color: 'green' }
         ]
     },
     {
@@ -64,14 +65,14 @@ export const BOOKS_DATA = [
         remainingTime: '',
         publisher: "Flag",
         publishDate: "2023/11/15",
-        source: 'iRead',
+        source: '灰熊',
         description: '探討設計主管如何帶領團隊，建立高效的設計文化與流程。',
         expiryDate: '',
         duration: '1 小時 05 分',
         lastRead: '2025/10/30',
         format: 'EPUB',
         notes: [
-            { id: 4, type: 'note', page: 88, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。', color: 'red' }
+            { id: 4, type: 'note', page: 68, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。', color: 'red' }
         ]
     },
     {
@@ -85,7 +86,7 @@ export const BOOKS_DATA = [
         remainingTime: '6 小時',
         publisher: "Business Books",
         publishDate: "2011/09/13",
-        source: 'Kobo',
+        source: '金石堂',
         description: '如何利用創新來建立極具競爭力的成功企業。',
         expiryDate: '',
         duration: '6 小時 15 分',
@@ -107,7 +108,7 @@ export const BOOKS_DATA = [
         remainingTime: '10 天',
         publisher: "Prentice Hall",
         publishDate: "2008/08/01",
-        source: 'Amazon',
+        source: '香港聯合',
         description: '軟體工程師必讀經典，教你寫出乾淨、易維護的程式碼。',
         expiryDate: '2026/01/01',
         duration: '15 小時',
@@ -129,15 +130,15 @@ export const BOOKS_DATA = [
         remainingTime: '12 小時',
         publisher: "Penguin",
         publishDate: "2011/10/25",
-        source: 'Audible',
+        source: '三民',
         description: '諾貝爾經濟學獎得主康納曼探索人類理性與非理性的經典之作。',
         expiryDate: '',
         duration: '20 小時',
         lastRead: '2025/11/05',
-        format: 'Audiobook',
+        format: 'EPUB',
         notes: [
-            { id: 9, type: 'highlight', page: 55, date: '2025/11/18 14:00', quote: 'What you see is all there is (WYSIATI).原子習慣', color: 'red' },
-            { id: 10, type: 'note', page: 120, date: '2025/11/19 15:00', quote: 'System 1 operates automatically and quickly...', comment: '系統一主覺直覺，系統二主宰理性分析。', color: 'green' }
+            { id: 9, type: 'highlight', page: 15, date: '2025/11/18 14:00', quote: 'What you see is all there is (WYSIATI).原子習慣', color: 'red' },
+            { id: 10, type: 'note', page: 35, date: '2025/11/19 15:00', quote: 'System 1 operates automatically and quickly...', comment: '系統一主覺直覺，系統二主宰理性分析。', color: 'green' }
         ]
     }
 ];

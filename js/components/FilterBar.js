@@ -19,38 +19,71 @@ export function createFilterBarHTML(prefix = '') {
         <button id="${prefix}batch-select-btn"
             class="flex-shrink-0 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">批次選取</button>
 
-        <div class="flex items-center space-x-2 flex-shrink-0 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg">
-            <span class="text-sm font-medium text-text-secondary whitespace-nowrap pl-2 md:pl-0">狀態:</span>
-            <select id="${prefix}status-filter"
-                class="bg-transparent md:bg-white border-none md:border md:border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
-                <option>全部</option>
-                <option>未閱讀</option>
-                <option>閱讀中</option>
-                <option>已讀完</option>
-            </select>
+        <!-- Status Filter -->
+        <div class="flex-shrink-0">
+            <!-- Desktop -->
+            <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">狀態:</span>
+                <select id="${prefix}status-filter"
+                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    <option>全部</option>
+                    <option>未閱讀</option>
+                    <option>閱讀中</option>
+                    <option>已讀完</option>
+                </select>
+            </div>
+            <!-- Mobile -->
+            <button id="${prefix}mobile-status-btn" 
+                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                data-filter-type="status">
+                <span>狀態:</span> <span id="${prefix}mobile-status-label" class="font-bold text-text-primary">全部</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+            </button>
         </div>
 
-        <div class="flex items-center space-x-2 flex-shrink-0 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg md:border-l md:border-border-color md:pl-4">
-            <span class="text-sm font-medium text-text-secondary whitespace-nowrap pl-2 md:pl-0">來源:</span>
-            <select id="${prefix}source-filter"
-                class="bg-transparent md:bg-white border-none md:border md:border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
-                <option>全部來源</option>
-                <option>TAAZE 讀冊</option>
-                <option>三民書局</option>
-                <option>iRead 灰熊</option>
-            </select>
+        <!-- Source Filter -->
+        <div class="flex-shrink-0 md:border-l md:border-border-color md:pl-4">
+            <!-- Desktop -->
+            <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">來源:</span>
+                <select id="${prefix}source-filter"
+                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    <option>全部來源</option>
+                    <option>TAAZE 讀冊</option>
+                    <option>三民書局</option>
+                    <option>iRead 灰熊</option>
+                </select>
+            </div>
+            <!-- Mobile -->
+            <button id="${prefix}mobile-source-btn" 
+                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                data-filter-type="source">
+                <span>來源:</span> <span id="${prefix}mobile-source-label" class="font-bold text-text-primary">全部來源</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+            </button>
         </div>
 
-        <div class="flex items-center space-x-2 flex-shrink-0 bg-gray-50 md:bg-transparent p-1 md:p-0 rounded-lg md:border-l md:border-border-color md:pl-4">
-            <span class="text-sm font-medium text-text-secondary whitespace-nowrap pl-2 md:pl-0">類別:</span>
-            <select id="${prefix}category-filter"
-                class="bg-transparent md:bg-white border-none md:border md:border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
-                <option value="all">全部類別</option>
-                <option value="商業">商業</option>
-                <option value="文學">文學</option>
-                <option value="設計">設計</option>
-                <option value="科技">科技</option>
-            </select>
+        <!-- Category Filter -->
+        <div class="flex-shrink-0 md:border-l md:border-border-color md:pl-4">
+           <!-- Desktop -->
+            <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">類別:</span>
+                <select id="${prefix}category-filter"
+                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    <option value="all">全部類別</option>
+                    <option value="商業">商業</option>
+                    <option value="文學">文學</option>
+                    <option value="設計">設計</option>
+                    <option value="科技">科技</option>
+                </select>
+            </div>
+            <!-- Mobile -->
+            <button id="${prefix}mobile-category-btn" 
+                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                data-filter-type="category">
+                <span>類別:</span> <span id="${prefix}mobile-category-label" class="font-bold text-text-primary">全部類別</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+            </button>
         </div>
 
         <div class="flex items-center space-x-2 flex-shrink-0 md:border-l md:border-border-color md:pl-4">
@@ -62,7 +95,10 @@ export function createFilterBarHTML(prefix = '') {
                 class="${prefix === 'details-' ? 'details-' : ''}filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">教科書</button>
         </div>
 
-        <div class="relative flex-shrink-0 md:border-l md:border-border-color md:pl-4"
+
+
+        <!-- Sort Menu -->
+        <div class="relative flex-shrink-0 md:border-l md:border-border-color md:pl-4 hidden md:block"
             id="${prefix}sort-menu-container">
             <div class="flex items-center">
                 <button id="${prefix}sort-menu-btn"
@@ -81,13 +117,23 @@ export function createFilterBarHTML(prefix = '') {
                     <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100"
                         data-sort="recently-read">最近閱讀</button>
                     <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100"
-                        data-sort="purchase-date">最近購買</button>
+                        data-sort="purchase-date">最近取得</button>
                     <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100"
                         data-sort="title">書名</button>
                     <button class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100"
                         data-sort="publish-date">出版日期</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Mobile Sort Button -->
+        <div class="block md:hidden flex-shrink-0">
+             <button id="${prefix}mobile-sort-btn" 
+                class="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                data-filter-type="sort">
+                <span>排序</span>
+                <i data-lucide="arrow-down-up" class="w-3 h-3 ml-1"></i>
+            </button>
         </div>
         <div class="flex-1"></div>
         <div class="flex bg-gray-100 p-1 rounded-lg">

@@ -275,10 +275,30 @@ export function showBookDetails(bookId) {
 
     if (window.lucide) window.lucide.createIcons();
     openModal('book-info-modal');
+
+    // Bind "Add to Shelf" buttons in the detail modal
+    const addShelfBtn = document.getElementById('modal-btn-add-shelf');
+    const addShelfBtnMobile = document.getElementById('modal-btn-add-shelf-mobile');
+
+    const handleAddShelf = () => {
+        renderShelfModal(bookId);
+        openModal('add-shelf-modal');
+    };
+
+    if (addShelfBtn) {
+        addShelfBtn.onclick = handleAddShelf;
+    }
+    if (addShelfBtnMobile) {
+        addShelfBtnMobile.onclick = handleAddShelf;
+    }
 }
 
 export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
     console.log(`[FilterBar] Initializing for prefix: "${prefix}"`);
+
+    let localSortType = 'recently-read';
+    let localSortDirection = 'desc';
+
     // 視圖切換 (Grid/List)
     const gridBtn = document.getElementById(`${prefix}grid-view-btn`);
     const listBtn = document.getElementById(`${prefix}list-view-btn`);
@@ -298,6 +318,172 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
             gridBtn.classList.remove('active');
             gridView.classList.add('hidden');
             listView.classList.remove('hidden');
+        });
+    }
+
+    // --- Mobile Filter Logic ---
+    const mobileStatusBtn = document.getElementById(`${prefix}mobile-status-btn`);
+    const mobileSourceBtn = document.getElementById(`${prefix}mobile-source-btn`);
+    const mobileCategoryBtn = document.getElementById(`${prefix}mobile-category-btn`);
+    const mobileSortBtn = document.getElementById(`${prefix}mobile-sort-btn`);
+
+    // Enhanced openSheet to support direction
+    const openSheet = (title, options, onSelect, currentValue, currentDirection = null) => {
+        const sheet = document.getElementById('mobile-filter-sheet');
+        const sheetTitle = document.getElementById('mobile-sheet-title');
+        const sheetOptions = document.getElementById('mobile-sheet-options');
+
+        if (!sheet || !sheetTitle || !sheetOptions) return;
+
+        sheetTitle.textContent = title;
+        sheetOptions.innerHTML = '';
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            const isSelected = opt.value === currentValue || opt.label === currentValue;
+
+            let iconHtml = '';
+            if (isSelected) {
+                if (currentDirection) {
+                    // Sort Mode: Show Arrow
+                    iconHtml = currentDirection === 'asc'
+                        ? '<i data-lucide="arrow-up" class="w-4 h-4"></i>'
+                        : '<i data-lucide="arrow-down" class="w-4 h-4"></i>';
+                } else {
+                    // Normal Mode: Show Check
+                    iconHtml = '<i data-lucide="check" class="w-4 h-4"></i>';
+                }
+            }
+
+            btn.className = `w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors ${isSelected ? 'bg-accent/10 text-accent font-bold' : 'text-text-primary hover:bg-gray-50'}`;
+            btn.innerHTML = `<span>${opt.label}</span>${iconHtml}`;
+
+            btn.onclick = () => {
+                onSelect(opt.value);
+                // Only close if NOT in sort toggling mode
+                if (currentDirection) {
+                    // Sort Mode: Do not close. 
+                    // The handler (onSelect) is responsible for refreshing the UI (re-calling openSheet).
+                } else {
+                    closeModal('mobile-filter-sheet');
+                }
+            };
+            sheetOptions.appendChild(btn);
+        });
+
+        if (window.lucide) window.lucide.createIcons();
+        openModal('mobile-filter-sheet');
+    };
+
+    // 1. Status
+    if (mobileStatusBtn) {
+        mobileStatusBtn.addEventListener('click', () => {
+            const select = document.getElementById(`${prefix}status-filter`);
+            const currentVal = select ? select.value : '全部';
+            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
+
+            openSheet('篩選狀態', options, (val) => {
+                if (select) {
+                    select.value = val;
+                    select.dispatchEvent(new Event('change'));
+                    const label = document.getElementById(`${prefix}mobile-status-label`);
+                    if (label) label.textContent = val;
+                }
+            }, currentVal);
+        });
+    }
+
+    // 2. Source
+    if (mobileSourceBtn) {
+        mobileSourceBtn.addEventListener('click', () => {
+            const select = document.getElementById(`${prefix}source-filter`);
+            const currentVal = select ? select.value : '全部來源';
+            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
+
+            openSheet('篩選來源', options, (val) => {
+                if (select) {
+                    select.value = val;
+                    select.dispatchEvent(new Event('change'));
+                    const label = document.getElementById(`${prefix}mobile-source-label`);
+                    if (label) label.textContent = val;
+                }
+            }, currentVal);
+        });
+    }
+
+    // 3. Category
+    if (mobileCategoryBtn) {
+        mobileCategoryBtn.addEventListener('click', () => {
+            const select = document.getElementById(`${prefix}category-filter`);
+            const currentVal = select ? select.value : 'all';
+            // Need check map because value vs label can differ
+            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
+
+            openSheet('篩選類別', options, (val) => {
+                if (select) {
+                    select.value = val;
+                    select.dispatchEvent(new Event('change'));
+                    // Find selected option label
+                    const selectedOpt = Array.from(select.options).find(o => o.value === val);
+                    const label = document.getElementById(`${prefix}mobile-category-label`);
+                    if (label && selectedOpt) label.textContent = selectedOpt.text;
+                }
+            }, currentVal);
+        });
+    }
+
+    // 4. Sort (Updated)
+    if (mobileSortBtn) {
+        mobileSortBtn.addEventListener('click', () => {
+            const options = [
+                { label: '最近閱讀', value: 'recently-read' },
+                { label: '最近取得', value: 'purchase-date' },
+                { label: '書名', value: 'title' },
+                { label: '出版日期', value: 'publish-date' }
+            ];
+
+            const handleMobileSortSelect = (val) => {
+                if (val === localSortType) {
+                    // Toggle direction
+                    localSortDirection = localSortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    // New type, default desc
+                    localSortType = val;
+                    localSortDirection = 'desc';
+                }
+
+                // Update Desktop UI (Sort Button Text)
+                const sortLabel = document.getElementById(`${prefix}sort-menu-label`);
+                const selectedOpt = options.find(o => o.value === localSortType);
+                if (sortLabel && selectedOpt) {
+                    sortLabel.textContent = `排序: ${selectedOpt.label}`;
+                }
+
+                // Update Desktop Direction Button
+                const dirBtn = document.getElementById(`${prefix}sort-direction-btn`);
+                if (dirBtn) {
+                    const icon = dirBtn.querySelector('i');
+                    if (icon) {
+                        // Lucide icons are replaced, so we toggle innerHTML or class?
+                        // Re-creating is safer if icon lib is generic.
+                        // Or using class replace if lucide is active (lucide uses specific svg).
+                        // Simplest: replace innerHTML with new lucide data attribute and call createIcons? 
+                        // No, lucide.createIcons() scans entire DOM or specific root.
+                        // Just replace innerHTML.
+                        dirBtn.innerHTML = localSortDirection === 'asc'
+                            ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
+                            : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
+                        if (window.lucide) window.lucide.createIcons({ root: dirBtn });
+                    }
+                }
+
+                if (onSort) onSort(localSortType, localSortDirection);
+
+                // Re-render sheet to show updated arrow without closing
+                openSheet('排序方式', options, handleMobileSortSelect, localSortType, localSortDirection);
+            };
+
+            openSheet('排序方式', options, handleMobileSortSelect, localSortType, localSortDirection);
         });
     }
 
@@ -512,6 +698,22 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
     const sortBtn = document.getElementById(`${prefix}sort-menu-btn`);
     const sortDropdown = document.getElementById(`${prefix}sort-dropdown`);
     const sortLabel = document.getElementById(`${prefix}sort-menu-label`);
+    const sortDirBtn = document.getElementById(`${prefix}sort-direction-btn`); // New
+
+    // Desktop Direction Button Logic
+    if (sortDirBtn) {
+        sortDirBtn.addEventListener('click', () => {
+            localSortDirection = localSortDirection === 'asc' ? 'desc' : 'asc';
+
+            // Update Icon
+            sortDirBtn.innerHTML = localSortDirection === 'asc'
+                ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
+                : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
+            if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
+
+            if (onSort) onSort(localSortType, localSortDirection);
+        });
+    }
 
     if (sortBtn && sortDropdown) {
         sortBtn.addEventListener('click', (e) => {
@@ -568,6 +770,17 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
                 const sortType = item.dataset.sort;
                 const sortName = item.textContent;
 
+                localSortType = sortType;
+                // Reset direction to desc on type change? Or keep?
+                // Let's reset to desc for consistency.
+                localSortDirection = 'desc';
+
+                // Update Icon
+                if (sortDirBtn) {
+                    sortDirBtn.innerHTML = `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
+                    if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
+                }
+
                 // 更新按鈕文字
                 if (sortLabel) {
                     sortLabel.textContent = `排序: ${sortName}`;
@@ -575,7 +788,7 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
 
                 // 執行排序回調
                 if (onSort) {
-                    onSort(sortType);
+                    onSort(localSortType, localSortDirection);
                 }
 
                 // 關閉選單
@@ -710,8 +923,8 @@ export function initBookshelfFeature() {
 
     // 設定 All Books 篩選列功能 (UI & View toggle)
     // Pass a callback that forwards the sort request to our filter logic
-    const filterControls = initFilterBar('', 'all-books-grid', 'all-books-list', (sortType) => {
-        if (filterLogic) filterLogic.handleSort(sortType);
+    const filterControls = initFilterBar('', 'all-books-grid', 'all-books-list', (sortType, direction) => {
+        if (filterLogic) filterLogic.handleSort(sortType, direction);
     });
 
 
@@ -820,18 +1033,33 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
     };
 
     let currentSortType = 'recently-read';
+    let currentSortDirection = 'desc'; // 'asc' or 'desc'
 
     // Sort Logic Wrapper
     const applySort = (books) => {
         const sorted = [...books];
         if (currentSortType === 'recently-read') {
-            sorted.sort((a, b) => (b.lastRead || '').localeCompare(a.lastRead || ''));
+            sorted.sort((a, b) => {
+                const valA = a.lastRead || '';
+                const valB = b.lastRead || '';
+                return currentSortDirection === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+            });
         } else if (currentSortType === 'purchase-date') {
-            // Default order (usually)
+            // Default order (usually) - assuming data is already in default order or we have a date field?
+            // Books data doesn't have explicit purchase date. Using original index or fallback.
+            if (currentSortDirection === 'asc') sorted.reverse();
         } else if (currentSortType === 'title') {
-            sorted.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hant'));
+            sorted.sort((a, b) => {
+                return currentSortDirection === 'asc'
+                    ? a.title.localeCompare(b.title, 'zh-Hant')
+                    : b.title.localeCompare(a.title, 'zh-Hant');
+            });
         } else if (currentSortType === 'publish-date') {
-            sorted.sort((a, b) => (b.publishDate || '').localeCompare(a.publishDate || ''));
+            sorted.sort((a, b) => {
+                const valA = a.publishDate || '';
+                const valB = b.publishDate || '';
+                return currentSortDirection === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+            });
         }
         return sorted;
     };
@@ -898,10 +1126,35 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
     typeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             btn.classList.toggle('active');
-            btn.classList.toggle('bg-accent');
-            btn.classList.toggle('text-white');
-            btn.classList.toggle('bg-white');
-            btn.classList.toggle('text-text-secondary');
+
+            // Old Style: bg-accent text-white
+            // New Style: bg-accent/10 text-accent font-bold border-accent
+            // Remove old toggles
+            // btn.classList.toggle('bg-accent');
+            // btn.classList.toggle('text-white');
+
+            // Toggle New Styles
+            btn.classList.toggle('bg-accent/10');
+            btn.classList.toggle('text-accent');
+            btn.classList.toggle('font-bold');
+            btn.classList.toggle('border-accent'); // Ensure border is visible
+
+            // Revert state classes
+            // When INACTIVE: bg-white text-text-secondary border-border-color
+            // When ACTIVE: bg-accent/10 text-accent border-accent
+
+            // We need to handle the removal of inactive classes carefully or just toggle them?
+            // "bg-white" vs "bg-accent/10" -> if we add bg-accent/10, bg-white might still be there. 
+            // In Tailwind, later classes usually win or specific ones. 
+            // But let's be clean.
+
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('bg-white', 'text-text-secondary', 'border-border-color');
+                btn.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'font-bold');
+            } else {
+                btn.classList.add('bg-white', 'text-text-secondary', 'border-border-color');
+                btn.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'font-bold');
+            }
 
             const type = btn.textContent.trim();
             if (activeFilters.types.has(type)) {
@@ -914,8 +1167,9 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
     });
 
     return {
-        handleSort: (sortType) => {
+        handleSort: (sortType, direction) => {
             currentSortType = sortType;
+            if (direction) currentSortDirection = direction;
             applyFilters();
         },
         triggerFilter: applyFilters

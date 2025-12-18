@@ -17,7 +17,7 @@ export function initRouter() {
     const logoBtns = document.querySelectorAll('.logo-reload-btn');
     logoBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            window.location.reload(); 
+            window.location.reload();
         });
     });
 
@@ -50,10 +50,10 @@ function switchView(viewName) {
             nav.classList.remove('active');
         }
     });
-    
+
     // Scroll to top
     const main = document.querySelector('main');
-    if(main) main.scrollTop = 0;
+    if (main) main.scrollTop = 0;
 
     console.log(`Switched to view: ${viewName}`);
 }

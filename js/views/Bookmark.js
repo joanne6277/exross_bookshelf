@@ -50,7 +50,6 @@ export function createBookmarkHTML() {
                         
                         <!-- Type Filters -->
                         <div class="flex items-center gap-1 rounded-lg bg-gray-100 p-1 flex-shrink-0">
-                            <button class="note-filter-btn active px-3 py-1.5 text-xs md:text-sm font-medium rounded-md transition-all" data-filter="all">全部</button>
                             <button class="note-filter-btn px-3 py-1.5 text-xs md:text-sm font-medium rounded-md transition-all" data-filter="highlight">劃線</button>
                             <button class="note-filter-btn px-3 py-1.5 text-xs md:text-sm font-medium rounded-md transition-all" data-filter="note">筆記</button>
                         </div>

@@ -45,7 +45,7 @@ export function createModalsHTML() {
                                 style="background-color: var(--bg-accent);"><i data-lucide="book-open"
                                     class="w-5 h-5"></i> 立即閱讀</button>
 
-                            <button data-modal-target="add-shelf-modal"
+                            <button id="modal-btn-add-shelf-mobile"
                                 class="flex-1 py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i
                                     data-lucide="plus" class="w-5 h-5"></i> 加入書單</button>
 
@@ -102,7 +102,7 @@ export function createModalsHTML() {
                                     style="background-color: var(--bg-accent);"><i data-lucide="book-open"
                                         class="w-5 h-5"></i> 立即閱讀</button>
 
-                                <button data-modal-target="add-shelf-modal"
+                                <button id="modal-btn-add-shelf"
                                     class="flex-[0.5] py-3 px-4 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"><i
                                         data-lucide="plus" class="w-5 h-5"></i>加入書單</button>
 
@@ -263,6 +263,7 @@ export function createModalsHTML() {
                         data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-4 space-y-4">
+                <p class="text-xs text-text-secondary leading-relaxed">請選擇要加入的書單（可多選）。</p>
                 <div>
                     <div class="flex flex-wrap gap-2" id="shelf-tags-container">
                         <!-- Dynamic Content -->
@@ -359,7 +360,7 @@ export function createModalsHTML() {
                             <input type="radio" name="mobile-sort" value="purchase-date" class="peer sr-only">
                             <div
                                 class="p-3 rounded-lg border border-border-color text-center text-sm font-medium text-text-primary peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-accent transition-all">
-                                最近購買
+                                最近取得
                             </div>
                         </label>
                         <label class="cursor-pointer">
@@ -458,6 +459,27 @@ export function createModalsHTML() {
                     style="background-color: var(--bg-accent);">
                     確認套用
                 </button>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile Filter Bottom Sheet -->
+    <div id="mobile-filter-sheet" class="modal-overlay hidden fixed inset-0 z-[70] flex flex-col justify-end" 
+         data-modal-close="mobile-filter-sheet">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 transition-opacity" onclick="event.stopPropagation()"></div>
+        
+        <!-- Sheet Content -->
+        <div class="bg-white w-full rounded-t-2xl p-4 transform transition-transform duration-300 translate-y-full flex flex-col max-h-[70vh]"
+             onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                <h3 id="mobile-sheet-title" class="text-lg font-bold text-text-primary">篩選</h3>
+                <button data-modal-close="mobile-filter-sheet" class="p-2 bg-gray-100 rounded-full text-text-secondary hover:bg-gray-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div id="mobile-sheet-options" class="flex-1 overflow-y-auto space-y-2 pb-6">
+                <!-- Dynamic Options Injected Here -->
             </div>
         </div>
     </div>

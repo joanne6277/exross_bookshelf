@@ -16,8 +16,8 @@ export function initBookmarkFeature() {
     let state = {
         selectedBooks: new Set(), // Multi-select: Set of Strings (Book IDs)
         selectedColors: new Set(), // Multi-select: Set of Strings (Colors)
+        selectedTypes: new Set(), // Multi-select: Set of Strings ('highlight', 'note', 'mixed')
         searchTerm: '',
-        noteType: 'all',
         sort: 'date_desc',
     };
 
@@ -76,21 +76,32 @@ export function initBookmarkFeature() {
     typeFilterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const filterType = btn.dataset.filter;
-            state.noteType = filterType;
+
+            if (state.selectedTypes.has(filterType)) {
+                state.selectedTypes.delete(filterType);
+            } else {
+                state.selectedTypes.add(filterType);
+            }
 
             // UI Update
-            typeFilterButtons.forEach(b => b.classList.remove('active', 'bg-white', 'text-text-primary', 'shadow-sm'));
-            typeFilterButtons.forEach(b => b.classList.add('text-text-secondary', 'hover:bg-gray-200'));
-
-            const sameTypeButtons = document.querySelectorAll(`.note-filter-btn[data-filter="${filterType}"]`);
-            sameTypeButtons.forEach(activeBtn => {
-                activeBtn.classList.add('active', 'bg-white', 'text-text-primary', 'shadow-sm');
-                activeBtn.classList.remove('text-text-secondary', 'hover:bg-gray-200');
-            });
-
+            updateTypeFilterUI();
             renderContent();
         });
     });
+
+    function updateTypeFilterUI() {
+        typeFilterButtons.forEach(btn => {
+            const type = btn.dataset.filter;
+
+            if (state.selectedTypes.has(type)) {
+                btn.classList.add('active', 'bg-white', 'text-text-primary', 'shadow-sm');
+                btn.classList.remove('text-text-secondary', 'hover:bg-gray-200');
+            } else {
+                btn.classList.remove('active', 'bg-white', 'text-text-primary', 'shadow-sm');
+                btn.classList.add('text-text-secondary', 'hover:bg-gray-200');
+            }
+        });
+    }
 
     // Color Filter (Multi-select)
     colorFilterButtons.forEach(btn => {
@@ -217,7 +228,7 @@ export function initBookmarkFeature() {
             // All Books
             booksWithNotes.forEach(book => {
                 book.notes.forEach(note => {
-                    sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id });
+                    sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id, bookFormat: book.format });
                 });
             });
         } else {
@@ -225,16 +236,29 @@ export function initBookmarkFeature() {
             booksWithNotes.forEach(book => {
                 if (state.selectedBooks.has(book.id)) {
                     book.notes.forEach(note => {
-                        sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id });
+                        sourceNotes.push({ ...note, bookTitle: book.title, bookId: book.id, bookFormat: book.format });
                     });
                 }
             });
         }
 
-        // 3. Filter Metrics
         let resultNotes = sourceNotes.filter(note => {
             // Type Filter
-            if (state.noteType !== 'all' && note.type !== state.noteType) return false;
+            if (state.selectedTypes.size === 1) {
+                const hasQuote = note.quote && note.quote.trim().length > 0;
+                const hasComment = note.comment && note.comment.trim().length > 0;
+
+                if (state.selectedTypes.has('highlight')) {
+                    // Exclusive Highlight: Quote only, no comment
+                    return hasQuote && !hasComment;
+                }
+                if (state.selectedTypes.has('note')) {
+                    // Exclusive Note: Comment only, no quote
+                    return !hasQuote && hasComment;
+                }
+            }
+            // If size is 0 (None) or 2 (Both), show everything (Highight + Note + Mixed)
+            // Implicitly 'return true' for type filter, continue to other filters.
 
             // Color Filter (Multi-select)
             if (state.selectedColors.size > 0) {
@@ -245,7 +269,7 @@ export function initBookmarkFeature() {
             // Search Filter
             if (state.searchTerm) {
                 const term = state.searchTerm;
-                const matchQuote = note.quote.toLowerCase().includes(term);
+                const matchQuote = note.quote && note.quote.toLowerCase().includes(term);
                 const matchComment = note.comment && note.comment.toLowerCase().includes(term);
                 const matchBookTitle = note.bookTitle.toLowerCase().includes(term);
 
@@ -355,25 +379,25 @@ export function initBookmarkFeature() {
                         <span class="text-xs text-text-secondary font-medium mb-0.5 block md:hidden">${note.bookTitle}</span> 
                         <a href="#" class="text-xs font-bold text-text-secondary hover:text-accent hover:underline mb-0.5 hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
                     </div>
-                    <span class="${badgeColor} text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">${typeLabel}</span>
                 </div>
 
+                ${note.quote ? `
                 <blockquote class="text-base text-text-primary leading-relaxed mb-3 font-medium relative">
                     <span class="absolute -left-3 -top-1 text-2xl text-gray-300 font-serif">"</span>
                     <span class="${styles.highlight} px-1 rounded box-decoration-clone leading-loose py-0.5">${checkQuote}</span>
-                </blockquote>
+                </blockquote>` : ''}
 
                 ${isNote && note.comment ? `
                 <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-transparent">
-                    <span class="block text-xs font-bold text-gray-500 mb-1">心得</span>
+                    <span class="block text-xs font-bold text-gray-500 mb-1">筆記</span>
                     <p class="text-sm text-gray-800">${checkComment}</p>
                 </div>` : ''}
 
-                <div class="flex items-center justify-between text-xs text-text-secondary mt-3 pt-3 border-t border-gray-50">
-                    <div class="flex items-center gap-3">
-                        <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> P.${note.page}</span>
-                        <span>${note.date.split(' ')[0]}</span>
-                    </div>
+            <div class="flex items-center justify-between text-xs text-text-secondary mt-3 pt-3 border-t border-gray-50">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> ${note.bookFormat === 'EPUB' ? note.page + '%' : 'P.' + note.page}</span>
+                    <span>${note.date.split(' ')[0]}</span>
+                </div>
                     <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button class="hover:text-accent p-1"><i data-lucide="share-2" class="w-4 h-4"></i></button>
                         <button class="hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
