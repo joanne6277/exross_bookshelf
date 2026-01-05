@@ -89,7 +89,6 @@ export function initBookmarkFeature() {
     });
 
     // 6. Sort Menu
-    // 6. Sort Menu
     if (sortMenuBtn && sortDropdown) {
 
         const renderDropdown = () => {
@@ -179,7 +178,6 @@ export function initBookmarkFeature() {
     }
 
     // 7. Sort Direction
-    // 7. Sort Direction
     if (sortDirBtn) {
         sortDirBtn.addEventListener('click', () => {
             state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -189,6 +187,164 @@ export function initBookmarkFeature() {
             if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
             renderContent();
         });
+    }
+
+    // 8. Note Actions (Share / Delete) - Delegation on Container
+    // State for actions
+    let noteToDelete = null;
+    let currentShareBook = null;
+    let currentShareNote = null;
+
+    const generateShareContent = (format, book, note) => {
+        if (!book || !note) return '';
+        const title = book.title;
+        const author = book.author;
+        const year = book.publishDate ? book.publishDate.split('/')[0] : 'Unknown';
+        const quote = note.quote || '';
+        const comment = note.comment || '';
+        // If EPUB, do not show page info
+        const page = book.format === 'EPUB' ? '' : `P.${note.page}`;
+
+        let content = '';
+
+        // 1. Highlight (Quote)
+        if (quote) content += `> ${quote}\n\n`;
+
+        // 2. Citation Info
+        let citation = '';
+        if (format === 'apa7') {
+            citation = `${author}. (${year}). *${title}*. ${book.publisher || 'Publisher'}.`;
+        } else if (format === 'apa6') {
+            citation = `${author}. (${year}). *${title}*. ${book.publisher || 'Publisher'}.`;
+        } else if (format === 'mla') {
+            citation = `${author}. *${title}*. ${book.publisher || 'Publisher'}, ${year}.`;
+        } else if (format === 'chicago') {
+            citation = `${author}. *${title}*. ${book.publisher || 'Publisher'}, ${year}.`;
+        } else {
+            // General
+            citation = `— 《${title}》, ${author}`;
+            if (page) citation += `, ${page}`;
+        }
+        content += `${citation}\n`;
+
+        // 3. Note (Comment) - Distinct style
+        if (comment) {
+            content += `\n📝 筆記：\n${comment}\n`;
+        }
+
+        return content;
+    };
+
+    const updateSharePreview = () => {
+        const formatSelect = document.getElementById('share-format-select');
+        const previewArea = document.getElementById('share-content-preview');
+        if (formatSelect && previewArea && currentShareBook && currentShareNote) {
+            const content = generateShareContent(formatSelect.value, currentShareBook, currentShareNote);
+            previewArea.value = content;
+        }
+    };
+
+    if (container) {
+        container.addEventListener('click', (e) => {
+            const shareBtn = e.target.closest('.btn-share-note');
+            const deleteBtn = e.target.closest('.btn-delete-note');
+
+            if (shareBtn) {
+                const bookId = shareBtn.dataset.bookId;
+                const noteId = parseInt(shareBtn.dataset.noteId);
+
+                const book = BOOKS_DATA.find(b => b.id === bookId);
+                const note = book?.notes.find(n => n.id === noteId);
+
+                if (book && note) {
+                    currentShareBook = book;
+                    currentShareNote = note;
+
+                    // Reset Select
+                    const formatSelect = document.getElementById('share-format-select');
+                    if (formatSelect) {
+                        formatSelect.value = 'general';
+                        formatSelect.onchange = updateSharePreview;
+                    }
+
+                    updateSharePreview();
+                    openModal('share-note-modal');
+                }
+            }
+
+            if (deleteBtn) {
+                const bookId = deleteBtn.dataset.bookId;
+                const noteId = parseInt(deleteBtn.dataset.noteId);
+                noteToDelete = { bookId, noteId };
+                openModal('delete-note-modal');
+            }
+        });
+    }
+
+    // 9. Modal Action Listeners
+    const confirmDeleteBtn = document.getElementById('confirm-delete-note-btn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.onclick = () => {
+            if (noteToDelete) {
+                const { bookId, noteId } = noteToDelete;
+                const book = BOOKS_DATA.find(b => b.id === bookId);
+                if (book) {
+                    book.notes = book.notes.filter(n => n.id !== noteId);
+                    renderContent();
+                    closeModal('delete-note-modal');
+                    noteToDelete = null;
+                }
+            }
+        };
+    }
+
+    const shareCopyBtn = document.getElementById('share-copy-btn');
+    if (shareCopyBtn) {
+        shareCopyBtn.onclick = () => {
+            const previewArea = document.getElementById('share-content-preview');
+            if (!previewArea) return;
+
+            const textToCopy = previewArea.value;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = shareCopyBtn.innerHTML;
+                const originalBg = shareCopyBtn.style.backgroundColor;
+
+                shareCopyBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> 已複製`;
+                shareCopyBtn.style.backgroundColor = '#10B981'; // Green
+
+                setTimeout(() => {
+                    shareCopyBtn.innerHTML = originalText;
+                    shareCopyBtn.style.backgroundColor = originalBg;
+                    if (window.lucide) window.lucide.createIcons({ root: shareCopyBtn });
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed', err);
+                alert('複製失敗，請手動複製。');
+            });
+        };
+    }
+
+    const shareExportBtn = document.getElementById('share-export-btn');
+    if (shareExportBtn) {
+        shareExportBtn.onclick = () => {
+            const previewArea = document.getElementById('share-content-preview');
+            if (!previewArea) return;
+
+            const content = previewArea.value;
+            const title = currentShareBook ? currentShareBook.title : 'note';
+
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Note_${title.replace(/\s+/g, '_')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
     }
 }
 
@@ -559,8 +715,12 @@ function createNoteCard(note, searchTerm) {
                     <span>${note.date.split(' ')[0]}</span>
                 </div>
                     <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button class="hover:text-accent p-1"><i data-lucide="share-2" class="w-4 h-4"></i></button>
-                        <button class="hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button class="hover:text-accent p-1 btn-share-note" data-book-id="${note.bookId}" data-note-id="${note.id}" title="分享">
+                            <i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
+                        <button class="hover:text-red-500 p-1 btn-delete-note" data-book-id="${note.bookId}" data-note-id="${note.id}" title="刪除">
+                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
                     </div>
                 </div>
             </div>

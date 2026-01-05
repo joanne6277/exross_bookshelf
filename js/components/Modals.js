@@ -483,5 +483,74 @@ export function createModalsHTML() {
             </div>
         </div>
     </div>
+    <!-- Share Note Modal -->
+    <div id="share-note-modal" class="modal-overlay hidden fixed inset-0 z-[80] flex items-center justify-center p-4"
+         data-modal-close="share-note-modal">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden modal-content"
+             onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-4 border-b border-border-color bg-gray-50">
+                <h3 class="text-lg font-bold text-text-primary">分享筆記</h3>
+                <button data-modal-close="share-note-modal" class="text-text-secondary hover:text-text-primary">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-5">
+                <!-- Content Preview -->
+                <div>
+                    <label class="block text-sm font-bold text-text-secondary mb-2">內容預覽</label>
+                    <textarea id="share-content-preview" 
+                        class="w-full h-48 border border-border-color rounded-xl p-4 text-text-primary text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-accent transition-shadow bg-gray-50"
+                        readonly></textarea>
+                </div>
+
+                <!-- Format Selection -->
+                <div>
+                   <label class="block text-sm font-bold text-text-secondary mb-1">引用格式</label>
+                   <select id="share-format-select" class="w-full border border-border-color rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow bg-white">
+                       <option value="general">無</option>
+                       <option value="apa7">APA 7th Edition</option>
+                       <option value="apa6">APA 6th Edition</option>
+                       <option value="mla">MLA</option>
+                       <option value="chicago">Chicago</option>
+                   </select>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-color bg-gray-50 flex gap-3">
+                <button id="share-copy-btn" class="flex-1 py-3 rounded-lg text-white font-bold shadow-md hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                        style="background-color: var(--bg-accent);">
+                    <i data-lucide="copy" class="w-4 h-4"></i> 複製
+                </button>
+                <button id="share-export-btn" class="flex-1 py-3 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>匯出
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Note Confirmation Modal -->
+    <div id="delete-note-modal" class="modal-overlay hidden fixed inset-0 z-[80] flex items-center justify-center p-4"
+         data-modal-close="delete-note-modal">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xs overflow-hidden modal-content"
+             onclick="event.stopPropagation()">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-text-primary mb-2">刪除筆記</h3>
+                <p class="text-text-secondary text-sm leading-relaxed">確定要刪除這則筆記嗎？<br>此動作無法復原。</p>
+            </div>
+            <div class="flex border-t border-border-color">
+                <button data-modal-close="delete-note-modal" 
+                        class="flex-1 py-3 text-text-secondary font-bold hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <div class="w-px bg-border-color"></div>
+                <button id="confirm-delete-note-btn" 
+                        class="flex-1 py-3 text-red-500 font-bold hover:bg-red-50 transition-colors">
+                    確認刪除
+                </button>
+            </div>
+        </div>
+    </div>
     `;
 }
