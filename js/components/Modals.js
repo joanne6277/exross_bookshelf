@@ -466,7 +466,7 @@ export function createModalsHTML() {
     <div id="mobile-filter-sheet" class="modal-overlay hidden fixed inset-0 z-[70] flex flex-col justify-end" 
          data-modal-close="mobile-filter-sheet">
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/50 transition-opacity" onclick="event.stopPropagation()"></div>
+        <div class="absolute inset-0 bg-black/50 transition-opacity"></div>
         
         <!-- Sheet Content -->
         <div class="bg-white w-full rounded-t-2xl p-4 transform transition-transform duration-300 translate-y-full flex flex-col max-h-[70vh]"

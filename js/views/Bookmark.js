@@ -69,15 +69,29 @@ export function createBookmarkHTML() {
                             </div>
                         </div>
                         
-                        <!-- Divider -->
-                        <div class="h-6 w-px bg-gray-200 flex-shrink-0"></div>
+                        <!-- Sort Menu (Desktop) -->
+                        <div class="relative hidden md:block" id="notes-sort-menu-container">
+                            <div class="flex items-center">
+                                <button id="notes-sort-menu-btn"
+                                    class="flex items-center gap-2 bg-white border border-border-color rounded-lg px-4 py-2 text-sm text-text-primary font-medium hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300 whitespace-nowrap">
+                                    <span id="notes-sort-menu-label">排序: 依新增時間</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </button>
+                                <button id="notes-sort-direction-btn"
+                                    class="ml-2 p-2 bg-white border border-border-color rounded-lg text-text-primary hover:border-accent focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div id="notes-sort-dropdown"
+                                class="hidden absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 text-left text-text-primary">
+                            </div>
+                        </div>
 
-                        <!-- Sort Select -->
-                        <select id="notes-sort-select" class="bg-transparent text-xs md:text-sm font-medium text-text-secondary focus:outline-none cursor-pointer hover:text-text-primary flex-shrink-0">
-                            <option value="date_desc">排序: 最新</option>
-                            <option value="date_asc">排序: 最舊</option>
-                            <option value="page_asc">排序: 頁碼</option>
-                        </select>
+                         <!-- Sort Button (Mobile) -->
+                        <button id="mobile-notes-sort-btn" class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm">
+                            <span id="mobile-notes-sort-label">排序：依新增時間</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+                        </button>
                     </div>
 
                     <!-- Note Cards Container -->

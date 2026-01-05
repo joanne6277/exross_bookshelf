@@ -1,3 +1,51 @@
+const DROPDOWN_CONTENT = `
+    <div class="p-5">
+        <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">連結書店帳號</p>
+        <div class="space-y-3">
+            <div class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
+                data-store-name="讀冊生活">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                        T</div>
+                    <div>
+                        <p class="text-sm font-bold text-text-primary">讀冊生活</p>
+                        <p class="text-xs status-text">未連結</p>
+                    </div>
+                </div><button
+                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
+            </div>
+            <div class="store-card linked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
+                data-store-name="三民書局">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600">
+                        S</div>
+                    <div>
+                        <p class="text-sm font-bold text-text-primary">三民書局</p>
+                        <p class="text-xs status-text">已連結</p>
+                    </div>
+                </div><button
+                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">管理</button>
+            </div>
+            <div id="store-iread"
+                class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
+                data-store-id="iread" data-store-name="iRead 灰熊">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-xs font-bold text-yellow-600">
+                        i</div>
+                    <div>
+                        <p class="text-sm font-bold text-text-primary">iRead 灰熊</p>
+                        <p class="text-xs status-text">未連結</p>
+                    </div>
+                </div><button
+                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
+            </div>
+        </div>
+    </div>
+`;
+
 export function createHeaderHTML() {
     return `
     <header id="desktop-header"
@@ -24,57 +72,13 @@ export function createHeaderHTML() {
             <button class="p-2 rounded-full hover:bg-gray-100 transition-colors relative"><i data-lucide="bell"
                     class="w-5 h-5 text-gray-600"></i><span
                     class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
-            <div class="relative">
+            <div class="relative group">
                 <button id="user-menu-btn-desktop"
-                    class="rounded-full w-9 h-9 bg-gray-200 flex items-center justify-center overflow-hidden hover:bg-gray-300 transition-all border border-gray-200 user-menu-trigger"><i
-                        data-lucide="user" class="w-5 h-5 text-gray-600"></i></button>
-                <div id="user-dropdown"
-                    class="hidden absolute top-full right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
-                    <div class="p-5">
-                        <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">連結書店帳號</p>
-                        <div class="space-y-3">
-                            <div class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                                data-store-name="讀冊生活">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                                        T</div>
-                                    <div>
-                                        <p class="text-sm font-bold text-text-primary">讀冊生活</p>
-                                        <p class="text-xs status-text">未連結</p>
-                                    </div>
-                                </div><button
-                                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
-                            </div>
-                            <div class="store-card linked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                                data-store-name="三民書局">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600">
-                                        S</div>
-                                    <div>
-                                        <p class="text-sm font-bold text-text-primary">三民書局</p>
-                                        <p class="text-xs status-text">已連結</p>
-                                    </div>
-                                </div><button
-                                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">管理</button>
-                            </div>
-                            <div id="store-iread"
-                                class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                                data-store-id="iread" data-store-name="iRead 灰熊">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-xs font-bold text-yellow-600">
-                                        i</div>
-                                    <div>
-                                        <p class="text-sm font-bold text-text-primary">iRead 灰熊</p>
-                                        <p class="text-xs status-text">未連結</p>
-                                    </div>
-                                </div><button
-                                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
-                            </div>
-                        </div>
-                    </div>
+                    class="rounded-full w-9 h-9 bg-gray-200 flex items-center justify-center overflow-hidden hover:bg-gray-300 transition-all border border-gray-200 user-menu-trigger">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <div class="user-dropdown hidden absolute top-full right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
+                    ${DROPDOWN_CONTENT}
                 </div>
             </div>
         </div>
@@ -93,39 +97,56 @@ export function createHeaderHTML() {
         <div class="flex items-center gap-3">
             <button class="relative"><i data-lucide="bell" class="w-5 h-5 text-gray-500"></i><span
                     class="absolute -top-0.5 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
-            <button id="user-menu-btn-mobile"
-                class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-text-secondary user-menu-trigger"><i
-                    data-lucide="user" class="w-4 h-4"></i></button>
+            <div class="relative group">
+                <button id="user-menu-btn-mobile"
+                    class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-text-secondary user-menu-trigger">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                </button>
+                <div class="user-dropdown hidden absolute top-full right-0 mt-3 w-80 max-w-[90vw] bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
+                    ${DROPDOWN_CONTENT}
+                </div>
+            </div>
         </div>
     </header>
     `;
 }
 
 export function initHeaderEvents() {
-    const triggers = document.querySelectorAll('.user-menu-trigger');
-    const dropdown = document.getElementById('user-dropdown');
-
-    if (triggers.length > 0 && dropdown) {
-        triggers.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle('hidden');
-            });
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !Array.from(triggers).some(trigger => trigger.contains(e.target))) {
-                dropdown.classList.add('hidden');
-            }
-        });
-    }
-
     // Logo reload
     const logoBtns = document.querySelectorAll('.logo-reload-btn');
     logoBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             window.location.reload();
         });
+    });
+
+    // Handle user menu dropdowns
+    // Use delegation or setup specific listeners for each trigger/dropdown pair
+    // Since we wrapped them in relative containers with trigger and dropdown as siblings:
+    const triggers = document.querySelectorAll('.user-menu-trigger');
+
+    triggers.forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = trigger.parentElement.querySelector('.user-dropdown');
+
+            // Close all other dropdowns first (optional, but cleaner)
+            document.querySelectorAll('.user-dropdown').forEach(d => {
+                if (d !== dropdown) d.classList.add('hidden');
+            });
+
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.user-dropdown') && !e.target.closest('.user-menu-trigger')) {
+            document.querySelectorAll('.user-dropdown').forEach(d => {
+                d.classList.add('hidden');
+            });
+        }
     });
 }
