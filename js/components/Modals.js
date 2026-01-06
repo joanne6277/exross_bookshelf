@@ -33,12 +33,14 @@ export function createModalsHTML() {
                                     class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
                                 <span id="modal-book-format-mobile"
                                     class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded-full border border-gray-600 shadow-sm hidden">EPUB</span>
+                                <span id="modal-book-audiobook-icon-mobile"
+                                    class="bg-purple-600 text-white p-1 rounded-full shadow-sm hidden border border-white/50"><i data-lucide="volume-2" class="w-4 h-4"></i></span>
 
                             </div>
 
                         </div>
 
-                        <div class="grid grid-rows-[60px_60px_60px] gap-4 content-start">
+                        <div id="modal-actions-normal-mobile" class="grid grid-rows-[60px_60px_60px] gap-4 content-start">
 
                             <button
                                 class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
@@ -53,6 +55,22 @@ export function createModalsHTML() {
                                 class="flex-1 py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i
                                     data-lucide="archive" class="w-5 h-5"></i> 封存</button>
 
+                        </div>
+
+                        <!-- Archived (Manual) Actions -->
+                        <div id="modal-actions-archived-mobile" class="hidden grid grid-rows-[60px] gap-4 content-start">
+                            <button id="modal-btn-unarchive-mobile"
+                                class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                style="background-color: var(--bg-accent);"><i data-lucide="archive-restore"
+                                    class="w-5 h-5"></i> 加入我的書櫃</button>
+                        </div>
+
+                        <!-- Expired Textbook Actions -->
+                        <div id="modal-actions-expired-mobile" class="hidden grid grid-rows-[60px] gap-4 content-start">
+                            <button id="modal-btn-purchase-mobile"
+                                class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                style="background-color: var(--bg-accent);"><i data-lucide="external-link"
+                                    class="w-5 h-5"></i> 購買連結</button>
                         </div>
 
                     </div>
@@ -71,6 +89,8 @@ export function createModalsHTML() {
                                     class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
                                 <span id="modal-book-format"
                                     class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded-full border border-gray-600 shadow-sm hidden">EPUB</span>
+                                <span id="modal-book-audiobook-icon"
+                                    class="bg-purple-600 text-white p-1 rounded-full shadow-sm hidden border border-white/50"><i data-lucide="volume-2" class="w-4 h-4"></i></span>
 
                             </div>
 
@@ -95,7 +115,7 @@ export function createModalsHTML() {
 
                             </div>
 
-                            <div class="flex gap-4 mb-8">
+                            <div id="modal-actions-normal" class="flex gap-4 mb-8">
 
                                 <button
                                     class="flex-[0.5] py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
@@ -110,6 +130,22 @@ export function createModalsHTML() {
                                     class="flex-[0.4] py-3 px-4 rounded-lg bg-red-500 text-white font-bold shadow-sm hover:bg-red-600 transition-opacity flex items-center justify-center gap-2"><i
                                         data-lucide="archive" class="w-5 h-5"></i> 封存</button>
 
+                            </div>
+
+                            <!-- Archived (Manual) Actions -->
+                            <div id="modal-actions-archived" class="hidden flex gap-4 mb-8">
+                                <button id="modal-btn-unarchive"
+                                    class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                    style="background-color: var(--bg-accent);"><i data-lucide="archive-restore"
+                                        class="w-5 h-5"></i> 加入我的書櫃</button>
+                            </div>
+
+                            <!-- Expired Textbook Actions -->
+                            <div id="modal-actions-expired" class="hidden flex gap-4 mb-8">
+                                <button id="modal-btn-purchase"
+                                    class="flex-1 py-3 px-4 rounded-lg text-white font-bold shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                    style="background-color: var(--bg-accent);"><i data-lucide="external-link"
+                                        class="w-5 h-5"></i> 購買連結</button>
                             </div>
 
                             <div class="border-t border-border-color pt-4">
@@ -505,7 +541,7 @@ export function createModalsHTML() {
 
                 <!-- Format Selection -->
                 <div>
-                   <label class="block text-sm font-bold text-text-secondary mb-1">引用格式</label>
+                   <label class="block text-sm font-bold text-text-secondary mb-1">學術引用格式</label>
                    <select id="share-format-select" class="w-full border border-border-color rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow bg-white">
                        <option value="general">無</option>
                        <option value="apa7">APA 7th Edition</option>

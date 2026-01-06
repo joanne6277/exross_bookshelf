@@ -25,7 +25,7 @@ export function createFilterBarHTML(prefix = '') {
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
                 <span class="text-sm font-medium text-text-secondary whitespace-nowrap">狀態:</span>
                 <select id="${prefix}status-filter"
-                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
                     <option>全部</option>
                     <option>未閱讀</option>
                     <option>閱讀中</option>
@@ -34,7 +34,7 @@ export function createFilterBarHTML(prefix = '') {
             </div>
             <!-- Mobile -->
             <button id="${prefix}mobile-status-btn" 
-                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="status">
                 <span>狀態:</span> <span id="${prefix}mobile-status-label" class="font-bold text-text-primary">全部</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
@@ -47,7 +47,7 @@ export function createFilterBarHTML(prefix = '') {
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
                 <span class="text-sm font-medium text-text-secondary whitespace-nowrap">來源:</span>
                 <select id="${prefix}source-filter"
-                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
                     <option>全部來源</option>
                     <option>TAAZE 讀冊</option>
                     <option>三民書局</option>
@@ -56,7 +56,7 @@ export function createFilterBarHTML(prefix = '') {
             </div>
             <!-- Mobile -->
             <button id="${prefix}mobile-source-btn" 
-                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="source">
                 <span>來源:</span> <span id="${prefix}mobile-source-label" class="font-bold text-text-primary">全部來源</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
@@ -69,7 +69,7 @@ export function createFilterBarHTML(prefix = '') {
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
                 <span class="text-sm font-medium text-text-secondary whitespace-nowrap">類別:</span>
                 <select id="${prefix}category-filter"
-                    class="bg-white border border-border-color rounded-lg px-2 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                    class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
                     <option value="all">全部類別</option>
                     <option value="商業">商業</option>
                     <option value="文學">文學</option>
@@ -79,7 +79,7 @@ export function createFilterBarHTML(prefix = '') {
             </div>
             <!-- Mobile -->
             <button id="${prefix}mobile-category-btn" 
-                class="md:hidden flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="category">
                 <span>類別:</span> <span id="${prefix}mobile-category-label" class="font-bold text-text-primary">全部類別</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
@@ -129,7 +129,7 @@ export function createFilterBarHTML(prefix = '') {
         <!-- Mobile Sort Button -->
         <div class="block md:hidden flex-shrink-0">
              <button id="${prefix}mobile-sort-btn" 
-                class="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="sort">
                 <span>排序</span>
                 <i data-lucide="arrow-down-up" class="w-3 h-3 ml-1"></i>

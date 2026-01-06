@@ -12,6 +12,24 @@ function areAllBooksInCollection(collectionTitle, bookIds) {
     return bookIds.every(id => collection.books.includes(id));
 }
 
+// Helper: Check if a book is archived
+export function isBookArchived(book) {
+    if (book.isArchived) return true;
+    if (book.type === '教科書' && book.expiryDate) {
+        // Compare expiry date string (YYYY/MM/DD) with today
+        // Simple string comparison works for ISO-like YYYY/MM/DD if no time involved, or just parsing
+        // Let's parse to be safe.
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const expiryParts = book.expiryDate.split(' ')[0].split('/'); // Remove time if any
+        if (expiryParts.length === 3) {
+            const expiry = new Date(expiryParts[0], expiryParts[1] - 1, expiryParts[2]);
+            if (expiry < today) return true;
+        }
+    }
+    return false;
+}
+
 function renderShelfModal(bookIdOrArray) {
     // Normalize to array
     if (Array.isArray(bookIdOrArray)) {
@@ -123,21 +141,45 @@ export function createBookCardHTML(book, options = {}) {
     const remainingTag = isTextbook && book.remainingTime
         ? `<div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 ${book.remainingTime}</span></div>`
         : '';
+    const audiobookIcon = book.isAudiobook
+        ? (isTextbook
+            ? `<div class="absolute top-9 right-2 z-10"><span class="bg-purple-600 text-white p-1 rounded-full shadow-md flex items-center justify-center border border-white/50"><i data-lucide="volume-2" class="w-3 h-3"></i></span></div>`
+            : `<div class="absolute top-2 left-2 z-10"><span class="bg-purple-600 text-white p-1 rounded-full shadow-md flex items-center justify-center border border-white/50"><i data-lucide="volume-2" class="w-3 h-3"></i></span></div>`)
+        : '';
+
+    // Archived Logic
+    const isArchivedView = options.isArchivedView || false;
+    const isExpired = isTextbook && isBookArchived(book); // Check validity again or reuse passed prop? Rely on helper.
+    // However, if we are in archived view, we can assume it IS archived or expired.
+
+    // Image Classes: If archived view, grayscale
+    const imgClasses = `w-full h-full object-cover transition-transform duration-500 md:group-hover:scale-110 ${isArchivedView ? 'grayscale' : ''}`;
+
+    // Label Logic: Expired
+    let topLabel = remainingTag;
+    if (isArchivedView && isExpired) {
+        topLabel = `<div class="absolute top-2 right-2 z-10"><span class="bg-gray-600 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">已過期</span></div>`;
+    }
 
     return `
     <div class="book-item bg-secondary rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-color md:hover:shadow-lg transition-all group relative cursor-pointer" data-book-id="${book.id}">
         <div class="absolute top-2 left-2 z-30 batch-checkbox hidden">
             <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer">
         </div>
-        ${remainingTag}
+        ${topLabel}
+        ${audiobookIcon}
         <div class="relative overflow-hidden aspect-[2/3] viewer-trigger">
-            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover transition-transform duration-500 md:group-hover:scale-110">
+            <img src="${book.cover}" alt="${book.title}" class="${imgClasses}">
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
                 <div class="h-full" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
             </div>
             <div class="absolute inset-0 bg-black/70 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3 p-6 z-20 backdrop-blur-[2px] pointer-events-none md:group-hover:pointer-events-auto">
-                <button class="mask-btn w-full py-2.5 rounded-lg shadow-md read-btn pointer-events-auto">立即閱讀</button>
-                <button class="mask-btn w-full py-2.5 rounded-lg shadow-md shelf-btn pointer-events-auto">加入/移出書單</button>
+                ${isArchivedView
+            ? (isExpired
+                ? `<button class="mask-btn w-full py-2.5 rounded-lg shadow-md purchase-btn pointer-events-auto">購買連結</button>`
+                : `<button class="mask-btn w-full py-2.5 rounded-lg shadow-md unarchive-btn pointer-events-auto">加入我的書櫃</button>`)
+            : `<button class="mask-btn w-full py-2.5 rounded-lg shadow-md read-btn pointer-events-auto">立即閱讀</button>
+                <button class="mask-btn w-full py-2.5 rounded-lg shadow-md shelf-btn pointer-events-auto">加入/移出書單</button>`}
             </div>
         </div>
         <div class="p-4 flex-1 flex flex-col relative">
@@ -219,6 +261,17 @@ export function showBookDetails(bookId) {
         if (formatElMobile) formatElMobile.classList.add('hidden');
     }
 
+    // Audiobook Icon
+    const audioIcon = document.getElementById('modal-book-audiobook-icon');
+    const audioIconMobile = document.getElementById('modal-book-audiobook-icon-mobile');
+    if (book.isAudiobook) {
+        if (audioIcon) audioIcon.classList.remove('hidden');
+        if (audioIconMobile) audioIconMobile.classList.remove('hidden');
+    } else {
+        if (audioIcon) audioIcon.classList.add('hidden');
+        if (audioIconMobile) audioIconMobile.classList.add('hidden');
+    }
+
     // Bibliographic info
     document.getElementById('modal-book-pubdate').textContent = book.publishDate || '-';
     document.getElementById('modal-book-pubdate-mobile').textContent = book.publishDate || '-';
@@ -244,8 +297,9 @@ export function showBookDetails(bookId) {
     toggleVisibility('teaching-resources-container', isTextbook);
 
     if (isTextbook) {
-        document.getElementById('modal-book-expiry').textContent = book.expiryDate;
-        document.getElementById('modal-book-expiry-mobile').textContent = book.expiryDate;
+        const expiryDateFormatted = book.expiryDate ? book.expiryDate.split(' ')[0] : '-';
+        document.getElementById('modal-book-expiry').textContent = expiryDateFormatted;
+        document.getElementById('modal-book-expiry-mobile').textContent = expiryDateFormatted;
 
         const resources = book.teachingResources;
         let contentHTML = '';
@@ -271,6 +325,37 @@ export function showBookDetails(bookId) {
         const finalHTML = contentHTML || '<p>無可用資源。</p>';
         if (desktopContent) desktopContent.innerHTML = finalHTML;
         if (mobileContent) mobileContent.innerHTML = finalHTML;
+    }
+
+    // --- Action Button Logic for Archived Books ---
+    const isArchived = isBookArchived(book);
+    const isExpiredTextbook = isTextbook && isArchived && !book.isArchived; // It's archived due to expiry, not manual flag
+
+    // Toggle action button containers
+    const actionsNormal = document.getElementById('modal-actions-normal');
+    const actionsNormalMobile = document.getElementById('modal-actions-normal-mobile');
+    const actionsArchived = document.getElementById('modal-actions-archived');
+    const actionsArchivedMobile = document.getElementById('modal-actions-archived-mobile');
+    const actionsExpired = document.getElementById('modal-actions-expired');
+    const actionsExpiredMobile = document.getElementById('modal-actions-expired-mobile');
+
+    // Hide all first
+    [actionsNormal, actionsNormalMobile, actionsArchived, actionsArchivedMobile, actionsExpired, actionsExpiredMobile].forEach(el => {
+        if (el) el.classList.add('hidden');
+    });
+
+    if (isExpiredTextbook) {
+        // Expired Textbook -> Show Purchase Link
+        if (actionsExpired) actionsExpired.classList.remove('hidden');
+        if (actionsExpiredMobile) actionsExpiredMobile.classList.remove('hidden');
+    } else if (book.isArchived) {
+        // Manually Archived -> Show Unarchive/Add to Bookshelf
+        if (actionsArchived) actionsArchived.classList.remove('hidden');
+        if (actionsArchivedMobile) actionsArchivedMobile.classList.remove('hidden');
+    } else {
+        // Normal Book -> Show Normal Actions
+        if (actionsNormal) actionsNormal.classList.remove('hidden');
+        if (actionsNormalMobile) actionsNormalMobile.classList.remove('hidden');
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -520,7 +605,7 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
         }
 
         // Disable hover effects if in batch mode (optional UX choice)
-        // document.body.classList.toggle('batch-mode-active', isBatchMode);
+        document.body.classList.toggle('batch-mode-active', isBatchMode);
     };
 
     if (batchBtn) {
@@ -801,14 +886,42 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
 // 4. 初始化功能
 export function initBookshelfFeature() {
     // 渲染書籍
-    let currentBooks = [...BOOKS_DATA];
+    let currentBooks = BOOKS_DATA.filter(b => !isBookArchived(b));
     const gridContainer = document.getElementById('all-books-grid');
     const listContainer = document.getElementById('all-books-list');
 
     const render = () => {
-        if (gridContainer) gridContainer.innerHTML = currentBooks.map(createBookCardHTML).join('');
+        if (gridContainer) gridContainer.innerHTML = currentBooks.map(b => createBookCardHTML(b)).join('');
         if (listContainer) listContainer.innerHTML = currentBooks.map(createBookListItemHTML).join('');
         if (window.lucide) window.lucide.createIcons();
+    };
+
+    // New: Render Archived Books
+    const renderArchivedBooks = () => {
+        const archivedContainer = document.getElementById('archived');
+        if (!archivedContainer) return;
+
+        // Find archived books
+        const archivedBooks = BOOKS_DATA.filter(b => isBookArchived(b));
+
+        const gridHTML = `
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
+                ${archivedBooks.map(b => createBookCardHTML(b, { isArchivedView: true })).join('')}
+            </div>
+        `;
+
+        const emptyHTML = `<div class="text-center py-20 text-text-secondary">暫無封存書籍</div>`;
+
+        archivedContainer.innerHTML = archivedBooks.length > 0 ? gridHTML : emptyHTML;
+        if (window.lucide) window.lucide.createIcons();
+
+        // Bind click events for archived cards (e.g., allow opening details/viewer? User requirement didn't specify interaction changes, assuming standard but filtered)
+        // Re-use logic or duplicate listener? 
+        // Let's add listener to this new container for standard behavior.
+        // Or better, delegate? 
+        // We can attach a listener to 'archived' container.
+        // Remove old listener if re-rendering? (Not needed if innerHTML clears children)
+        archivedContainer.addEventListener('click', handleBookClick);
     };
 
     render();
@@ -823,7 +936,7 @@ export function initBookshelfFeature() {
             currentBooks.sort((a, b) => (b.lastRead || '').localeCompare(a.lastRead || ''));
         } else if (sortType === 'purchase-date') {
             // 恢復預設順序
-            currentBooks = [...BOOKS_DATA];
+            currentBooks = BOOKS_DATA.filter(b => !isBookArchived(b));
         } else if (sortType === 'title') {
             currentBooks.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hant'));
         } else if (sortType === 'publish-date') {
@@ -835,6 +948,9 @@ export function initBookshelfFeature() {
     // 事件代理：處理點擊 (Grid & List 通用)
     // 事件代理：處理點擊 (Grid & List 通用)
     const handleBookClick = (e) => {
+        // Prevent viewer/details if in batch mode (handled by global class toggle in FilterBar)
+        if (document.body.classList.contains('batch-mode-active')) return;
+
         const target = e.target;
         const card = target.closest('.book-item') || target.closest('.book-list-item');
         if (!card) return;
@@ -891,6 +1007,10 @@ export function initBookshelfFeature() {
             document.getElementById(targetId)?.classList.remove('hidden');
             tab.classList.add('tab-active');
 
+            if (targetId === 'archived') {
+                renderArchivedBooks();
+            }
+
             // Toggle search bar visibility
             if (searchContainer) {
                 if (targetId === 'all-books') {
@@ -909,7 +1029,7 @@ export function initBookshelfFeature() {
 
     // 設定 All Books 篩選列功能
     // --- Filter Logic ---
-    const allBooksDataSource = () => BOOKS_DATA;
+    const allBooksDataSource = () => BOOKS_DATA.filter(b => !isBookArchived(b));
 
     // Setup generic filter logic
     const filterLogic = setupFilterLogic({

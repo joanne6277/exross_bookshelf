@@ -207,10 +207,7 @@ export function initBookmarkFeature() {
 
         let content = '';
 
-        // 1. Highlight (Quote)
-        if (quote) content += `> ${quote}\n\n`;
-
-        // 2. Citation Info
+        // 1. Citation Info (Book Info) - TOP
         let citation = '';
         if (format === 'apa7') {
             citation = `${author}. (${year}). *${title}*. ${book.publisher || 'Publisher'}.`;
@@ -225,11 +222,14 @@ export function initBookmarkFeature() {
             citation = `— 《${title}》, ${author}`;
             if (page) citation += `, ${page}`;
         }
-        content += `${citation}\n`;
+        content += `${citation}\n\n`;
 
-        // 3. Note (Comment) - Distinct style
+        // 2. Highlight (Quote) - MIDDLE
+        if (quote) content += `> ${quote}\n\n`;
+
+        // 3. Note (Comment) - BOTTOM
         if (comment) {
-            content += `\n📝 筆記：\n${comment}\n`;
+            content += `📝 筆記：\n${comment}\n`;
         }
 
         return content;

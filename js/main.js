@@ -1,7 +1,7 @@
 import { initRouter } from './router.js';
 import { initUtils } from './utils.js';
 import { initStoreFeature } from './features/store.js';
-import { initBookshelfFeature, initFilterBar, createBookCardHTML, createBookListItemHTML, setupFilterLogic, showBookDetails, openShelfModalForBook } from './features/bookshelf.js';
+import { initBookshelfFeature, initFilterBar, createBookCardHTML, createBookListItemHTML, setupFilterLogic, showBookDetails, openShelfModalForBook, isBookArchived } from './features/bookshelf.js';
 import { BOOKS_DATA } from './data/books.js';
 import { initBookmarkFeature } from './features/bookmark.js';
 import { initReadingGoal } from './features/readingGoal.js';
@@ -27,7 +27,7 @@ function initDetailsView() {
         const collections = getCollections();
         const collection = collections[activeCollectionTitle];
         if (!collection) return [];
-        return BOOKS_DATA.filter(book => collection.books.includes(book.id));
+        return BOOKS_DATA.filter(book => collection.books.includes(book.id) && !isBookArchived(book));
     };
 
     const render = (books) => {
@@ -71,6 +71,7 @@ function initDetailsView() {
     const grid = document.getElementById('bookshelf-books-grid');
     if (grid) {
         grid.addEventListener('click', (e) => {
+            if (document.body.classList.contains('batch-mode-active')) return;
             const target = e.target;
             const card = target.closest('.book-item');
             if (!card) return;

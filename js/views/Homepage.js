@@ -58,6 +58,46 @@ export function createHomepageHTML() {
                         <span>71%</span>
                     </div>
                 </div>
+                <!-- Clean Code -->
+                <div
+                    class="min-w-[180px] max-w-[180px] md:min-w-[220px] md:max-w-[220px] bg-secondary rounded-xl p-3 md:p-4 shadow-sm border border-border-color flex flex-col hover:shadow-md transition-shadow cursor-pointer relative group">
+                    <div class="absolute top-2.5 right-2.5 z-10"><span
+                            class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘
+                            10 天 10 小時</span></div>
+                    <div class="relative aspect-[2/3] mb-3"><img
+                            src="https://placehold.co/220x140/3498DB/FFFFFF?text=Clean" alt="Cover"
+                            class="w-full h-full object-cover rounded-lg shadow-sm">
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full"
+                                style="width: 20%; background-color: var(--bg-accent);"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-base text-text-primary truncate mb-0.5">Clean Code</h3>
+                    <p class="text-xs text-text-secondary mb-2">Robert C. Martin</p>
+                    <div class="mt-auto flex justify-between text-[10px] text-text-secondary font-medium">
+                        <span>20%</span>
+                    </div>
+                </div>
+                <!-- English Listening -->
+                <div
+                    class="min-w-[180px] max-w-[180px] md:min-w-[220px] md:max-w-[220px] bg-secondary rounded-xl p-3 md:p-4 shadow-sm border border-border-color flex flex-col hover:shadow-md transition-shadow cursor-pointer relative group">
+                    <div class="absolute top-2.5 right-2.5 z-10"><span
+                            class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘
+                            30 天</span></div>
+                    <div class="relative aspect-[2/3] mb-3"><img
+                            src="https://placehold.co/220x140/8E45AD/FFFFFF?text=English" alt="Cover"
+                            class="w-full h-full object-cover rounded-lg shadow-sm">
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full"
+                                style="width: 10%; background-color: var(--bg-accent);"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-base text-text-primary truncate mb-0.5">英語聽力特訓</h3>
+                    <p class="text-xs text-text-secondary mb-2">Teacher John</p>
+                    <div class="mt-auto flex justify-between text-[10px] text-text-secondary font-medium">
+                        <span>10%</span>
+                    </div>
+                </div>
             </div>
         </section>
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-8">
