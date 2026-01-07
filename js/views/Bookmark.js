@@ -48,6 +48,13 @@ export function createBookmarkHTML() {
                     <!-- Unified Scrollable Filters Toolbar -->
                     <div class="p-3 md:p-4 border-b border-border-color bg-white flex items-center overflow-x-auto no-scrollbar gap-4 sticky top-0 z-10 whitespace-nowrap">
                         
+                        <!-- Batch Select Button -->
+                        <button id="notes-batch-select-btn"
+                            class="flex-shrink-0 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">批次選取</button>
+
+                        <!-- Divider -->
+                        <div class="h-6 w-px bg-gray-200 flex-shrink-0"></div>
+
                         <!-- Type Filters -->
                         <div class="flex items-center gap-1 rounded-lg bg-gray-100 p-1 flex-shrink-0">
                             <button class="note-filter-btn px-3 py-1.5 text-xs md:text-sm font-medium rounded-md transition-all" data-filter="highlight">劃線</button>
@@ -97,6 +104,30 @@ export function createBookmarkHTML() {
                     <!-- Note Cards Container -->
                     <div id="note-content-area" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6">
                         <!-- Dynamic Content -->
+                    </div>
+
+                    <!-- Batch Action Bar -->
+                    <div id="notes-batch-action-bar"
+                        class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl p-4 z-50">
+                        <div
+                            class="bg-white rounded-xl shadow-2xl border border-gray-100 flex items-center justify-between p-4">
+                            <div class="flex items-center gap-4">
+                                <button id="notes-batch-select-all-btn" class="text-accent font-bold text-sm hover:underline">全選</button>
+                                <span id="notes-selected-count" class="text-sm font-bold">已選取 0 則</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <button id="notes-batch-share-btn"
+                                    class="px-4 py-2 bg-blue-100 text-black text-sm font-bold rounded-lg hover:bg-blue-200 flex items-center gap-1.5">
+                                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                                    分享
+                                </button>
+                                <button id="notes-batch-delete-btn"
+                                    class="px-4 py-2 bg-red-100 text-red-600 text-sm font-bold rounded-lg hover:bg-red-200 flex items-center gap-1.5">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    刪除
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

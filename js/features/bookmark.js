@@ -7,7 +7,9 @@ const state = {
     selectedTypes: new Set(),
     selectedColors: new Set(),
     sortType: 'date',
-    sortDirection: 'desc'
+    sortDirection: 'desc',
+    isBatchMode: false,
+    selectedNotes: new Set() // Stores "bookId:noteId" strings
 };
 
 export function initBookmarkFeature() {
@@ -56,19 +58,63 @@ export function initBookmarkFeature() {
         });
     }
 
-    // 4. Type Filter
+    // Helper: Update color filter disabled state based on type selection
+    const updateColorFilterState = () => {
+        const isNoteOnly = state.selectedTypes.has('note') && state.selectedTypes.size === 1;
+
+        colorFilterButtons.forEach(btn => {
+            if (isNoteOnly) {
+                // Disable color filter when "note" is selected
+                btn.disabled = true;
+                btn.classList.add('opacity-30', 'cursor-not-allowed');
+                btn.classList.remove('hover:scale-110', 'ring-2', 'ring-offset-1', 'ring-gray-400');
+            } else {
+                // Enable color filter
+                btn.disabled = false;
+                btn.classList.remove('opacity-30', 'cursor-not-allowed');
+                btn.classList.add('hover:scale-110');
+                // Restore ring if was selected
+                if (state.selectedColors.has(btn.dataset.color)) {
+                    btn.classList.add('ring-2', 'ring-offset-1', 'ring-gray-400');
+                }
+            }
+        });
+
+        // Clear color selection when note-only mode is active
+        if (isNoteOnly && state.selectedColors.size > 0) {
+            state.selectedColors.clear();
+        }
+    };
+
+    // 4. Type Filter (Single-select: highlight, note, or none)
     typeFilterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const filter = btn.dataset.filter;
+
+            // If clicking the already selected filter, deselect it (show all)
             if (state.selectedTypes.has(filter)) {
-                state.selectedTypes.delete(filter);
+                state.selectedTypes.clear();
                 btn.classList.remove('bg-gray-800', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-text-primary'); // Reset style
+                btn.classList.add('bg-gray-100', 'text-text-primary');
             } else {
+                // Clear previous selection and select new one
+                state.selectedTypes.clear();
                 state.selectedTypes.add(filter);
-                btn.classList.add('bg-gray-800', 'text-white');
-                btn.classList.remove('bg-gray-100', 'text-text-primary');
+
+                // Update all buttons' visual state
+                typeFilterButtons.forEach(b => {
+                    if (b.dataset.filter === filter) {
+                        b.classList.add('bg-gray-800', 'text-white');
+                        b.classList.remove('bg-gray-100', 'text-text-primary');
+                    } else {
+                        b.classList.remove('bg-gray-800', 'text-white');
+                        b.classList.add('bg-gray-100', 'text-text-primary');
+                    }
+                });
             }
+
+            // Update color filter state based on type selection
+            updateColorFilterState();
             renderContent();
         });
     });
@@ -345,6 +391,141 @@ export function initBookmarkFeature() {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         };
+    }
+
+    // 10. Batch Mode Logic
+    const batchBtn = document.getElementById('notes-batch-select-btn');
+    const batchBar = document.getElementById('notes-batch-action-bar');
+    const batchSelectAllBtn = document.getElementById('notes-batch-select-all-btn');
+    const batchShareBtn = document.getElementById('notes-batch-share-btn');
+    const batchDeleteBtn = document.getElementById('notes-batch-delete-btn');
+    const selectedCountEl = document.getElementById('notes-selected-count');
+
+    const updateBatchUI = () => {
+        if (selectedCountEl) {
+            selectedCountEl.textContent = `已選取 ${state.selectedNotes.size} 則`;
+        }
+        if (batchBar) {
+            batchBar.classList.toggle('hidden', !state.isBatchMode);
+        }
+    };
+
+    if (batchBtn) {
+        batchBtn.addEventListener('click', () => {
+            state.isBatchMode = !state.isBatchMode;
+            state.selectedNotes.clear();
+
+            // Toggle Button Style (keep color, just toggle active state indicator)
+            batchBtn.classList.toggle('ring-2', state.isBatchMode);
+            batchBtn.classList.toggle('ring-offset-2', state.isBatchMode);
+
+            updateBatchUI();
+            renderContent();
+        });
+    }
+
+    // Select All Logic
+    if (batchSelectAllBtn) {
+        batchSelectAllBtn.addEventListener('click', () => {
+            const allCheckboxes = container.querySelectorAll('.note-batch-checkbox');
+            const allNoteIds = Array.from(allCheckboxes).map(cb => cb.dataset.noteKey);
+
+            if (state.selectedNotes.size === allNoteIds.length) {
+                // Deselect All
+                state.selectedNotes.clear();
+                allCheckboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.note-card')?.classList.remove('ring-2', 'ring-accent');
+                });
+            } else {
+                // Select All
+                allNoteIds.forEach(key => state.selectedNotes.add(key));
+                allCheckboxes.forEach(cb => {
+                    cb.checked = true;
+                    cb.closest('.note-card')?.classList.add('ring-2', 'ring-accent');
+                });
+            }
+            updateBatchUI();
+        });
+    }
+
+    // Checkbox Click Delegation
+    if (container) {
+        container.addEventListener('change', (e) => {
+            if (e.target.classList.contains('note-batch-checkbox')) {
+                const noteKey = e.target.dataset.noteKey;
+                const card = e.target.closest('.note-card');
+
+                if (e.target.checked) {
+                    state.selectedNotes.add(noteKey);
+                    card?.classList.add('ring-2', 'ring-accent');
+                } else {
+                    state.selectedNotes.delete(noteKey);
+                    card?.classList.remove('ring-2', 'ring-accent');
+                }
+                updateBatchUI();
+            }
+        });
+    }
+
+    // Batch Share Logic
+    if (batchShareBtn) {
+        batchShareBtn.addEventListener('click', () => {
+            if (state.selectedNotes.size === 0) {
+                alert('請先選取筆記！');
+                return;
+            }
+
+            // Collect all selected notes
+            let combinedContent = '';
+            state.selectedNotes.forEach(key => {
+                const [bookId, noteId] = key.split(':');
+                const book = BOOKS_DATA.find(b => b.id === bookId);
+                const note = book?.notes.find(n => n.id === parseInt(noteId));
+
+                if (book && note) {
+                    const page = book.format === 'EPUB' ? '' : `P.${note.page}`;
+                    let citation = `— 《${book.title}》, ${book.author}`;
+                    if (page) citation += `, ${page}`;
+
+                    if (note.quote) combinedContent += `> ${note.quote}\n`;
+                    combinedContent += `${citation}\n`;
+                    if (note.comment) combinedContent += `📝 筆記：${note.comment}\n`;
+                    combinedContent += '\n---\n\n';
+                }
+            });
+
+            // Update share modal
+            const previewArea = document.getElementById('share-content-preview');
+            if (previewArea) {
+                previewArea.value = combinedContent;
+            }
+            openModal('share-note-modal');
+        });
+    }
+
+    // Batch Delete Logic
+    if (batchDeleteBtn) {
+        batchDeleteBtn.addEventListener('click', () => {
+            if (state.selectedNotes.size === 0) {
+                alert('請先選取筆記！');
+                return;
+            }
+
+            if (confirm(`確定要刪除這 ${state.selectedNotes.size} 則筆記嗎？`)) {
+                state.selectedNotes.forEach(key => {
+                    const [bookId, noteId] = key.split(':');
+                    const book = BOOKS_DATA.find(b => b.id === bookId);
+                    if (book) {
+                        book.notes = book.notes.filter(n => n.id !== parseInt(noteId));
+                    }
+                });
+
+                state.selectedNotes.clear();
+                updateBatchUI();
+                renderContent();
+            }
+        });
     }
 }
 
@@ -686,10 +867,19 @@ function createNoteCard(note, searchTerm) {
     const checkComment = isNote && note.comment ? highlightText(note.comment, searchTerm) : '';
 
     return `
-        <div class="note-card bg-white p-5 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all">
+        <div class="note-card bg-white p-5 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all flex items-start gap-3">
+            <!-- Batch Checkbox (left aligned, vertically centered) -->
+            <div class="note-batch-checkbox-wrapper flex-shrink-0 self-center ${state.isBatchMode ? '' : 'hidden'}">
+                <input type="checkbox" 
+                    class="note-batch-checkbox w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer"
+                    data-note-key="${note.bookId}:${note.id}"
+                    ${state.selectedNotes.has(`${note.bookId}:${note.id}`) ? 'checked' : ''}>
+            </div>
+            
+            <!-- Color indicator bar -->
             <div class="absolute left-0 top-6 bottom-6 w-1.5 ${styles.border} rounded-r-full"></div>
             
-            <div class="pl-5">
+            <div class="flex-1 pl-2">
                 <div class="flex justify-between items-start mb-3">
                     <div class="flex flex-col">
                         <span class="text-xs text-text-secondary font-medium mb-0.5 block md:hidden">${note.bookTitle}</span> 
@@ -714,7 +904,7 @@ function createNoteCard(note, searchTerm) {
                     <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> ${note.bookFormat === 'EPUB' ? note.page + '%' : 'P.' + note.page}</span>
                     <span>${note.date.split(' ')[0]}</span>
                 </div>
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="flex gap-2">
                         <button class="hover:text-accent p-1 btn-share-note" data-book-id="${note.bookId}" data-note-id="${note.id}" title="分享">
                             <i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i>
                         </button>

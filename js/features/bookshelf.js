@@ -211,8 +211,11 @@ export function createBookListItemHTML(book) {
             <h3 class="font-bold text-base md:text-lg text-text-primary mb-1 hover:text-accent">${book.title}</h3>
             <p class="text-xs md:text-sm text-text-secondary mb-1">${book.author}</p>
             ${remainingText}
-            <div class="w-full max-w-xs h-1 md:h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                <div class="h-full bg-accent" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="w-full max-w-xs h-1 md:h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-accent" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
+                </div>
+                <span class="text-xs text-text-secondary font-medium flex-shrink-0">${book.progress}%</span>
             </div>
         </div>
         <div class="flex items-center gap-2">
