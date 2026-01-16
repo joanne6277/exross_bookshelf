@@ -557,7 +557,7 @@ export function createModalsHTML() {
                     <i data-lucide="copy" class="w-4 h-4"></i> 複製
                 </button>
                 <button id="share-export-btn" class="flex-1 py-3 rounded-lg border border-border-color text-text-primary font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="download" class="w-4 h-4"></i>匯出
+                    <i data-lucide="share-2" class="w-4 h-4"></i>分享
                 </button>
             </div>
         </div>

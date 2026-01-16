@@ -373,23 +373,38 @@ export function initBookmarkFeature() {
 
     const shareExportBtn = document.getElementById('share-export-btn');
     if (shareExportBtn) {
-        shareExportBtn.onclick = () => {
+        shareExportBtn.onclick = async () => {
             const previewArea = document.getElementById('share-content-preview');
             if (!previewArea) return;
 
             const content = previewArea.value;
             const title = currentShareBook ? currentShareBook.title : 'note';
 
-            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
+            // Check for Mobile (width < 768px) and Native Share Support
+            const isMobile = window.innerWidth < 768;
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Note_${title.replace(/\s+/g, '_')}.md`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            if (isMobile && navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `筆記分享: ${title}`,
+                        text: content
+                    });
+                } catch (err) {
+                    console.log('Share canceled or failed', err);
+                }
+            } else {
+                // Desktop: Download as .md
+                const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Note_${title.replace(/\s+/g, '_')}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
         };
     }
 

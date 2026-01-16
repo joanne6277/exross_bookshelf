@@ -1,3 +1,5 @@
+import { NOTIFICATIONS_DATA } from '../data/notifications.js';
+
 const DROPDOWN_CONTENT = `
     <div class="p-5">
         <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">連結書店帳號</p>
@@ -46,7 +48,52 @@ const DROPDOWN_CONTENT = `
     </div>
 `;
 
+function createNotificationDropdownHTML() {
+    return `
+        <div class="bg-white rounded-xl shadow-2xl border border-gray-100 w-80 max-h-[80vh] overflow-y-auto flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-sm font-bold text-text-primary">通知中心</h3>
+            </div>
+            <div id="notification-list" class="divide-y divide-gray-50">
+                ${NOTIFICATIONS_DATA.map(n => `
+                    <div class="p-4 hover:bg-gray-50 transition-colors ${n.isRead ? 'opacity-70' : ''}">
+                        <div class="flex gap-3 mb-1">
+                            <div>
+                                <h4 class="text-sm font-bold text-text-primary mb-1">${n.title}</h4>
+                                <p class="text-xs text-text-secondary leading-relaxed mb-2">${n.content}</p>
+                                <span class="text-[10px] text-gray-400 font-medium">${n.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function getNotificationColor(type) {
+    switch (type) {
+        case 'alert': return 'bg-red-500';
+        case 'success': return 'bg-green-500';
+        default: return 'bg-blue-500';
+    }
+}
+
 export function createHeaderHTML() {
+    const unreadCount = NOTIFICATIONS_DATA.filter(n => !n.isRead).length;
+    const badgeHTML = unreadCount > 0
+        ? `<span id="notification-badge-desktop" class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>`
+        : '';
+    const badgeHTMLMobile = unreadCount > 0
+        ? `<span id="notification-badge-mobile" class="absolute -top-0.5 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>`
+        : '';
+
+    const notificationDropdown = `
+        <div class="notification-dropdown hidden absolute top-full right-0 mt-3 z-50 animate-fade-in-down origin-top-right">
+            ${createNotificationDropdownHTML()}
+        </div>
+    `;
+
     return `
     <header id="desktop-header"
         class="desktop-header-container hidden md:flex sticky top-0 w-full h-16 items-center justify-between px-8 z-50 shadow-sm">
@@ -69,9 +116,14 @@ export function createHeaderHTML() {
         </nav>
 
         <div class="flex items-center gap-4">
-            <button class="p-2 rounded-full hover:bg-gray-100 transition-colors relative"><i data-lucide="bell"
-                    class="w-5 h-5 text-gray-600"></i><span
-                    class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
+            <div class="relative group">
+                <button id="notification-btn-desktop" class="p-2 rounded-full hover:bg-gray-100 transition-colors relative notification-trigger">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                    ${badgeHTML}
+                </button>
+                ${notificationDropdown}
+            </div>
+            
             <div class="relative group">
                 <button id="user-menu-btn-desktop"
                     class="rounded-full w-9 h-9 bg-gray-200 flex items-center justify-center overflow-hidden hover:bg-gray-300 transition-all border border-gray-200 user-menu-trigger">
@@ -95,8 +147,16 @@ export function createHeaderHTML() {
             <span class="text-lg font-bold tracking-wide text-gray-700">書紐eXross</span>
         </div>
         <div class="flex items-center gap-3">
-            <button class="relative"><i data-lucide="bell" class="w-5 h-5 text-gray-500"></i><span
-                    class="absolute -top-0.5 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
+             <div class="relative group">
+                <button id="notification-btn-mobile" class="relative notification-trigger">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-500"></i>
+                    ${badgeHTMLMobile}
+                </button>
+                <div class="notification-dropdown hidden absolute top-full right-[-50px] mt-3 z-50 animate-fade-in-down origin-top-right max-w-[90vw]">
+                     ${createNotificationDropdownHTML()}
+                </div>
+            </div>
+
             <div class="relative group">
                 <button id="user-menu-btn-mobile"
                     class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-text-secondary user-menu-trigger">
@@ -120,31 +180,51 @@ export function initHeaderEvents() {
         });
     });
 
-    // Handle user menu dropdowns
-    // Use delegation or setup specific listeners for each trigger/dropdown pair
-    // Since we wrapped them in relative containers with trigger and dropdown as siblings:
-    const triggers = document.querySelectorAll('.user-menu-trigger');
-
-    triggers.forEach(trigger => {
+    // Toggle Helper
+    const toggleDropdown = (trigger, dropdownSelector) => {
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            const dropdown = trigger.parentElement.querySelector('.user-dropdown');
+            const dropdown = trigger.parentElement.querySelector(dropdownSelector);
 
-            // Close all other dropdowns first (optional, but cleaner)
-            document.querySelectorAll('.user-dropdown').forEach(d => {
+            // Close all other dropdowns
+            document.querySelectorAll('.user-dropdown, .notification-dropdown').forEach(d => {
                 if (d !== dropdown) d.classList.add('hidden');
             });
 
             if (dropdown) {
                 dropdown.classList.toggle('hidden');
+
+                // If it's notification dropdown, hide badge on open
+                if (trigger.classList.contains('notification-trigger') && !dropdown.classList.contains('hidden')) {
+                    const badgeDesktop = document.getElementById('notification-badge-desktop');
+                    const badgeMobile = document.getElementById('notification-badge-mobile');
+                    if (badgeDesktop) badgeDesktop.style.display = 'none';
+                    if (badgeMobile) badgeMobile.style.display = 'none';
+
+                    // Note: Real app would api call to mark as read here
+                }
             }
         });
+    };
+
+    // User Menu
+    document.querySelectorAll('.user-menu-trigger').forEach(trigger => {
+        toggleDropdown(trigger, '.user-dropdown');
+    });
+
+    // Notification Menu
+    document.querySelectorAll('.notification-trigger').forEach(trigger => {
+        toggleDropdown(trigger, '.notification-dropdown');
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.user-dropdown') && !e.target.closest('.user-menu-trigger')) {
-            document.querySelectorAll('.user-dropdown').forEach(d => {
+        if (!e.target.closest('.user-dropdown') &&
+            !e.target.closest('.notification-dropdown') &&
+            !e.target.closest('.user-menu-trigger') &&
+            !e.target.closest('.notification-trigger')) {
+
+            document.querySelectorAll('.user-dropdown, .notification-dropdown').forEach(d => {
                 d.classList.add('hidden');
             });
         }
