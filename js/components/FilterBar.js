@@ -1,19 +1,4 @@
 export function createFilterBarHTML(prefix = '') {
-    // Ensure prefix has a trailing hyphen if not empty and not already having one, 
-    // but usually we pass like 'details-' or 'all-books-'.
-    // Existing IDs in main view were mixed. 
-    // Let's standardise: 
-    // Status -> ${prefix}status-filter
-    // Source -> ${prefix}source-filter
-    // Category -> ${prefix}category-filter
-    // Sort -> ${prefix}sort-menu-btn etc.
-
-    // Note: The original index.html didn't have IDs for status/source in the main view (all-books),
-    // but it DID have ids for details view.
-    // To make this work with existing logic (setupFilterLogic), we need to ensure the JS selects the right elements.
-    // setupFilterLogic selects by containerId, then queries.
-    // So if we add IDs, it won't hurt, but we must ensure classes match what css expects if any.
-
     return `
     <div id="${prefix}filter-bar" class="flex items-center gap-3 mb-4 md:mb-8 overflow-x-auto no-scrollbar w-full pb-2">
         <button id="${prefix}batch-select-btn"
@@ -23,7 +8,7 @@ export function createFilterBarHTML(prefix = '') {
         <div class="flex-shrink-0">
             <!-- Desktop -->
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
-                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">狀態:</span>
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">閱讀狀態:</span>
                 <select id="${prefix}status-filter"
                     class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
                     <option>全部</option>
@@ -36,7 +21,7 @@ export function createFilterBarHTML(prefix = '') {
             <button id="${prefix}mobile-status-btn" 
                 class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="status">
-                <span>狀態:</span> <span id="${prefix}mobile-status-label" class="font-bold text-text-primary">全部</span>
+                <span>閱讀狀態:</span> <span id="${prefix}mobile-status-label" class="font-bold text-text-primary">全部</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
             </button>
         </div>
@@ -45,10 +30,10 @@ export function createFilterBarHTML(prefix = '') {
         <div class="flex-shrink-0 md:border-l md:border-border-color md:pl-4">
             <!-- Desktop -->
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
-                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">來源:</span>
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">購書來源:</span>
                 <select id="${prefix}source-filter"
                     class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
-                    <option>全部來源</option>
+                    <option>全部</option>
                     <option>TAAZE 讀冊</option>
                     <option>三民書局</option>
                     <option>iRead 灰熊</option>
@@ -58,7 +43,7 @@ export function createFilterBarHTML(prefix = '') {
             <button id="${prefix}mobile-source-btn" 
                 class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="source">
-                <span>來源:</span> <span id="${prefix}mobile-source-label" class="font-bold text-text-primary">全部來源</span>
+                <span>購書來源:</span> <span id="${prefix}mobile-source-label" class="font-bold text-text-primary">全部</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
             </button>
         </div>
@@ -67,10 +52,10 @@ export function createFilterBarHTML(prefix = '') {
         <div class="flex-shrink-0 md:border-l md:border-border-color md:pl-4">
            <!-- Desktop -->
             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
-                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">類別:</span>
+                <span class="text-sm font-medium text-text-secondary whitespace-nowrap">分類:</span>
                 <select id="${prefix}category-filter"
                     class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
-                    <option value="all">全部類別</option>
+                    <option value="all">全部</option>
                     <option value="商業">商業</option>
                     <option value="文學">文學</option>
                     <option value="設計">設計</option>
@@ -81,18 +66,33 @@ export function createFilterBarHTML(prefix = '') {
             <button id="${prefix}mobile-category-btn" 
                 class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="category">
-                <span>類別:</span> <span id="${prefix}mobile-category-label" class="font-bold text-text-primary">全部類別</span>
+                <span>分類:</span> <span id="${prefix}mobile-category-label" class="font-bold text-text-primary">全部</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
             </button>
         </div>
 
-        <div class="flex items-center space-x-2 flex-shrink-0 md:border-l md:border-border-color md:pl-4">
-            <button
-                class="${prefix === 'details-' ? 'details-' : ''}filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">中文書</button>
-            <button
-                class="${prefix === 'details-' ? 'details-' : ''}filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">外文書</button>
-            <button
-                class="${prefix === 'details-' ? 'details-' : ''}filter-toggle px-3 py-1.5 rounded-md text-sm bg-white border border-border-color text-text-secondary hover:text-accent hover:border-accent transition-all whitespace-nowrap">教科書</button>
+        <!-- Type Filter (Consolidated) -->
+        <div class="flex-shrink-0 md:border-l md:border-border-color md:pl-4">
+            <!-- Desktop -->
+             <div class="hidden md:flex items-center space-x-2 bg-transparent p-0">
+                 <span class="text-sm font-medium text-text-secondary whitespace-nowrap">書種:</span>
+                 <select id="${prefix}type-filter"
+                     class="bg-white border border-border-color rounded-lg pl-2 pr-8 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:text-accent transition-colors">
+                     <option value="all">全部</option>
+                     <option value="中文書">中文書</option>
+                     <option value="外文書">外文書</option>
+                     <option value="教科書">教科書</option>
+                     <option value="audiobook">有聲書</option>
+                     <option value="tts">可朗讀</option>
+                 </select>
+             </div>
+             <!-- Mobile -->
+             <button id="${prefix}mobile-type-btn" 
+                 class="md:hidden flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
+                 data-filter-type="type">
+                 <span>書種:</span> <span id="${prefix}mobile-type-label" class="font-bold text-text-primary">全部</span>
+                 <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+             </button>
         </div>
 
 

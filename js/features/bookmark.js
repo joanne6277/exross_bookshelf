@@ -5,7 +5,7 @@ const state = {
     searchTerm: '',
     selectedBooks: new Set(),
     selectedTypes: new Set(),
-    selectedColors: new Set(),
+    selectedColor: 'all', // Single select string
     sortType: 'date',
     sortDirection: 'desc',
     isBatchMode: false,
@@ -19,7 +19,10 @@ export function initBookmarkFeature() {
     const searchInputs = document.querySelectorAll('#bookmark-search-input-desktop'); // Use querySelectorAll if there's possibly a mobile one with same ID? View says unique ID, but safe to assume 1.
     const searchInput = document.getElementById('bookmark-search-input-desktop');
     const typeFilterButtons = document.querySelectorAll('.note-filter-btn');
-    const colorFilterButtons = document.querySelectorAll('.color-filter-btn');
+    const colorSelect = document.getElementById('color-filter-select'); // Removed
+    const colorDropdownContainer = document.getElementById('color-filter-dropdown-container');
+    const colorTrigger = document.getElementById('color-filter-trigger');
+    const colorMenu = document.getElementById('color-filter-menu');
     const sortMenuBtn = document.getElementById('notes-sort-menu-btn');
     const sortDropdown = document.getElementById('notes-sort-dropdown');
     const sortDirBtn = document.getElementById('notes-sort-direction-btn');
@@ -58,31 +61,22 @@ export function initBookmarkFeature() {
         });
     }
 
-    // Helper: Update color filter disabled state based on type selection
     const updateColorFilterState = () => {
         const isNoteOnly = state.selectedTypes.has('note') && state.selectedTypes.size === 1;
 
-        colorFilterButtons.forEach(btn => {
+        if (colorTrigger) {
             if (isNoteOnly) {
                 // Disable color filter when "note" is selected
-                btn.disabled = true;
-                btn.classList.add('opacity-30', 'cursor-not-allowed');
-                btn.classList.remove('hover:scale-110', 'ring-2', 'ring-offset-1', 'ring-gray-400');
+                colorTrigger.disabled = true;
+                colorTrigger.classList.add('opacity-50', 'cursor-not-allowed');
+                // Reset to all
+                state.selectedColor = 'all';
+                renderColorDropdownUI();
             } else {
                 // Enable color filter
-                btn.disabled = false;
-                btn.classList.remove('opacity-30', 'cursor-not-allowed');
-                btn.classList.add('hover:scale-110');
-                // Restore ring if was selected
-                if (state.selectedColors.has(btn.dataset.color)) {
-                    btn.classList.add('ring-2', 'ring-offset-1', 'ring-gray-400');
-                }
+                colorTrigger.disabled = false;
+                colorTrigger.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-        });
-
-        // Clear color selection when note-only mode is active
-        if (isNoteOnly && state.selectedColors.size > 0) {
-            state.selectedColors.clear();
         }
     };
 
@@ -119,20 +113,142 @@ export function initBookmarkFeature() {
         });
     });
 
-    // 5. Color Filter
-    colorFilterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const color = btn.dataset.color;
-            if (state.selectedColors.has(color)) {
-                state.selectedColors.delete(color);
-                btn.classList.remove('ring-2', 'ring-offset-1', 'ring-gray-400');
-            } else {
-                state.selectedColors.add(color);
-                btn.classList.add('ring-2', 'ring-offset-1', 'ring-gray-400');
+    // 5. Custom Color Filter Dropdown Logic
+    const colors = [
+        { value: 'all', label: '全部顏色', bg: 'bg-gradient-to-tr from-yellow-300 via-red-300 to-blue-300' },
+        { value: 'yellow', label: '黃色', bg: 'bg-yellow-300' },
+        { value: 'green', label: '綠色', bg: 'bg-green-300' },
+        { value: 'blue', label: '藍色', bg: 'bg-blue-300' },
+        { value: 'red', label: '紅色', bg: 'bg-red-300' },
+        { value: 'purple', label: '紫色', bg: 'bg-purple-300' }
+    ];
+
+    const renderColorDropdownUI = () => {
+        // Update Trigger
+        const selected = colors.find(c => c.value === state.selectedColor) || colors[0];
+        const previewEl = document.getElementById('color-filter-preview');
+        const labelEl = document.getElementById('color-filter-label');
+
+        if (previewEl) {
+            previewEl.innerHTML = `<div class="absolute inset-0 ${selected.bg} opacity-80"></div>`;
+        }
+        if (labelEl) {
+            labelEl.textContent = selected.label;
+        }
+
+        // Render Menu Items
+        if (colorMenu) {
+            colorMenu.innerHTML = colors.map(c => {
+                const isSelected = c.value === state.selectedColor;
+                return `
+                    <button class="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-gray-50 rounded-lg transition-colors ${isSelected ? 'bg-gray-50 font-medium' : ''}"
+                        data-value="${c.value}">
+                        <div class="w-4 h-4 rounded-full border border-gray-300 ${c.bg} opacity-80"></div>
+                        <span>${c.label}</span>
+                        ${isSelected ? '<i data-lucide="check" class="w-4 h-4 ml-auto text-accent"></i>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            if (window.lucide) window.lucide.createIcons({ root: colorMenu });
+
+            // Add Click Listeners to Options
+            colorMenu.querySelectorAll('button').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation(); // Prevent closing immediately? No, we want to close.
+                    state.selectedColor = btn.dataset.value;
+                    renderColorDropdownUI();
+                    renderContent();
+                    colorMenu.classList.add('hidden');
+                };
+            });
+        }
+    };
+
+    if (colorTrigger && colorMenu) {
+        // Init UI
+        renderColorDropdownUI();
+
+        // Toggle Menu
+        colorTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (colorTrigger.disabled) return;
+
+            // Mobile: Open Sheet
+            if (window.innerWidth < 768) {
+                const sheetOptions = colors.map(c => ({
+                    value: c.value,
+                    label: `<span class="inline-block w-4 h-4 rounded-full border border-gray-300 ${c.bg} align-middle mr-2 opacity-80"></span>${c.label}`
+                }));
+
+                const handleColorSelect = (val) => {
+                    state.selectedColor = val;
+                    renderColorDropdownUI();
+                    renderContent();
+                    // Sheet closes automatically via internal logic usually, but let's check openSheet 
+                    // openSheet calls onSelect then doesn't auto-close? 
+                    // looking at openSheet code: `btn.onclick = () => { onSelect(opt.value); ... }` 
+                    // It doesn't seem to close explicitly in the provided snippet? 
+                    // Wait, earlier snippet: 
+                    // btn.onclick = () => { onSelect(opt.value); import('../utils.js').then(({ closeModal }) => { closeModal('mobile-filter-sheet'); }); };
+                    // actually openSheet in bookmark.js (lines 599+) logic:
+                    /* 
+                    btn.onclick = () => {
+                        onSelect(opt.value);
+                        // Don't close immediately if sorting logic handles re-open (toggle behavior)
+                    };
+                    */
+                    // The sort logic re-opens sheet. For color, we want to close.
+                    // I should probably use a dedicated openColorSheet or ensure openSheet closes.
+                    // Existing openSheet implementation (lines 599+) does NOT close modal.
+                    // I will import closeModal and close it here.
+                    import('../utils.js').then(({ closeModal }) => {
+                        closeModal('mobile-filter-sheet');
+                    });
+                };
+
+                // Reuse openSheet but we need to ensure it supports HTML in label (it does)
+                openSheet('劃線顏色', sheetOptions, handleColorSelect, state.selectedColor);
+                return;
             }
-            renderContent();
+
+            // Desktop: Dropdown
+            const isHidden = colorMenu.classList.contains('hidden');
+            if (!isHidden) {
+                colorMenu.classList.add('hidden');
+            } else {
+                colorMenu.classList.remove('hidden');
+
+                // Fixed Positioning Logic
+                const rect = colorTrigger.getBoundingClientRect();
+                colorMenu.style.position = 'fixed';
+                colorMenu.style.top = `${rect.bottom + 8}px`; // slightly more gap
+                colorMenu.style.left = `${rect.left}px`;
+                colorMenu.style.width = `${Math.max(rect.width, 150)}px`; // Min width 150px
+                colorMenu.style.zIndex = '9999';
+
+                // Ensure it doesn't go off-screen right
+                if (rect.left + colorMenu.offsetWidth > window.innerWidth) {
+                    colorMenu.style.left = 'auto';
+                    colorMenu.style.right = '16px'; // 16px padding from right edge
+                }
+            }
         });
-    });
+
+        // Close when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!colorMenu.classList.contains('hidden') && !colorTrigger.contains(e.target) && !colorMenu.contains(e.target)) {
+                colorMenu.classList.add('hidden');
+            }
+        });
+
+        // Close on window resize
+        window.addEventListener('resize', () => {
+            if (!colorMenu.classList.contains('hidden')) {
+                colorMenu.classList.add('hidden');
+            }
+        });
+    }
 
     // 6. Sort Menu
     if (sortMenuBtn && sortDropdown) {
@@ -291,9 +407,113 @@ export function initBookmarkFeature() {
     };
 
     if (container) {
+        // Helper: Collapse all expanded cards
+        const collapseAllCards = () => {
+            container.querySelectorAll('.note-card[data-expanded="true"]').forEach(card => {
+                collapseCard(card);
+            });
+        };
+
+        // Helper: Expand a card
+        const expandCard = (card) => {
+            card.dataset.expanded = 'true';
+            card.classList.add('ring-2', 'ring-accent/30');
+
+            const expandBtn = card.querySelector('.btn-toggle-expand');
+            const noteDisplayReadonly = card.querySelector('.note-display-readonly');
+            const noteEditArea = card.querySelector('.note-edit-area');
+            const actionBar = card.querySelector('.note-action-bar');
+
+            if (expandBtn) expandBtn.classList.add('hidden');
+            if (noteDisplayReadonly) noteDisplayReadonly.classList.add('hidden');
+            if (noteEditArea) noteEditArea.classList.remove('hidden');
+            if (actionBar) actionBar.classList.remove('hidden');
+            if (actionBar) actionBar.classList.add('flex');
+        };
+
+        // Helper: Collapse a card
+        const collapseCard = (card) => {
+            card.dataset.expanded = 'false';
+            card.classList.remove('ring-2', 'ring-accent/30');
+
+            const expandBtn = card.querySelector('.btn-toggle-expand');
+            const noteDisplayReadonly = card.querySelector('.note-display-readonly');
+            const noteEditArea = card.querySelector('.note-edit-area');
+            const actionBar = card.querySelector('.note-action-bar');
+            const textarea = card.querySelector('.note-edit-textarea');
+
+            if (expandBtn) expandBtn.classList.remove('hidden');
+            if (noteDisplayReadonly) noteDisplayReadonly.classList.remove('hidden');
+            if (noteEditArea) noteEditArea.classList.add('hidden');
+            if (actionBar) actionBar.classList.add('hidden');
+            if (actionBar) actionBar.classList.remove('flex');
+
+            // Restore original value on collapse (cancel behavior)
+            if (textarea) {
+                const bookId = card.dataset.bookId;
+                const noteId = parseInt(card.dataset.noteId);
+                const book = BOOKS_DATA.find(b => b.id === bookId);
+                const note = book?.notes.find(n => n.id === noteId);
+                if (note) {
+                    textarea.value = note.comment || '';
+                }
+            }
+        };
+
         container.addEventListener('click', (e) => {
+            const toggleBtn = e.target.closest('.btn-toggle-expand');
+            const cancelBtn = e.target.closest('.btn-cancel-edit');
+            const saveBtn = e.target.closest('.btn-save-edit');
             const shareBtn = e.target.closest('.btn-share-note');
             const deleteBtn = e.target.closest('.btn-delete-note');
+
+            // Toggle Expand/Collapse
+            if (toggleBtn) {
+                e.stopPropagation();
+                const card = toggleBtn.closest('.note-card');
+                if (!card) return;
+
+                const isExpanded = card.dataset.expanded === 'true';
+
+                if (isExpanded) {
+                    collapseCard(card);
+                } else {
+                    // Collapse any other expanded card first
+                    collapseAllCards();
+                    expandCard(card);
+                }
+                return;
+            }
+
+            // Cancel Edit
+            if (cancelBtn) {
+                e.stopPropagation();
+                const card = cancelBtn.closest('.note-card');
+                if (card) collapseCard(card);
+                return;
+            }
+
+            // Save Edit
+            if (saveBtn) {
+                e.stopPropagation();
+                const card = saveBtn.closest('.note-card');
+                if (!card) return;
+
+                const bookId = card.dataset.bookId;
+                const noteId = parseInt(card.dataset.noteId);
+                const textarea = card.querySelector('.note-edit-textarea');
+                const newComment = textarea?.value?.trim() || '';
+
+                // Update data
+                const book = BOOKS_DATA.find(b => b.id === bookId);
+                const note = book?.notes.find(n => n.id === noteId);
+                if (note) {
+                    note.comment = newComment;
+                    // Re-render to show updated content
+                    renderContent();
+                }
+                return;
+            }
 
             if (shareBtn) {
                 const bookId = shareBtn.dataset.bookId;
@@ -700,6 +920,150 @@ function renderSidebar(booksToRender) {
     updateSidebarActiveState();
 }
 
+function renderMobileBookCapsules(booksWithNotes) {
+    const container = document.getElementById('mobile-book-capsules-container');
+    if (!container) return;
+
+    // Hide on desktop or if searching
+    if (window.innerWidth >= 768 || state.searchTerm) {
+        container.classList.add('hidden');
+        return;
+    }
+    container.classList.remove('hidden');
+
+    if (booksWithNotes.length === 0) {
+        container.innerHTML = '<span class="text-xs text-text-secondary">尚無書籍筆記</span>';
+        return;
+    }
+
+    const maxVisible = 5;
+    const visibleBooks = booksWithNotes.slice(0, maxVisible);
+    const hasMore = booksWithNotes.length > maxVisible;
+
+    // Capsule style matching search result capsules (with book cover)
+    let html = visibleBooks.map(book => {
+        const isActive = state.selectedBooks.has(book.id);
+        const bgClass = isActive
+            ? 'bg-accent/10 shadow-md ring-2 ring-accent ring-offset-1'
+            : 'bg-white border border-border-color';
+
+        return `
+            <div class="flex-shrink-0 py-1 px-0.5">
+                <button class="mobile-book-capsule flex items-center gap-2 pl-1 pr-3 py-1 ${bgClass} rounded-full shadow-sm transition-all group" data-book-id="${book.id}">
+                    <div class="w-6 h-8 bg-gray-200 rounded overflow-hidden relative border border-white/20">
+                        <img src="${book.cover}" class="w-full h-full object-cover">
+                        ${!isActive ? '<div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>' : ''}
+                    </div>
+                    <span class="text-sm font-bold text-text-primary">${book.title.length > 6 ? book.title.substring(0, 6) + '...' : book.title}</span>
+                </button>
+            </div>
+        `;
+    }).join('');
+
+    if (hasMore) {
+        html += `
+            <div class="flex-shrink-0 py-1 px-0.5">
+                <button id="mobile-book-capsule-more" class="flex items-center justify-center px-4 py-3 bg-gray-100 border border-gray-200 rounded-full text-sm font-bold text-text-secondary hover:bg-gray-200 transition-colors">
+                    ...
+                </button>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+
+    // Bind Click Events
+    container.querySelectorAll('.mobile-book-capsule').forEach(btn => {
+        btn.onclick = () => {
+            const bookId = btn.dataset.bookId;
+            toggleBookSelection(bookId);
+        };
+    });
+
+    // "..." Button: Open Drawer with all books as capsules (multi-select)
+    const moreBtn = document.getElementById('mobile-book-capsule-more');
+    if (moreBtn) {
+        moreBtn.onclick = () => {
+            openBookCapsuleSheet(booksWithNotes);
+        };
+    }
+}
+
+function openBookCapsuleSheet(booksWithNotes) {
+    const sheet = document.getElementById('mobile-filter-sheet');
+    const sheetTitle = document.getElementById('mobile-sheet-title');
+    const sheetOptions = document.getElementById('mobile-sheet-options');
+
+    if (!sheet || !sheetTitle || !sheetOptions) return;
+
+    sheetTitle.textContent = '選擇書籍';
+
+    const renderSheetCapsules = () => {
+        sheetOptions.innerHTML = `
+            <div class="flex flex-wrap gap-2 p-2">
+                ${booksWithNotes.map(book => {
+            const isActive = state.selectedBooks.has(book.id);
+            const bgClass = isActive
+                ? 'bg-accent/10 shadow-md ring-2 ring-accent ring-offset-1'
+                : 'bg-white border border-border-color';
+
+            return `
+                        <button class="sheet-book-capsule flex items-center gap-2 pl-1 pr-3 py-1 ${bgClass} rounded-full shadow-sm transition-all group" data-book-id="${book.id}">
+                            <div class="w-6 h-8 bg-gray-200 rounded overflow-hidden relative border border-white/20">
+                                <img src="${book.cover}" class="w-full h-full object-cover">
+                                ${!isActive ? '<div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>' : ''}
+                            </div>
+                            <span class="text-sm font-bold text-text-primary">${book.title}</span>
+                        </button>
+                    `;
+        }).join('')}
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-100 flex gap-2 px-2">
+                <button id="sheet-clear-selection" class="flex-1 py-2.5 px-4 rounded-lg border border-gray-200 bg-gray-50 text-text-primary text-sm font-bold hover:bg-gray-100 transition-colors">
+                    清除選擇
+                </button>
+                <button id="sheet-confirm-selection" class="flex-1 py-2.5 px-4 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors">
+                    確認
+                </button>
+            </div>
+        `;
+
+        // Bind capsule clicks (toggle selection, re-render)
+        sheetOptions.querySelectorAll('.sheet-book-capsule').forEach(btn => {
+            btn.onclick = () => {
+                const bookId = btn.dataset.bookId;
+                if (state.selectedBooks.has(bookId)) {
+                    state.selectedBooks.delete(bookId);
+                } else {
+                    state.selectedBooks.add(bookId);
+                }
+                renderSheetCapsules(); // Re-render to update selection state
+            };
+        });
+
+        // Clear Selection
+        const clearBtn = document.getElementById('sheet-clear-selection');
+        if (clearBtn) {
+            clearBtn.onclick = () => {
+                state.selectedBooks.clear();
+                renderSheetCapsules();
+            };
+        }
+
+        // Confirm and Close
+        const confirmBtn = document.getElementById('sheet-confirm-selection');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => {
+                renderContent();
+                closeModal('mobile-filter-sheet');
+            };
+        }
+    };
+
+    renderSheetCapsules();
+    openModal('mobile-filter-sheet');
+}
+
 function renderContent() {
     const container = document.getElementById('note-content-area');
     if (!container) return;
@@ -728,6 +1092,9 @@ function renderContent() {
 
     // UPDATE SIDEBAR 
     renderSidebar(filteredBooks);
+
+    // UPDATE MOBILE BOOK CAPSULES
+    renderMobileBookCapsules(booksWithNotes);
 
     // 2. Prepare Notes (Multi-select Logic)
     if (state.selectedBooks.size === 0) {
@@ -768,10 +1135,10 @@ function renderContent() {
         }
         // If size is 0 (None) or 2 (Both), show everything (Highight + Note + Mixed)
 
-        // Color Filter (Multi-select)
-        if (state.selectedColors.size > 0) {
+        // Color Filter (Single-select)
+        if (state.selectedColor !== 'all') {
             const noteColor = note.color || 'yellow';
-            if (!state.selectedColors.has(noteColor)) return false;
+            if (state.selectedColor !== noteColor) return false;
         }
 
         // Search Filter
@@ -865,8 +1232,6 @@ function highlightText(text, term) {
 
 function createNoteCard(note, searchTerm) {
     const isNote = note.type === 'note';
-    // const badgeColor = isNote ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800'; // Unused
-    // const typeLabel = isNote ? '筆記' : '劃線'; // Unused
 
     const colorMap = {
         'yellow': { border: 'border-yellow-400', highlight: 'bg-yellow-100' },
@@ -880,52 +1245,86 @@ function createNoteCard(note, searchTerm) {
 
     const checkQuote = highlightText(note.quote, searchTerm);
     const checkComment = isNote && note.comment ? highlightText(note.comment, searchTerm) : '';
+    const rawComment = note.comment || '';
 
     return `
-        <div class="note-card bg-white p-5 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all flex items-start gap-3">
-            <!-- Batch Checkbox (left aligned, vertically centered) -->
-            <div class="note-batch-checkbox-wrapper flex-shrink-0 self-center ${state.isBatchMode ? '' : 'hidden'}">
-                <input type="checkbox" 
-                    class="note-batch-checkbox w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer"
-                    data-note-key="${note.bookId}:${note.id}"
-                    ${state.selectedNotes.has(`${note.bookId}:${note.id}`) ? 'checked' : ''}>
-            </div>
+        <div class="note-card bg-white p-5 rounded-xl shadow-sm border border-border-color relative group hover:shadow-md transition-all"
+            data-book-id="${note.bookId}" data-note-id="${note.id}" data-expanded="false">
             
-            <!-- Color indicator bar -->
-            <div class="absolute left-0 top-6 bottom-6 w-1.5 ${styles.border} rounded-r-full"></div>
-            
-            <div class="flex-1 pl-2">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-text-secondary font-medium mb-0.5 block md:hidden">${note.bookTitle}</span> 
-                        <a href="#" class="text-xs font-bold text-text-secondary hover:text-accent hover:underline mb-0.5 hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
+            <!-- Top Row: Batch Checkbox + Book Title + Expand Toggle -->
+            <div class="flex items-start gap-3">
+                <!-- Batch Checkbox -->
+                <div class="note-batch-checkbox-wrapper flex-shrink-0 self-center ${state.isBatchMode ? '' : 'hidden'}">
+                    <input type="checkbox" 
+                        class="note-batch-checkbox w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer"
+                        data-note-key="${note.bookId}:${note.id}"
+                        ${state.selectedNotes.has(`${note.bookId}:${note.id}`) ? 'checked' : ''}>
+                </div>
+                
+                <!-- Color indicator bar -->
+                <div class="absolute left-0 top-6 bottom-6 w-1.5 ${styles.border} rounded-r-full"></div>
+                
+                <div class="flex-1 pl-2">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex flex-col flex-1">
+                            <span class="text-xs text-text-secondary font-medium mb-0.5 block md:hidden">${note.bookTitle}</span>
+                            <a href="#" class="text-xs font-bold text-text-secondary hover:text-accent hover:underline mb-0.5 hidden md:block" data-book-link="${note.bookId}">${note.bookTitle}</a>
+                        </div>
                     </div>
-                </div>
 
-                ${note.quote ? `
-                <blockquote class="text-base text-text-primary leading-relaxed mb-3 font-medium relative">
-                    <span class="absolute -left-3 -top-1 text-2xl text-gray-300 font-serif">"</span>
-                    <span class="${styles.highlight} px-1 rounded box-decoration-clone leading-loose py-0.5">${checkQuote}</span>
-                </blockquote>` : ''}
+                    <!-- Quote -->
+                    ${note.quote ? `
+                    <blockquote class="text-base text-text-primary leading-relaxed mb-3 font-medium relative">
+                        <span class="absolute -left-3 -top-1 text-2xl text-gray-300 font-serif">"</span>
+                        <span class="${styles.highlight} px-1 rounded box-decoration-clone leading-loose py-0.5">${checkQuote}</span>
+                    </blockquote>` : ''}
 
-                ${isNote && note.comment ? `
-                <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-transparent">
-                    <span class="block text-xs font-bold text-gray-500 mb-1">筆記</span>
-                    <p class="text-sm text-gray-800">${checkComment}</p>
-                </div>` : ''}
+                    <!-- Note Display (Collapsed State) -->
+                    ${isNote && note.comment ? `
+                    <div class="note-display-readonly mt-3 p-3 bg-gray-50 rounded-lg border border-transparent">
+                        <span class="block text-xs font-bold text-gray-500 mb-1">筆記</span>
+                        <p class="text-sm text-gray-800">${checkComment}</p>
+                    </div>` : ''}
 
-            <div class="flex items-center justify-between text-xs text-text-secondary mt-3 pt-3 border-t border-gray-50">
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> ${note.bookFormat === 'EPUB' ? note.page + '%' : 'P.' + note.page}</span>
-                    <span>${note.date.split(' ')[0]}</span>
-                </div>
-                    <div class="flex gap-2">
-                        <button class="hover:text-accent p-1 btn-share-note" data-book-id="${note.bookId}" data-note-id="${note.id}" title="分享">
-                            <i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                        <button class="hover:text-red-500 p-1 btn-delete-note" data-book-id="${note.bookId}" data-note-id="${note.id}" title="刪除">
-                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
+                    <!-- Note Edit Area (Expanded State - Hidden by default) -->
+                    <div class="note-edit-area hidden mt-3">
+                        <label class="block text-xs font-bold text-gray-500 mb-2">編輯筆記</label>
+                        <textarea class="note-edit-textarea w-full p-3 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none transition-all"
+                            rows="3" placeholder="輸入筆記...">${rawComment}</textarea>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between text-xs text-text-secondary mt-3 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i> ${note.bookFormat === 'EPUB' ? note.page + '%' : 'P.' + note.page}</span>
+                            <span>${note.date.split(' ')[0]}</span>
+                        </div>
+                        
+                        <!-- Actions Container -->
+                        <div class="flex items-center">
+                             <!-- Expand Toggle (Visible when collapsed) -->
+                            <button class="btn-toggle-expand p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-text-secondary hover:text-accent" title="編輯筆記">
+                                <i data-lucide="square-pen" class="w-4 h-4 pointer-events-none"></i>
+                            </button>
+
+                            <!-- Expanded Action Bar (Hidden by default) -->
+                            <div class="note-action-bar hidden items-center gap-2">
+                                <button class="btn-cancel-edit px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                                    取消
+                                </button>
+                                <button class="btn-save-edit px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                                    儲存
+                                </button>
+                                <div class="w-px h-5 bg-gray-200 mx-1"></div>
+                                <button class="btn-share-note p-1.5 rounded-lg hover:bg-gray-100 text-text-secondary hover:text-accent transition-colors" data-book-id="${note.bookId}" data-note-id="${note.id}" title="分享">
+                                    <i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i>
+                                </button>
+                                <button class="btn-delete-note p-1.5 rounded-lg hover:bg-red-50 text-text-secondary hover:text-red-500 transition-colors" data-book-id="${note.bookId}" data-note-id="${note.id}" title="刪除">
+                                    <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

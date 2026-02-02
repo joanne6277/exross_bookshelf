@@ -14,6 +14,14 @@ export function createModalsHTML() {
                         data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
+            <!-- Tag Row -->
+            <div id="modal-tag-row" class="flex flex-wrap gap-2 px-6 py-3 border-b border-border-color bg-white">
+                <span id="modal-book-source" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">來源</span>
+                <span id="modal-book-format" class="bg-gray-800 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden">EPUB</span>
+                <span id="modal-book-audiobook-icon" class="bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> 有聲書</span>
+                <span id="modal-book-tts-icon" class="bg-teal-500 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="speech" class="w-3 h-3"></i> 可朗讀</span>
+            </div>
+
             <div class="flex-1 overflow-y-auto p-6">
 
                 <div class="flex flex-col gap-y-6">
@@ -27,15 +35,9 @@ export function createModalsHTML() {
                             <img id="modal-book-cover-mobile" src="" alt="Book Cover"
                                 class="w-full rounded-lg shadow-md">
 
-                            <div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
-
-                                <span id="modal-book-source-mobile"
-                                    class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
-                                <span id="modal-book-format-mobile"
-                                    class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded-full border border-gray-600 shadow-sm hidden">EPUB</span>
-                                <span id="modal-book-audiobook-icon-mobile"
-                                    class="bg-purple-600 text-white p-1 rounded-full shadow-sm hidden border border-white/50"><i data-lucide="volume-2" class="w-4 h-4"></i></span>
-
+                            <!-- Remaining Time Tag (stays on cover) -->
+                            <div id="modal-remaining-time-container-mobile" class="absolute top-2 right-2 z-10 hidden">
+                                <span id="modal-book-remaining-mobile" class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘時間</span>
                             </div>
 
                         </div>
@@ -83,15 +85,9 @@ export function createModalsHTML() {
 
                             <img id="modal-book-cover" src="" alt="Book Cover" class="w-full rounded-lg shadow-md">
 
-                            <div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
-
-                                <span id="modal-book-source"
-                                    class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full border border-blue-200 shadow-sm">來源</span>
-                                <span id="modal-book-format"
-                                    class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded-full border border-gray-600 shadow-sm hidden">EPUB</span>
-                                <span id="modal-book-audiobook-icon"
-                                    class="bg-purple-600 text-white p-1 rounded-full shadow-sm hidden border border-white/50"><i data-lucide="volume-2" class="w-4 h-4"></i></span>
-
+                            <!-- Remaining Time Tag (stays on cover) -->
+                            <div id="modal-remaining-time-container" class="absolute top-2 right-2 z-10 hidden">
+                                <span id="modal-book-remaining" class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘時間</span>
                             </div>
 
                         </div>

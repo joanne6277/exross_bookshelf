@@ -99,7 +99,14 @@ export function createBookshelfHTML() {
                     </div>
                 </div>
             </div>
-            <div id="archived" class="tab-panel hidden"></div>
+            <div id="archived" class="tab-panel hidden">
+                <div id="archive-filter-container"></div>
+                <div id="archived-grid"
+                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
+                </div>
+                <div id="archived-list" class="hidden space-y-4">
+                </div>
+            </div>
         </div>
     </div>
     `;

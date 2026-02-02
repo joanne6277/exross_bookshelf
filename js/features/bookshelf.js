@@ -2,6 +2,7 @@ import { openModal, closeModal } from '../utils.js';
 import { BOOKS_DATA } from '../data/books.js';
 
 import { getCollections, toggleBookInCollection, addCollection } from './collections.js';
+import { createArchiveFilterBarHTML, initArchiveFilterBar, filterArchivedBooks } from '../components/ArchiveFilterBar.js';
 
 let currentEditingBookIds = []; // Changed to array
 
@@ -141,11 +142,6 @@ export function createBookCardHTML(book, options = {}) {
     const remainingTag = isTextbook && book.remainingTime
         ? `<div class="absolute top-2 right-2 z-10"><span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/50 shadow-md">剩餘 ${book.remainingTime}</span></div>`
         : '';
-    const audiobookIcon = book.isAudiobook
-        ? (isTextbook
-            ? `<div class="absolute top-9 right-2 z-10"><span class="bg-purple-600 text-white p-1 rounded-full shadow-md flex items-center justify-center border border-white/50"><i data-lucide="volume-2" class="w-3 h-3"></i></span></div>`
-            : `<div class="absolute top-2 left-2 z-10"><span class="bg-purple-600 text-white p-1 rounded-full shadow-md flex items-center justify-center border border-white/50"><i data-lucide="volume-2" class="w-3 h-3"></i></span></div>`)
-        : '';
 
     // Archived Logic
     const isArchivedView = options.isArchivedView || false;
@@ -167,7 +163,6 @@ export function createBookCardHTML(book, options = {}) {
             <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer">
         </div>
         ${topLabel}
-        ${audiobookIcon}
         <div class="relative overflow-hidden aspect-[2/3] viewer-trigger">
             <img src="${book.cover}" alt="${book.title}" class="${imgClasses}">
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
@@ -243,36 +238,51 @@ export function showBookDetails(bookId) {
     document.getElementById('modal-book-cover').src = book.cover;
     document.getElementById('modal-book-cover-mobile').src = book.cover;
 
-    // Source badge
+    // Source badge (now in tag row, no mobile version needed)
     document.getElementById('modal-book-source').textContent = book.source;
-    document.getElementById('modal-book-source-mobile').textContent = book.source;
 
-    // Format badge
+    // Format badge (now in tag row, no mobile version needed)
     const formatEl = document.getElementById('modal-book-format');
-    const formatElMobile = document.getElementById('modal-book-format-mobile');
     if (book.format) {
         if (formatEl) {
             formatEl.textContent = book.format;
             formatEl.classList.remove('hidden');
         }
-        if (formatElMobile) {
-            formatElMobile.textContent = book.format;
-            formatElMobile.classList.remove('hidden');
-        }
     } else {
         if (formatEl) formatEl.classList.add('hidden');
-        if (formatElMobile) formatElMobile.classList.add('hidden');
     }
 
-    // Audiobook Icon
+    // Audiobook Icon (now in tag row, no mobile version needed)
     const audioIcon = document.getElementById('modal-book-audiobook-icon');
-    const audioIconMobile = document.getElementById('modal-book-audiobook-icon-mobile');
     if (book.isAudiobook) {
         if (audioIcon) audioIcon.classList.remove('hidden');
-        if (audioIconMobile) audioIconMobile.classList.remove('hidden');
     } else {
         if (audioIcon) audioIcon.classList.add('hidden');
-        if (audioIconMobile) audioIconMobile.classList.add('hidden');
+    }
+
+    // TTS (可朗讀) Icon
+    const ttsIcon = document.getElementById('modal-book-tts-icon');
+    if (book.isTTSEnabled) {
+        if (ttsIcon) ttsIcon.classList.remove('hidden');
+    } else {
+        if (ttsIcon) ttsIcon.classList.add('hidden');
+    }
+
+    // Remaining Time (stays on cover for textbooks)
+    const isTextbook = book.type === '教科書';
+    const remainingContainer = document.getElementById('modal-remaining-time-container');
+    const remainingContainerMobile = document.getElementById('modal-remaining-time-container-mobile');
+    const remainingEl = document.getElementById('modal-book-remaining');
+    const remainingElMobile = document.getElementById('modal-book-remaining-mobile');
+
+    if (isTextbook && book.remainingTime) {
+        if (remainingContainer) remainingContainer.classList.remove('hidden');
+        if (remainingContainerMobile) remainingContainerMobile.classList.remove('hidden');
+        if (remainingEl) remainingEl.textContent = `剩餘 ${book.remainingTime}`;
+        if (remainingElMobile) remainingElMobile.textContent = `剩餘 ${book.remainingTime}`;
+    } else {
+        if (remainingContainer) remainingContainer.classList.add('hidden');
+        if (remainingContainerMobile) remainingContainerMobile.classList.add('hidden');
     }
 
     // Bibliographic info
@@ -288,7 +298,6 @@ export function showBookDetails(bookId) {
     document.getElementById('modal-book-description-mobile').textContent = book.description;
 
     // --- Textbook-specific logic ---
-    const isTextbook = book.type === '教科書';
 
     // Helper to toggle visibility for desktop and mobile containers
     const toggleVisibility = (selector, visible) => {
@@ -520,7 +529,27 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
         });
     }
 
-    // 4. Sort (Updated)
+    // 4. Type (New)
+    const mobileTypeBtn = document.getElementById(`${prefix}mobile-type-btn`);
+    if (mobileTypeBtn) {
+        mobileTypeBtn.addEventListener('click', () => {
+            const select = document.getElementById(`${prefix}type-filter`);
+            const currentVal = select ? select.value : 'all';
+            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
+
+            openSheet('篩選類型與功能', options, (val) => {
+                if (select) {
+                    select.value = val;
+                    select.dispatchEvent(new Event('change'));
+                    const selectedOpt = Array.from(select.options).find(o => o.value === val);
+                    const label = document.getElementById(`${prefix}mobile-type-label`);
+                    if (label && selectedOpt) label.textContent = selectedOpt.text;
+                }
+            }, currentVal);
+        });
+    }
+
+    // 5. Sort (Updated)
     if (mobileSortBtn) {
         mobileSortBtn.addEventListener('click', () => {
             const options = [
@@ -899,32 +928,75 @@ export function initBookshelfFeature() {
         if (window.lucide) window.lucide.createIcons();
     };
 
-    // New: Render Archived Books
-    const renderArchivedBooks = () => {
-        const archivedContainer = document.getElementById('archived');
-        if (!archivedContainer) return;
+    // New: Render Archived Books with Filter Support
+    let currentArchiveFilter = 'all';
+    let currentArchiveView = 'grid';
+    let archiveFilterInitialized = false;
 
-        // Find archived books
-        const archivedBooks = BOOKS_DATA.filter(b => isBookArchived(b));
+    const renderArchivedBooks = (filterType = currentArchiveFilter) => {
+        currentArchiveFilter = filterType;
 
-        const gridHTML = `
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
-                ${archivedBooks.map(b => createBookCardHTML(b, { isArchivedView: true })).join('')}
-            </div>
-        `;
+        const filterContainer = document.getElementById('archive-filter-container');
+        const gridContainer = document.getElementById('archived-grid');
+        const listContainer = document.getElementById('archived-list');
 
-        const emptyHTML = `<div class="text-center py-20 text-text-secondary">暫無封存書籍</div>`;
+        if (!gridContainer) return;
 
-        archivedContainer.innerHTML = archivedBooks.length > 0 ? gridHTML : emptyHTML;
+        // Initialize filter bar (only once)
+        if (filterContainer && !archiveFilterInitialized) {
+            filterContainer.innerHTML = createArchiveFilterBarHTML('archive-');
+
+            initArchiveFilterBar({
+                prefix: 'archive-',
+                onFilterChange: (value) => {
+                    renderArchivedBooks(value);
+                },
+                onViewChange: (view) => {
+                    currentArchiveView = view;
+                    if (gridContainer && listContainer) {
+                        if (view === 'grid') {
+                            gridContainer.classList.remove('hidden');
+                            listContainer.classList.add('hidden');
+                        } else {
+                            gridContainer.classList.add('hidden');
+                            listContainer.classList.remove('hidden');
+                        }
+                    }
+                }
+            });
+
+            archiveFilterInitialized = true;
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        // Filter archived books
+        const archivedBooks = filterArchivedBooks(BOOKS_DATA, filterType);
+
+        // Render Grid
+        if (gridContainer) {
+            gridContainer.innerHTML = archivedBooks.length > 0
+                ? archivedBooks.map(b => createBookCardHTML(b, { isArchivedView: true })).join('')
+                : '';
+        }
+
+        // Render List
+        if (listContainer) {
+            listContainer.innerHTML = archivedBooks.length > 0
+                ? archivedBooks.map(createBookListItemHTML).join('')
+                : '';
+        }
+
+        // Empty state
+        if (archivedBooks.length === 0) {
+            const emptyHTML = `<div class="text-center py-20 text-text-secondary col-span-full">暫無${filterType === 'expired' ? '已過期' : filterType === 'archived' ? '已封存' : '封存'}書籍</div>`;
+            if (gridContainer && currentArchiveView === 'grid') {
+                gridContainer.innerHTML = emptyHTML;
+            } else if (listContainer && currentArchiveView === 'list') {
+                listContainer.innerHTML = emptyHTML;
+            }
+        }
+
         if (window.lucide) window.lucide.createIcons();
-
-        // Bind click events for archived cards (e.g., allow opening details/viewer? User requirement didn't specify interaction changes, assuming standard but filtered)
-        // Re-use logic or duplicate listener? 
-        // Let's add listener to this new container for standard behavior.
-        // Or better, delegate? 
-        // We can attach a listener to 'archived' container.
-        // Remove old listener if re-rendering? (Not needed if innerHTML clears children)
-        archivedContainer.addEventListener('click', handleBookClick);
     };
 
     render();
@@ -996,6 +1068,12 @@ export function initBookshelfFeature() {
 
     if (gridContainer) gridContainer.addEventListener('click', handleBookClick);
     if (listContainer) listContainer.addEventListener('click', handleBookClick);
+
+    // Archived containers event delegation
+    const archivedGridContainer = document.getElementById('archived-grid');
+    const archivedListContainer = document.getElementById('archived-list');
+    if (archivedGridContainer) archivedGridContainer.addEventListener('click', handleBookClick);
+    if (archivedListContainer) archivedListContainer.addEventListener('click', handleBookClick);
 
     // Tab 切換
     const tabs = document.querySelectorAll('.tab-btn');
@@ -1145,14 +1223,15 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
     const statusSelect = container.querySelector(`select[id$="status-filter"]`) || container.querySelector('select:nth-of-type(1)');
     const sourceSelect = container.querySelector(`select[id$="source-filter"]`) || container.querySelector('select:nth-of-type(2)');
     const categorySelect = container.querySelector(`select[id$="category-filter"]`) || container.querySelector('select:nth-of-type(3)');
+    const typeSelect = container.querySelector(`select[id$="type-filter"]`);
 
-    const typeButtons = container.querySelectorAll('.filter-toggle');
+    // const typeButtons = container.querySelectorAll('.filter-toggle'); // Removed
 
     let activeFilters = {
         status: '全部',
         source: '全部來源',
         category: 'all',
-        types: new Set()
+        type: 'all' // Changed from types (Set) to type (String)
     };
 
     let currentSortType = 'recently-read';
@@ -1213,9 +1292,16 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
                 if (book.category !== activeFilters.category) return false;
             }
 
-            // Context: Type
-            if (activeFilters.types.size > 0) {
-                if (!activeFilters.types.has(book.type)) return false;
+            // Context: Type & Features (Consolidated)
+            if (activeFilters.type !== 'all') {
+                if (activeFilters.type === 'audiobook') {
+                    if (!book.isAudiobook) return false;
+                } else if (activeFilters.type === 'tts') {
+                    if (!book.isTTSEnabled) return false;
+                } else {
+                    // "中文書", "外文書", "教科書" -> match book.type
+                    if (book.type !== activeFilters.type) return false;
+                }
             }
 
             return true;
@@ -1246,48 +1332,12 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
         });
     }
 
-    typeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.classList.toggle('active');
-
-            // Old Style: bg-accent text-white
-            // New Style: bg-accent/10 text-accent font-bold border-accent
-            // Remove old toggles
-            // btn.classList.toggle('bg-accent');
-            // btn.classList.toggle('text-white');
-
-            // Toggle New Styles
-            btn.classList.toggle('bg-accent/10');
-            btn.classList.toggle('text-accent');
-            btn.classList.toggle('font-bold');
-            btn.classList.toggle('border-accent'); // Ensure border is visible
-
-            // Revert state classes
-            // When INACTIVE: bg-white text-text-secondary border-border-color
-            // When ACTIVE: bg-accent/10 text-accent border-accent
-
-            // We need to handle the removal of inactive classes carefully or just toggle them?
-            // "bg-white" vs "bg-accent/10" -> if we add bg-accent/10, bg-white might still be there. 
-            // In Tailwind, later classes usually win or specific ones. 
-            // But let's be clean.
-
-            if (btn.classList.contains('active')) {
-                btn.classList.remove('bg-white', 'text-text-secondary', 'border-border-color');
-                btn.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'font-bold');
-            } else {
-                btn.classList.add('bg-white', 'text-text-secondary', 'border-border-color');
-                btn.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'font-bold');
-            }
-
-            const type = btn.textContent.trim();
-            if (activeFilters.types.has(type)) {
-                activeFilters.types.delete(type);
-            } else {
-                activeFilters.types.add(type);
-            }
+    if (typeSelect) {
+        typeSelect.addEventListener('change', (e) => {
+            activeFilters.type = e.target.value;
             applyFilters();
         });
-    });
+    }
 
     return {
         handleSort: (sortType, direction) => {
