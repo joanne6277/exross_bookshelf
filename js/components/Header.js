@@ -1,48 +1,30 @@
 import { NOTIFICATIONS_DATA } from '../data/notifications.js';
+import { openPersonalCenter } from '../views/PersonalCenter.js';
 
 const DROPDOWN_CONTENT = `
     <div class="p-5">
-        <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3">連結書店帳號</p>
-        <div class="space-y-3">
-            <div class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                data-store-name="讀冊生活">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                        T</div>
-                    <div>
-                        <p class="text-sm font-bold text-text-primary">讀冊生活</p>
-                        <p class="text-xs status-text">未連結</p>
-                    </div>
-                </div><button
-                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
+        <div class="mb-4">
+            <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">主帳號</p>
+            <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <span class="text-sm font-medium text-gray-700">[灰熊] abcd123@gmail.com</span>
             </div>
-            <div class="store-card linked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                data-store-name="三民書局">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600">
-                        S</div>
-                    <div>
-                        <p class="text-sm font-bold text-text-primary">三民書局</p>
-                        <p class="text-xs status-text">已連結</p>
-                    </div>
-                </div><button
-                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">管理</button>
+        </div>
+        
+        <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider">已連結書店</p>
+                <button id="btn-link-other-accounts" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
+                    連結其他帳號
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </button>
             </div>
-            <div id="store-iread"
-                class="store-card unlinked flex items-center justify-between p-3 rounded-lg border cursor-pointer"
-                data-store-id="iread" data-store-name="iRead 灰熊">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-xs font-bold text-yellow-600">
-                        i</div>
-                    <div>
-                        <p class="text-sm font-bold text-text-primary">iRead 灰熊</p>
-                        <p class="text-xs status-text">未連結</p>
-                    </div>
-                </div><button
-                    class="text-xs px-3 py-1.5 rounded-full font-medium transition-colors action-btn">連結</button>
+            <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    [讀冊]
+                </span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    [三民]
+                </span>
             </div>
         </div>
     </div>
@@ -53,6 +35,9 @@ function createNotificationDropdownHTML() {
         <div class="bg-white rounded-xl shadow-2xl border border-gray-100 w-80 max-h-[80vh] overflow-y-auto flex flex-col">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
                 <h3 class="text-sm font-bold text-text-primary">通知中心</h3>
+                <a href="#" class="view-all-notifications-link text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                    查看全部
+                </a>
             </div>
             <div id="notification-list" class="divide-y divide-gray-50">
                 ${NOTIFICATIONS_DATA.map(n => `
@@ -228,5 +213,38 @@ export function initHeaderEvents() {
                 d.classList.add('hidden');
             });
         }
+    });
+
+    // View All Notifications Link
+    document.querySelectorAll('.view-all-notifications-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Close notification dropdown
+            document.querySelectorAll('.notification-dropdown').forEach(d => {
+                d.classList.add('hidden');
+            });
+
+            // Open personal center with notifications section
+            openPersonalCenter('notifications');
+        });
+    });
+
+    // Link Other Accounts Button
+    const linkOtherAccountsBtns = document.querySelectorAll('#btn-link-other-accounts');
+    linkOtherAccountsBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Close user dropdown
+            document.querySelectorAll('.user-dropdown').forEach(d => {
+                d.classList.add('hidden');
+            });
+
+            // Open personal center with account section
+            openPersonalCenter('account');
+        });
     });
 }

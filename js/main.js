@@ -17,6 +17,7 @@ import { createHomepageHTML } from './views/Homepage.js';
 import { createBookshelfHTML } from './views/Bookshelf.js';
 import { createBookmarkHTML } from './views/Bookmark.js';
 import { createBookDetailsHTML } from './views/BookDetails.js';
+import { createPersonalCenterHTML, initPersonalCenterEvents } from './views/PersonalCenter.js';
 
 let activeCollectionTitle = '';
 let detailsFilterLogic;
@@ -259,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${createBookshelfHTML()}
             ${createBookmarkHTML()}
             ${createBookDetailsHTML()}
+            ${createPersonalCenterHTML()}
         </main>
         ${createModalsHTML()}
     `;
@@ -282,10 +284,33 @@ document.addEventListener('DOMContentLoaded', () => {
     initBookshelfFeature();
     initBookmarkFeature();
     initHomepageSlider();
-    initReadingGoal();
+    initReadingGoal(); // Refactored state management
     initCollectionsFeature();
     initDetailsView();
     initGlobalListeners(); // Attach the delegating listener for details view
+    initPersonalCenterEvents(); // Initialize personal center events
+
+    // Homepage Reading Goal Setting Button -> Redirects to Personal Center
+    // This needs to be attached after createHomepageHTML is called (which it is)
+    // But since Homepage is static in this prototype, we can attach once.
+    const homepage = document.getElementById('view-homepage');
+    if (homepage) {
+        homepage.addEventListener('click', (e) => {
+            const btn = e.target.closest('#reading-goal-setting-btn');
+            if (btn) {
+                // Import dynamically or use the global function if exposed, 
+                // but openPersonalCenter is exported from the module.
+                // We need to use the one imported in main.js
+                // Wait, openPersonalCenter is NOT imported in main.js, only create... and init...
+                // Let's import it at the top of main.js first.
+                // Actually, I can fix the import in the next step or assume it's there. 
+                // I will add the import now.
+                import('./views/PersonalCenter.js').then(module => {
+                    module.openPersonalCenter('reading-goal');
+                });
+            }
+        });
+    }
 
     // Fix: Router expects 'view-section' classes to handle switching. 
     // They are included in component HTMLs.

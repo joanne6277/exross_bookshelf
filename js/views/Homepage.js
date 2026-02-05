@@ -108,8 +108,9 @@ export function createHomepageHTML() {
                         <h2 class="text-xl font-bold text-text-primary mb-2 flex items-center gap-2">
                             <i data-lucide="target" class="w-5 h-5 text-accent"></i>今日閱讀目標
                         </h2>
-                        <button id="reading-goal-setting-btn"
-                            class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <button id="reading-goal-setting-btn" tabindex="0" role="button"
+                            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                            aria-label="設定閱讀目標">
                             <i data-lucide="settings-2" class="w-5 h-5 text-gray-600"></i>
                         </button>
                     </div>
@@ -125,26 +126,7 @@ export function createHomepageHTML() {
                             <div id="reading-progress-bar" class="h-3 rounded-full transition-all duration-1000"
                                 style="width: 75%; background-color: var(--bg-accent);"></div>
                         </div>
-                        <p id="reading-progress-text" class="text-sm text-text-secondary text-right font-medium">已達成
-                            75%</p>
-                    </div>
-                </div>
-                <div id="reading-goal-setting" class="hidden">
-                    <div>
-                        <h2 class="text-xl font-bold text-text-primary mb-2 flex items-center gap-2">
-                            <i data-lucide="settings-2" class="w-5 h-5 text-accent"></i>設定閱讀目標
-                        </h2>
-                        <p class="text-text-secondary text-sm mb-6">設定您每天想要閱讀的分鐘數</p>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <input type="number" id="reading-goal-input" value="60"
-                            class="w-full border border-border-color rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow">
-                    </div>
-                    <div class="flex justify-end gap-4 mt-4">
-                        <button id="cancel-reading-goal"
-                            class="px-4 py-2 bg-gray-200 text-text-primary text-sm font-bold rounded-lg hover:bg-gray-300">取消</button>
-                        <button id="save-reading-goal"
-                            class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600">儲存</button>
+                        <p id="reading-progress-text" class="text-sm text-text-secondary text-right font-medium">已達成 75%</p>
                     </div>
                 </div>
             </section>

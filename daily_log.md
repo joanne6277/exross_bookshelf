@@ -1,5 +1,78 @@
 # Daily Log
 
+## 2026-02-05
+
+### 個人中心功能開發
+
+#### 變更內容
+
+**1. 修改使用者選單**
+
+##### [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)
+- 更新下拉選單內容結構：
+  - [Update] 主帳號顯示格式：`[灰熊] abcd123@gmail.com`
+  - [New] 新增「已連結書店」區塊，以膠囊標籤顯示（`[讀冊]`、`[三民]`）
+  - [Update] 「連結其他帳號」改為標題列右側的文字連結，減少視覺干擾
+- [New] 新增按鈕事件監聽，支援跳轉功能
+
+**2. 新增個人中心頁面結構**
+
+##### [NEW] [PersonalCenter.js](file:///d:/Projects/the-fictional-train/js/views/PersonalCenter.js)
+- 建立個人中心主頁面 View 模組
+- 採用模組化設計，支援多區塊動態切換
+- RWD 響應式設計：
+  - 桌機版 (md+)：左側固定側邊欄 + 右側內容區
+  - 手機版：頂部橫向滾動 Tab 列 + 全寬內容區
+- 匯出 `openPersonalCenter(sectionId)` 函式供外部呼叫
+
+##### [NEW] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)
+- 帳號管理區塊元件
+- 顯示書店帳號連結卡片（讀冊生活、三民書局、iRead 灰熊）
+- 包含連結說明區塊
+- 支援篩選：系統訊息、到期提醒、閱讀目標。
+
+**8. 錯誤修復與優化**
+
+- [Fix] 修正 `notifications.js` 缺失欄位導致的白屏問題（補回 `category` 與 `NOTIFICATION_CATEGORIES`）。
+- [Fix] 修正 Personal Center 導覽列膠囊背景色與選取色衝突問題，改用 CSS 變數 `var(--bg-accent)` 確保顯示正確。
+
+##### [NEW] [NotificationsSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/NotificationsSection.js)
+- 全部通知區塊元件
+- 按時間排序顯示所有通知（最新在上）
+- 顯示通知類型圖示（成功/警告/資訊）
+- 未讀通知標記與「全部標為已讀」功能
+- 點擊通知自動標記為已讀
+
+**2. 修改通知下拉選單**
+
+##### [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)
+- 在通知中心標題列新增「查看全部」連結
+- 點擊連結後關閉下拉選單並跳轉至個人中心通知區塊
+- 匯入並使用 `openPersonalCenter` 函式
+
+**3. 整合至主程式**
+
+##### [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)
+- 匯入 `createPersonalCenterHTML` 和 `initPersonalCenterEvents`
+- 在 app layout 中加入個人中心頁面 HTML
+- 初始化個人中心事件監聽
+
+**4. 樣式更新**
+
+##### [MODIFY] [components.css](file:///d:/Projects/the-fictional-train/css/components.css)
+- 新增 `.personal-center-nav` 導覽列樣式
+- 新增 `.scrollbar-hide` 隱藏滾動條樣式
+- 新增 `.notification-card` 通知卡片懸停效果
+- 新增 `.store-card-large` 大尺寸書店卡片樣式
+
+**5. 文件更新**
+
+##### [MODIFY] [SITEMAP.md](file:///d:/Projects/the-fictional-train/doc/SITEMAP.md)
+- 新增個人中心頁面結構說明
+- 更新通知下拉選單結構（加入「查看全部」連結）
+
+---
+
 ## 2026-02-02
 
 ### 書籍 TTS 設定及詳情彈窗標籤列調整
