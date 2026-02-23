@@ -294,6 +294,14 @@ export function showBookDetails(bookId) {
         if (ttsIcon) ttsIcon.classList.add('hidden');
     }
 
+    // New Teaching Resource Tag
+    const newResourceTag = document.getElementById('modal-book-new-resource-tag');
+    if (book.teachingResources && book.teachingResources.hasNew) {
+        if (newResourceTag) newResourceTag.classList.remove('hidden');
+    } else {
+        if (newResourceTag) newResourceTag.classList.add('hidden');
+    }
+
     // Remaining Time (stays on cover for textbooks)
     const isTextbook = book.type === '教科書';
     const remainingContainer = document.getElementById('modal-remaining-time-container');
@@ -345,14 +353,16 @@ export function showBookDetails(bookId) {
             if (resources.attachments && resources.attachments.length > 0) {
                 contentHTML += '<h4 class="text-sm font-bold text-text-secondary mb-2 uppercase">附件</h4><div class="space-y-2">';
                 resources.attachments.forEach(file => {
-                    contentHTML += `<a href="${file.url}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><div class="flex items-center gap-3"><i data-lucide="file-text" class="w-5 h-5 text-text-secondary"></i><div><div class="font-medium text-text-primary">${file.name}</div><div class="text-xs text-text-secondary">${file.size}</div></div></div><i data-lucide="download" class="w-5 h-5 text-text-secondary"></i></a>`;
+                    const newBadge = file.isNew ? '<span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">NEW</span>' : '';
+                    contentHTML += `<a href="${file.url}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><div class="flex items-center gap-3"><i data-lucide="file-text" class="w-5 h-5 text-text-secondary"></i><div><div class="font-medium text-text-primary">${file.name}</div><div class="text-xs text-text-secondary">${file.size}</div></div></div><div class="flex items-center gap-2">${newBadge}<i data-lucide="download" class="w-5 h-5 text-text-secondary"></i></div></a>`;
                 });
                 contentHTML += '</div>';
             }
             if (resources.links && resources.links.length > 0) {
                 contentHTML += '<h4 class="text-sm font-bold text-text-secondary mt-4 mb-2 uppercase">參考連結</h4><div class="space-y-2">';
                 resources.links.forEach(link => {
-                    contentHTML += `<a href="${link.url}" target="_blank" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><i data-lucide="link" class="w-5 h-5 text-text-secondary"></i><span class="font-medium text-text-primary">${link.title}</span><i data-lucide="arrow-up-right" class="w-4 h-4 text-text-secondary ml-auto"></i></a>`;
+                    const newBadge = link.isNew ? '<span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">NEW</span>' : '';
+                    contentHTML += `<a href="${link.url}" target="_blank" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-border-color hover:bg-gray-100 transition-colors"><i data-lucide="link" class="w-5 h-5 text-text-secondary"></i><span class="font-medium text-text-primary">${link.title}</span><div class="flex items-center gap-2 ml-auto">${newBadge}<i data-lucide="arrow-up-right" class="w-4 h-4 text-text-secondary"></i></div></a>`;
                 });
                 contentHTML += '</div>';
             }

@@ -2,6 +2,41 @@
 
 ## 2026-02-23
 
+### 濾選列 (FilterBar) 重構缺失修正
+
+**1. [MODIFY] [FilterBar.js](file:///d:/Projects/the-fictional-train/js/components/FilterBar.js)**
+- [Fix] 將所有篩選、排序、視圖切換的監聽器改為基於 \`document.addEventListener\` 的事件委派 (Event Delegation)，解決當篩選列 DOM 被重新渲染（例如執行 \`renderContent()\` 更新 \`innerHTML\`）時，已綁定的事件會丟失導致按鈕失效的問題。
+- [Fix] 修復 \`type: 'buttons'\` 在產生 HTML 時漏掉 \`id\` 屬性的問題，確保事件委派可以準確選到該按鈕。
+- [Fix] 解決因為 \`initFilterBarEvents\` 被多次呼叫而可能綁定重複 \`document\` 監聽器的問題，加入 \`window._filterBarEventsInitialized\` 全域追蹤紀錄，確保每種 \`prefix\` 的監聽只註冊一次，並動態更新 \`callback\` 以防 Closure 捕獲舊的函式。
+- [Style] 修改 \`createFilterBarHTML\` 預設的 \`containerClass\`，使其在手機版 (\`< md\`) 恢復 \`overflow-x-auto no-scrollbar whitespace-nowrap\` 單列左右滑動，並保留在桌機版 (\`md:\`) 使用 \`overflow-visible md:whitespace-normal md:flex-wrap\` 以解決排序下拉選單被裁切的問題。
+- [Style] 為了與手機版設計風格保持一致，將網頁版的「批次選取」按鈕文字精簡為「批次」，並一併加上打鉤的 icon 樣式。
+- [Feature] 為 \`type: 'buttons'\` 的篩選器新增 \`allowDeselect\` 支援，當使用者再次點擊已啟用的按鈕時，可將其取消選取，並送出 \`deselectValue\`（預設為空字串或 \`all\`）。
+
+**2. [MODIFY] [Bookmark.js](file:///d:/Projects/the-fictional-train/js/views/Bookmark.js)**
+- [Style] 將 \`bookmarkFilterConfig\` 的 \`containerClass\` 樣式套用與 \`FilterBar\` 相同的響應式 (RWD) 設定，確保手機版也是維持單行滑動而非自動換行，且同樣在桌面版避免裁切。
+- [Logic] 將 \`type\` (顯示類型) 篩選器的「全部」選項移除，並開啟 \`allowDeselect: true\` 允許作動態開關（Toggle）。
+
+**3. [MODIFY] [bookmark.js](file:///d:/Projects/the-fictional-train/js/features/bookmark.js)** & **[Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [Logic] 將手機版 Drawer 中的「全部」顯示類型按鈕移除。
+- [Logic] 更新手機版的點選邏輯：如果再次點擊當前選擇的「劃線/筆記」，則取消選擇狀態並將 \`draftFilterState.type\` 設回 \`all\`。
+- [Fix] 修正 \`applyBtn\` 同步更新桌面 UI 按鈕時遭遇自定義 Inline CSS (\`b.style.backgroundColor\`) 覆蓋導致顏色不會自動重設的問題，統一回歸 \`FilterBar.js\` 管理的 Tailwind \`bg-white shadow-sm\` 樣式切換。
+
+### 教科書教學資源更新提示
+
+**1. [MODIFY] [notifications.js](file:///d:/Projects/the-fictional-train/js/data/notifications.js)**
+- [New] 新增一筆「設計系統實戰」有新教學資源上傳的系統通知假資料。
+
+**2. [MODIFY] [books.js](file:///d:/Projects/the-fictional-train/js/data/books.js)**
+- [Update] 在「設計系統實戰」的 `teachingResources` 結構中加入 `hasNew` 旗標與各資源本身的 `isNew` 標示。
+
+**3. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [New] 於書籍資訊彈窗 (`#book-info-modal`) 的標籤列 (`#modal-tag-row`) 中，新增「新教學資源」紅底標籤。
+
+**4. [MODIFY] [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+- [Update] `showBookDetails` 中加入更新「新教學資源」標籤的顯示邏輯（依賴 `teachingResources.hasNew`）。
+- [Update] `showBookDetails` 在生成教學資源列表時，根據 `isNew` 屬性，在附件或連結卡片的左上角新增絕對定位的 `NEW` 標籤。
+- [Update] 修改 `NEW` 標籤的顯示位置，從卡片左上方移動至右側（下載或外部連結圖示左方），使其更融入列表項目佈局。
+
 ### 通用篩選列 (FilterBar) 模組化重構
 
 **1. [MODIFY] [FilterBar.js](file:///d:/Projects/the-fictional-train/js/components/FilterBar.js)**
@@ -16,6 +51,7 @@
 - [Fix] 更新因為重構造成 `state.selectedType` 遺失 Set Property (`has`, `size`) 的類型定義問題。
 - [Update] 修改配置 `bookmarkFilterConfig` 並將各個特殊屬性 (類型、顏色、排序) 全部隱藏手機版觸發按鈕，以單一客製化總列表按鈕 `extraMobileButtons` 替代。
 - [Revert] 重新放回原本遭到替換掉的 `openBookmarkFilterDrawer` 與對應的 `#bookmark-filter-drawer` 單一抽屜面板，並串皆回共用的 DOM 事件來觸發桌面版。
+- [Style] 調整 Drawer 中「顯示類型」與「排序方式」按鈕選中時的樣式，改為和「劃線顏色」相同的藍色框線，並修正選取「筆記」時顏色篩選僅 Disable 非隱藏，及排序方向無選擇時預設不顯示箭頭。
 
 **3. [MODIFY] [Bookshelf.js](file:///d:/Projects/the-fictional-train/js/views/Bookshelf.js) & [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
 - [Update] 移除原本寫死的 Toolbar DOM，改用 `createFilterBarHTML(bookshelfFilterConfig)` 生成我的書櫃的篩選列

@@ -3,13 +3,14 @@ import { createFilterBarHTML } from '../components/FilterBar.js';
 export const bookmarkFilterConfig = {
     prefix: 'notes-',
     batchSelect: true,
-    containerClass: "flex p-3 md:p-4 border-b border-border-color bg-white items-center gap-2 md:gap-4 sticky top-0 z-10 overflow-x-auto no-scrollbar whitespace-nowrap",
+    containerClass: "flex p-3 md:p-4 border-b border-border-color bg-white items-center gap-2 md:gap-4 sticky top-0 z-10 overflow-x-auto md:overflow-visible no-scrollbar whitespace-nowrap md:whitespace-normal md:flex-wrap",
     filters: [
         {
             id: 'type', label: '類型', type: 'buttons',
             hideOnMobile: true,
+            allowDeselect: true, // We'll add this feature to FilterBar.js
+            deselectValue: 'all', // What value to emit when deselected
             options: [
-                { value: 'all', label: '全部' },
                 { value: 'highlight', label: '劃線' },
                 { value: 'note', label: '筆記' }
             ]

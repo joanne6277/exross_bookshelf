@@ -52,6 +52,15 @@ export const NOTIFICATIONS_DATA = [
         isRead: true,
         type: 'info',
         category: 'reading-goal'
+    },
+    {
+        id: 7,
+        title: '教學資源更新',
+        content: '您的教科書《設計系統實戰》有新的教學資源上傳囉！',
+        date: '2026/02/23 15:00',
+        isRead: false,
+        type: 'info',
+        category: 'system'
     }
 ];
 

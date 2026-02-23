@@ -1039,7 +1039,10 @@ async function openBookmarkFilterDrawer() {
     };
 
     typeBtns.forEach(btn => {
-        btn.onclick = () => { draftFilterState.type = btn.dataset.type; renderDrawerUI(); };
+        btn.onclick = () => {
+            draftFilterState.type = (draftFilterState.type === btn.dataset.type) ? 'all' : btn.dataset.type;
+            renderDrawerUI();
+        };
     });
 
     resetBtn.onclick = () => {
@@ -1056,11 +1059,17 @@ async function openBookmarkFilterDrawer() {
         // update Desktop UI 
         document.querySelectorAll('.generic-filter-btn[data-filter-id="type"]').forEach(b => {
             if (b.dataset.value === state.selectedType) {
-                b.classList.add('bg-accent/10', 'border-accent', 'text-accent');
-                b.classList.remove('bg-white', 'border-gray-200', 'text-text-secondary');
+                b.classList.add('bg-white', 'shadow-sm', 'text-text-primary');
+                b.classList.remove('text-text-secondary', 'hover:text-text-primary');
+                b.style.backgroundColor = '';
+                b.style.color = '';
+                b.style.fontWeight = '';
             } else {
-                b.classList.remove('bg-accent/10', 'border-accent', 'text-accent');
-                b.classList.add('bg-white', 'border-gray-200', 'text-text-secondary');
+                b.classList.add('text-text-secondary', 'hover:text-text-primary');
+                b.classList.remove('bg-white', 'shadow-sm', 'text-text-primary');
+                b.style.backgroundColor = '';
+                b.style.color = '';
+                b.style.fontWeight = '';
             }
         });
 

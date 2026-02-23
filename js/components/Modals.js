@@ -20,6 +20,7 @@ export function createModalsHTML() {
                 <span id="modal-book-format" class="bg-gray-800 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden">EPUB</span>
                 <span id="modal-book-audiobook-icon" class="bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> 有聲書</span>
                 <span id="modal-book-tts-icon" class="bg-teal-500 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="speech" class="w-3 h-3"></i> 可朗讀</span>
+                <span id="modal-book-new-resource-tag" class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full hidden">新教學資源</span>
             </div>
 
             <div class="flex-1 overflow-y-auto p-6">
@@ -542,9 +543,6 @@ export function createModalsHTML() {
                 <section>
                     <h4 class="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider">顯示類型</h4>
                     <div class="flex gap-2">
-                        <button class="bfd-type-btn flex-1 py-2.5 px-4 rounded-xl border text-sm font-bold transition-all" data-type="all">
-                            全部
-                        </button>
                         <button class="bfd-type-btn flex-1 py-2.5 px-4 rounded-xl border text-sm font-bold transition-all" data-type="highlight">
                             <span class="flex items-center justify-center gap-1.5">
                                 <i data-lucide="highlighter" class="w-3.5 h-3.5"></i> 劃線

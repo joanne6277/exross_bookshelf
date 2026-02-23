@@ -12,13 +12,13 @@ export function createFilterBarHTML(config) {
         sort = null,
         viewToggle = false,
         extraMobileButtons = [],
-        containerClass = 'flex items-center gap-3 mb-4 md:mb-8 overflow-x-auto no-scrollbar w-full pb-2'
+        containerClass = "flex p-3 md:p-4 border-b border-border-color bg-white items-center gap-2 md:gap-4 sticky top-0 z-10 overflow-x-auto md:overflow-visible no-scrollbar whitespace-nowrap md:whitespace-normal md:flex-wrap"
     } = config;
 
     let html = `<div id="${prefix}filter-bar" class="${containerClass}">`;
 
     if (batchSelect) {
-        html += `<button id="${prefix}batch-select-btn" class="hidden md:block flex-shrink-0 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">批次選取</button>`;
+        html += `<button id="${prefix}batch-select-btn" class="hidden md:flex items-center gap-1.5 flex-shrink-0 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors"><i data-lucide="check-square" class="w-4 h-4"></i> 批次</button>`;
         html += `<button id="${prefix}batch-select-btn-mobile" class="md:hidden flex-shrink-0 flex items-center gap-1.5 px-3 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">
                     <i data-lucide="check-square" class="w-3.5 h-3.5"></i> 批次
                  </button>`;
@@ -39,8 +39,8 @@ export function createFilterBarHTML(config) {
             </div>`;
         } else if (filter.type === 'buttons') {
             html += `
-            <div class="hidden md:flex items-center gap-1 rounded-lg bg-gray-100 p-1">
-                ${filter.options.map(opt => `<button class="generic-filter-btn px-3 py-1.5 text-sm font-medium rounded-md transition-all ${opt.active ? 'bg-white shadow-sm text-text-primary' : 'text-text-secondary hover:text-text-primary'}" data-filter-id="${filter.id}" data-value="${opt.value}">${opt.label}</button>`).join('')}
+            <div class="hidden md:flex items-center gap-1 rounded-lg bg-gray-100 p-1" ${filter.allowDeselect ? 'data-allow-deselect="true"' : ''} ${filter.deselectValue ? `data-deselect-value="${filter.deselectValue}"` : ''}>
+                ${filter.options.map((opt, optIdx) => `<button id="${prefix}${filter.id}-btn-${optIdx}" class="generic-filter-btn px-3 py-1.5 text-sm font-medium rounded-md transition-all ${opt.active ? 'bg-white shadow-sm text-text-primary' : 'text-text-secondary hover:text-text-primary'}" data-filter-id="${filter.id}" data-value="${opt.value}">${opt.label}</button>`).join('')}
             </div>`;
         } else if (filter.type === 'custom') {
             if (filter.customHTML) {
@@ -128,12 +128,32 @@ export function createFilterBarHTML(config) {
     return html;
 }
 
+// Global tracking object to prevent duplicate listeners
+window._filterBarEventsInitialized = window._filterBarEventsInitialized || {};
+
 export function initFilterBarEvents(config, callback) {
     const { prefix = '', filters = [], sort = null, viewToggle = false } = config;
 
-    const selectElements = document.querySelectorAll(`select.generic-filter-select[id^="${prefix}"]`);
-    selectElements.forEach(select => {
-        select.addEventListener('change', (e) => {
+    if (window._filterBarEventsInitialized[prefix]) {
+        // Update the callback reference if it was re-initialized
+        window._filterBarEventsCallbacks = window._filterBarEventsCallbacks || {};
+        window._filterBarEventsCallbacks[prefix] = callback;
+        return;
+    }
+
+    window._filterBarEventsInitialized[prefix] = true;
+    window._filterBarEventsCallbacks = window._filterBarEventsCallbacks || {};
+    window._filterBarEventsCallbacks[prefix] = callback;
+
+    const fireCallback = (action, data) => {
+        if (window._filterBarEventsCallbacks[prefix]) {
+            window._filterBarEventsCallbacks[prefix](action, data);
+        }
+    };
+
+    // Event Delegation for Selects
+    document.addEventListener('change', (e) => {
+        if (e.target.matches(`select.generic-filter-select[id^="${prefix}"]`)) {
             const filterId = e.target.getAttribute('data-filter-id');
             const value = e.target.value;
             const labelEl = document.getElementById(`${prefix}mobile-${filterId}-label`);
@@ -141,26 +161,38 @@ export function initFilterBarEvents(config, callback) {
                 const optLabel = e.target.options[e.target.selectedIndex].text;
                 labelEl.textContent = optLabel;
             }
-            callback('filter', { id: filterId, value });
-        });
+            fireCallback('filter', { id: filterId, value });
+        }
     });
 
-    const filterButtons = document.querySelectorAll(`button.generic-filter-btn[id^="${prefix}"]`);
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const filterId = e.target.getAttribute('data-filter-id');
-            const value = e.target.getAttribute('data-value');
+    // Event Delegation for Filter Buttons
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest(`button.generic-filter-btn[id^="${prefix}"]`);
+        if (btn) {
+            const filterId = btn.getAttribute('data-filter-id');
+            const value = btn.getAttribute('data-value');
+            const isCurrentlyActive = btn.classList.contains('bg-white');
+            const container = btn.closest('div.hidden.md\\:flex');
 
             const groupBtns = document.querySelectorAll(`button.generic-filter-btn[data-filter-id="${filterId}"][id^="${prefix}"]`);
-            groupBtns.forEach(b => {
-                b.classList.remove('bg-white', 'shadow-sm', 'text-text-primary');
-                b.classList.add('text-text-secondary');
-            });
-            e.target.classList.add('bg-white', 'shadow-sm', 'text-text-primary');
-            e.target.classList.remove('text-text-secondary');
 
-            callback('filter', { id: filterId, value });
-        });
+            if (isCurrentlyActive && container && container.getAttribute('data-allow-deselect') === 'true') {
+                // Deselect
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-text-primary');
+                btn.classList.add('text-text-secondary');
+                const deselectVal = container.getAttribute('data-deselect-value') || '';
+                fireCallback('filter', { id: filterId, value: deselectVal });
+            } else {
+                // Select normally
+                groupBtns.forEach(b => {
+                    b.classList.remove('bg-white', 'shadow-sm', 'text-text-primary');
+                    b.classList.add('text-text-secondary');
+                });
+                btn.classList.add('bg-white', 'shadow-sm', 'text-text-primary');
+                btn.classList.remove('text-text-secondary');
+                fireCallback('filter', { id: filterId, value });
+            }
+        }
     });
 
     const openSheet = (title, options, onSelect, currentValue, currentDirection = null) => {
@@ -202,12 +234,13 @@ export function initFilterBarEvents(config, callback) {
         openModal('mobile-filter-sheet');
     };
 
-    filters.forEach(filter => {
-        if (filter.hideOnMobile || filter.type === 'custom' || !filter.options) return;
-        const mobileBtn = document.getElementById(`${prefix}mobile-${filter.id}-btn`);
-        if (mobileBtn) {
-            mobileBtn.addEventListener('click', () => {
-                const select = document.getElementById(`${prefix}${filter.id}-filter`);
+    document.addEventListener('click', (e) => {
+        const mobileBtnEl = e.target.closest(`.mobile-filter-trigger[id^="${prefix}mobile-"]`);
+        if (mobileBtnEl) {
+            const filterId = mobileBtnEl.getAttribute('data-filter-id');
+            const filter = filters.find(f => f.id === filterId);
+            if (filter && filter.options) {
+                const select = document.getElementById(`${prefix}${filterId}-filter`);
                 const currentVal = select ? select.value : filter.options[0].value;
 
                 openSheet(`篩選${filter.label}`, filter.options, (val) => {
@@ -215,13 +248,13 @@ export function initFilterBarEvents(config, callback) {
                         select.value = val;
                         select.dispatchEvent(new Event('change'));
                     } else {
-                        const label = document.getElementById(`${prefix}mobile-${filter.id}-label`);
+                        const label = document.getElementById(`${prefix}mobile-${filterId}-label`);
                         const selectedOpt = filter.options.find(o => o.value === val);
                         if (label && selectedOpt) label.textContent = selectedOpt.label;
-                        callback('filter', { id: filter.id, value: val });
+                        fireCallback('filter', { id: filterId, value: val });
                     }
                 }, currentVal);
-            });
+            }
         }
     });
 
@@ -233,48 +266,50 @@ export function initFilterBarEvents(config, callback) {
         const sortDropdown = document.getElementById(`${prefix}sort-dropdown`);
         const dirBtn = document.getElementById(`${prefix}sort-direction-btn`);
 
-        if (sortBtn && sortDropdown) {
-            sortBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                sortDropdown.classList.toggle('hidden');
-            });
-            document.addEventListener('click', () => {
-                sortDropdown.classList.add('hidden');
-            });
+        if (sortDropdown) {
+            document.addEventListener('click', (e) => {
+                const sortBtnEl = e.target.closest(`#${prefix}sort-menu-btn`);
+                const sortOptEl = e.target.closest(`.generic-sort-opt`);
 
-            const sortOpts = sortDropdown.querySelectorAll('.generic-sort-opt');
-            sortOpts.forEach(opt => {
-                opt.addEventListener('click', (e) => {
-                    currentSort = e.target.getAttribute('data-sort');
+                if (sortBtnEl) {
+                    e.stopPropagation();
+                    sortDropdown.classList.toggle('hidden');
+                } else if (sortOptEl && sortDropdown.contains(sortOptEl)) {
+                    currentSort = sortOptEl.getAttribute('data-sort');
                     currentDir = 'desc';
 
                     const sortLabel = document.getElementById(`${prefix}sort-menu-label`);
-                    if (sortLabel) sortLabel.textContent = `排序: ${e.target.textContent}`;
+                    if (sortLabel) sortLabel.textContent = `排序: ${sortOptEl.textContent}`;
 
-                    if (dirBtn) {
-                        dirBtn.setAttribute('data-dir', currentDir);
-                        dirBtn.innerHTML = '<i data-lucide="arrow-down" class="w-4 h-4"></i>';
-                        if (window.lucide) window.lucide.createIcons({ root: dirBtn });
+                    const currentDirBtn = document.getElementById(`${prefix}sort-direction-btn`);
+                    if (currentDirBtn) {
+                        currentDirBtn.setAttribute('data-dir', currentDir);
+                        currentDirBtn.innerHTML = '<i data-lucide="arrow-down" class="w-4 h-4"></i>';
+                        if (window.lucide) window.lucide.createIcons({ root: currentDirBtn });
                     }
 
-                    callback('sort', { type: currentSort, direction: currentDir });
-                });
+                    fireCallback('sort', { type: currentSort, direction: currentDir });
+                    sortDropdown.classList.add('hidden');
+                } else {
+                    sortDropdown.classList.add('hidden');
+                }
             });
         }
 
-        if (dirBtn) {
-            dirBtn.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+            const dirBtnEl = e.target.closest(`#${prefix}sort-direction-btn`);
+            if (dirBtnEl) {
                 currentDir = currentDir === 'asc' ? 'desc' : 'asc';
-                dirBtn.setAttribute('data-dir', currentDir);
-                dirBtn.innerHTML = '<i data-lucide="arrow-' + (currentDir === 'asc' ? 'up' : 'down') + '" class="w-4 h-4"></i>';
-                if (window.lucide) window.lucide.createIcons({ root: dirBtn });
-                callback('sort', { type: currentSort, direction: currentDir });
-            });
-        }
+                dirBtnEl.setAttribute('data-dir', currentDir);
+                dirBtnEl.innerHTML = '<i data-lucide="arrow-' + (currentDir === 'asc' ? 'up' : 'down') + '" class="w-4 h-4"></i>';
+                if (window.lucide) window.lucide.createIcons({ root: dirBtnEl });
+                fireCallback('sort', { type: currentSort, direction: currentDir });
+            }
+        });
 
-        const mobileSortBtn = document.getElementById(`${prefix}mobile-sort-btn`);
-        if (mobileSortBtn) {
-            mobileSortBtn.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+            const mobileSortBtnEl = e.target.closest(`#${prefix}mobile-sort-btn`);
+            if (mobileSortBtnEl) {
                 const handleMobileSortSelect = (val) => {
                     if (val === currentSort) {
                         currentDir = currentDir === 'asc' ? 'desc' : 'asc';
@@ -287,41 +322,49 @@ export function initFilterBarEvents(config, callback) {
                     const selectedOpt = sort.options.find(o => o.value === currentSort);
                     if (sortLabel && selectedOpt) sortLabel.textContent = `排序: ${selectedOpt.label}`;
 
-                    if (dirBtn) {
-                        dirBtn.setAttribute('data-dir', currentDir);
-                        dirBtn.innerHTML = '<i data-lucide="arrow-' + (currentDir === 'asc' ? 'up' : 'down') + '" class="w-4 h-4"></i>';
-                        if (window.lucide) window.lucide.createIcons({ root: dirBtn });
+                    const currentDirBtn = document.getElementById(`${prefix}sort-direction-btn`);
+                    if (currentDirBtn) {
+                        currentDirBtn.setAttribute('data-dir', currentDir);
+                        currentDirBtn.innerHTML = '<i data-lucide="arrow-' + (currentDir === 'asc' ? 'up' : 'down') + '" class="w-4 h-4"></i>';
+                        if (window.lucide) window.lucide.createIcons({ root: currentDirBtn });
                     }
 
-                    callback('sort', { type: currentSort, direction: currentDir });
+                    fireCallback('sort', { type: currentSort, direction: currentDir });
                     openSheet('排序方式', sort.options, handleMobileSortSelect, currentSort, currentDir);
                 };
 
                 openSheet('排序方式', sort.options, handleMobileSortSelect, currentSort, currentDir);
-            });
-        }
+            }
+        });
     }
 
     if (viewToggle) {
         const gridBtn = document.getElementById(`${prefix}grid-view-btn`);
         const listBtn = document.getElementById(`${prefix}list-view-btn`);
 
-        if (gridBtn && listBtn) {
-            gridBtn.addEventListener('click', () => {
-                gridBtn.classList.add('bg-white', 'shadow-sm');
-                gridBtn.classList.remove('text-text-secondary');
-                listBtn.classList.remove('bg-white', 'shadow-sm');
-                listBtn.classList.add('text-text-secondary');
-                callback('view', 'grid');
-            });
+        document.addEventListener('click', (e) => {
+            const gridBtnEl = e.target.closest(`#${prefix}grid-view-btn`);
+            const listBtnEl = e.target.closest(`#${prefix}list-view-btn`);
 
-            listBtn.addEventListener('click', () => {
-                listBtn.classList.add('bg-white', 'shadow-sm');
-                listBtn.classList.remove('text-text-secondary');
-                gridBtn.classList.remove('bg-white', 'shadow-sm');
-                gridBtn.classList.add('text-text-secondary');
-                callback('view', 'list');
-            });
-        }
+            if (gridBtnEl) {
+                const currentListBtn = document.getElementById(`${prefix}list-view-btn`);
+                gridBtnEl.classList.add('bg-white', 'shadow-sm');
+                gridBtnEl.classList.remove('text-text-secondary');
+                if (currentListBtn) {
+                    currentListBtn.classList.remove('bg-white', 'shadow-sm');
+                    currentListBtn.classList.add('text-text-secondary');
+                }
+                fireCallback('view', 'grid');
+            } else if (listBtnEl) {
+                const currentGridBtn = document.getElementById(`${prefix}grid-view-btn`);
+                listBtnEl.classList.add('bg-white', 'shadow-sm');
+                listBtnEl.classList.remove('text-text-secondary');
+                if (currentGridBtn) {
+                    currentGridBtn.classList.remove('bg-white', 'shadow-sm');
+                    currentGridBtn.classList.add('text-text-secondary');
+                }
+                fireCallback('view', 'list');
+            }
+        });
     }
 }
