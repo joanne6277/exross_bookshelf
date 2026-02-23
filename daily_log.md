@@ -9,6 +9,7 @@
 - [New] 支援 `type: 'select'`, `type: 'buttons'`, `type: 'custom'` 等多種篩選器配置
 - [New] 內建處理 RWD，自動生成 Mobile 底部選單觸發按鈕，並統整事件派發邏輯
 - [New] 新增 `initFilterBarEvents` 以統一註冊所有切換與點擊事件
+- [Fix] 修正由 `type: 'custom'` 自定義元件所引發的手機版按鈕 Undefined Property `options` 錯誤，加入型別保護機制以防止無 options 按鈕產生例外。
 
 **2. [MODIFY] [Bookshelf.js](file:///d:/Projects/the-fictional-train/js/views/Bookshelf.js) & [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
 - [Update] 移除原本寫死的 Toolbar DOM，改用 `createFilterBarHTML(bookshelfFilterConfig)` 生成我的書櫃的篩選列
