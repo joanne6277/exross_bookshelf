@@ -972,40 +972,41 @@ async function openBookmarkFilterDrawer() {
         typeBtns.forEach(btn => {
             const type = btn.dataset.type;
             if (type === draftFilterState.type) {
-                btn.classList.add('bg-accent/10', 'border-accent', 'text-accent');
-                btn.classList.remove('border-gray-200', 'text-text-secondary');
+                btn.classList.add('border-accent', 'text-accent', 'ring-2', 'ring-accent/20');
+                btn.classList.remove('border-gray-200', 'text-text-secondary', 'bg-accent/10');
             } else {
                 btn.classList.add('border-gray-200', 'text-text-secondary');
-                btn.classList.remove('bg-accent/10', 'border-accent', 'text-accent');
+                btn.classList.remove('border-accent', 'text-accent', 'ring-2', 'ring-accent/20', 'bg-accent/10');
             }
         });
 
         // Color Section
-        if (draftFilterState.type === 'highlight' || draftFilterState.type === 'all') {
-            colorSection.style.display = 'block';
-            colorOptions.innerHTML = colors.map(c => {
-                const isSelected = c.value === draftFilterState.color;
-                return `
-                    <button class="bfd-color-btn flex items-center justify-center h-10 w-10 bg-white border ${isSelected ? 'border-accent ring-2 ring-accent/20' : 'border-gray-200 hover:border-accent'} rounded-xl transition-all" data-color="${c.value}">
-                        <div class="w-5 h-5 rounded-full border border-gray-300 relative overflow-hidden flex items-center justify-center">
-                            ${c.value === 'all'
-                        ? '<div class="absolute inset-0 bg-gradient-to-tr from-yellow-300 via-red-300 to-blue-300 opacity-80"></div>'
-                        : `<div class="absolute inset-0 opacity-80" style="background-color:${c.hex}"></div>`}
-                            ${isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white absolute inset-0 m-auto z-10" style="drop-shadow: 0 1px 1px rgba(0,0,0,0.5);"></i>' : ''}
-                        </div>
-                    </button>
-                `;
-            }).join('');
+        const isColorDisabled = draftFilterState.type === 'note';
+        colorSection.style.display = 'block';
+        colorOptions.innerHTML = colors.map(c => {
+            const isSelected = !isColorDisabled && c.value === draftFilterState.color;
+            return `
+                <button class="bfd-color-btn flex items-center justify-center h-10 w-10 bg-white border ${isSelected ? 'border-accent ring-2 ring-accent/20' : 'border-gray-200 hover:border-accent'} rounded-xl transition-all ${isColorDisabled ? 'opacity-50 cursor-not-allowed' : ''}" data-color="${c.value}" ${isColorDisabled ? 'disabled' : ''}>
+                    <div class="w-5 h-5 rounded-full border border-gray-300 relative overflow-hidden flex items-center justify-center">
+                        ${c.value === 'all'
+                    ? '<div class="absolute inset-0 bg-gradient-to-tr from-yellow-300 via-red-300 to-blue-300 opacity-80"></div>'
+                    : `<div class="absolute inset-0 opacity-80" style="background-color:${c.hex}"></div>`}
+                        ${isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white absolute inset-0 m-auto z-10" style="drop-shadow: 0 1px 1px rgba(0,0,0,0.5);"></i>' : ''}
+                    </div>
+                </button>
+            `;
+        }).join('');
 
-            if (window.lucide) window.lucide.createIcons({ root: colorOptions });
+        if (window.lucide) window.lucide.createIcons({ root: colorOptions });
 
-            colorOptions.querySelectorAll('.bfd-color-btn').forEach(btn => {
-                btn.onclick = () => { draftFilterState.color = btn.dataset.color; renderDrawerUI(); };
-            });
-        } else {
-            colorSection.style.display = 'none';
-            draftFilterState.color = 'all';
-        }
+        colorOptions.querySelectorAll('.bfd-color-btn').forEach(btn => {
+            btn.onclick = () => {
+                if (!isColorDisabled) {
+                    draftFilterState.color = btn.dataset.color;
+                    renderDrawerUI();
+                }
+            };
+        });
 
         // Sort Options
         const sortConfigs = [
@@ -1016,11 +1017,11 @@ async function openBookmarkFilterDrawer() {
 
         sortOptions.innerHTML = sortConfigs.map(s => {
             const isActive = draftFilterState.sortType === s.id;
-            const dirIcon = isActive ? (draftFilterState.sortDirection === 'desc' ? 'arrow-down' : 'arrow-up') : 'arrow-down-up';
+            const dirIcon = isActive ? (draftFilterState.sortDirection === 'desc' ? 'arrow-down' : 'arrow-up') : '';
             return `
-                <button class="bfd-sort-btn flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg border text-xs font-bold transition-all ${isActive ? 'bg-accent/10 border-accent text-accent' : 'border-gray-200 text-text-secondary w-full'}" data-sort="${s.id}">
+                <button class="bfd-sort-btn flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg border text-xs font-bold transition-all ${isActive ? 'border-accent text-accent ring-2 ring-accent/20' : 'border-gray-200 text-text-secondary w-full'}" data-sort="${s.id}">
                     <span>${s.label}</span>
-                    <i data-lucide="${dirIcon}" class="w-3 h-3 text-current"></i>
+                    ${dirIcon ? `<i data-lucide="${dirIcon}" class="w-3 h-3 text-current"></i>` : ''}
                 </button>
             `;
         }).join('');
