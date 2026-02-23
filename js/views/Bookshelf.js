@@ -3,18 +3,37 @@ import { createFilterBarHTML } from '../components/FilterBar.js';
 export function createBookshelfHTML() {
     return `
     <div id="view-books" class="view-section hidden">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-text-primary">我的書櫃</h1>
-            <div class="flex items-center gap-4">
-                <div id="bookshelf-search-container" class="relative w-64">
-                    <input type="text" placeholder="搜尋書名、作者..."
-                        class="w-full border border-border-color rounded-lg py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow">
-                    <i data-lucide="search"
-                        class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i>
-                </div>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-6 gap-3 md:gap-0">
+            <h1 class="text-3xl font-bold text-text-primary hidden md:block">我的書櫃</h1>
+            <!-- Search Bar (層級提升，橫跨所有 tab) -->
+            <div id="bookshelf-search-container" class="relative w-full md:w-64">
+                <input id="bookshelf-search-input" type="text" placeholder="搜尋書名、作者..."
+                    class="w-full border border-border-color rounded-lg py-2.5 md:py-2 px-3 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow bg-white">
+                <i data-lucide="search"
+                    class="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <button id="bookshelf-search-clear" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary hidden">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
-        <div class="border-b border-border-color mb-8 overflow-x-auto">
+
+        <!-- Search Results (搜尋結果模擬畫面) -->
+        <div id="bookshelf-search-results" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <p id="search-results-info" class="text-sm text-text-secondary"></p>
+            </div>
+            <div id="search-results-grid"
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
+            </div>
+            <div id="search-results-empty" class="hidden text-center py-20">
+                <i data-lucide="search-x" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                <p class="text-lg font-medium text-text-secondary">找不到相關書籍</p>
+                <p class="text-sm text-text-secondary mt-1">請嘗試不同的關鍵字</p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div id="bookshelf-tabs-container" class="border-b border-border-color mb-8 overflow-x-auto">
             <nav class="flex space-x-8 -mb-px min-w-max"><button data-tab-target="all-books"
                     class="tab-btn py-4 px-2 border-b-2 border-transparent text-text-secondary font-medium hover:text-accent transition-all tab-active text-lg">全部書籍</button><button
                     data-tab-target="collections"
@@ -32,6 +51,9 @@ export function createBookshelfHTML() {
                 </div>
                 <div id="all-books-list" class="hidden space-y-4">
                 </div>
+
+                <!-- Pagination -->
+                <div id="all-books-pagination" class="mt-8"></div>
 
                 <!-- Batch Action Bar -->
                 <div id="batch-action-bar"
@@ -98,6 +120,8 @@ export function createBookshelfHTML() {
                         </div>
                     </div>
                 </div>
+                <!-- Pagination -->
+                <div id="collections-pagination" class="mt-8"></div>
             </div>
             <div id="archived" class="tab-panel hidden">
                 <div id="archive-filter-container"></div>
@@ -106,6 +130,8 @@ export function createBookshelfHTML() {
                 </div>
                 <div id="archived-list" class="hidden space-y-4">
                 </div>
+                <!-- Pagination -->
+                <div id="archived-pagination" class="mt-8"></div>
             </div>
         </div>
     </div>

@@ -57,7 +57,7 @@ export const BOOKS_DATA = [
         format: 'EPUB',
         notes: [
             { id: 1, type: 'note', page: 45, date: '2025/11/10 14:30', quote: '你採取的每一個行動，都是投票給你想要成為的那個人。你不必變得完美，但每一次的投票都是在強化你的身分認同。', comment: '這句話提醒我，每天的小選擇都會累積成未來的自己。要更注意自己的習慣。', color: 'blue' },
-            { id: 2, type: 'highlight', page: 82, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。', color: 'green' }
+            { id: 2, type: 'highlight', page: 82, date: '2025/11/08 09:00', quote: '習慣是自我改善的複利。', color: 'blue' }
         ]
     },
     {
@@ -81,7 +81,7 @@ export const BOOKS_DATA = [
         lastRead: '2025/10/30',
         format: 'EPUB',
         notes: [
-            { id: 4, type: 'note', page: 68, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。', color: 'red' }
+            { id: 4, type: 'note', page: 68, date: '2025/10/20 16:20', quote: '好的領導者不是告訴別人做什麼，而是移除障礙。', comment: '專案管理的重要心法。', color: 'pink' }
         ]
     },
     {
@@ -155,8 +155,8 @@ export const BOOKS_DATA = [
         lastRead: '2025/11/05',
         format: 'EPUB',
         notes: [
-            { id: 9, type: 'highlight', page: 15, date: '2025/11/18 14:00', quote: 'What you see is all there is (WYSIATI).原子習慣', color: 'red' },
-            { id: 10, type: 'note', page: 35, date: '2025/11/19 15:00', quote: 'System 1 operates automatically and quickly...', comment: '系統一主覺直覺，系統二主宰理性分析。', color: 'green' }
+            { id: 9, type: 'highlight', page: 15, date: '2025/11/18 14:00', quote: 'What you see is all there is (WYSIATI).原子習慣', color: 'pink' },
+            { id: 10, type: 'note', page: 35, date: '2025/11/19 15:00', quote: 'System 1 operates automatically and quickly...', comment: '系統一主覺直覺，系統二主宰理性分析。', color: 'purple' }
         ]
     },
     {

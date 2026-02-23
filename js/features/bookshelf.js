@@ -1,5 +1,6 @@
 import { openModal, closeModal } from '../utils.js';
 import { BOOKS_DATA } from '../data/books.js';
+import { renderPagination, initPagination } from '../components/Pagination.js';
 
 import { getCollections, toggleBookInCollection, addCollection } from './collections.js';
 import { createArchiveFilterBarHTML, initArchiveFilterBar, filterArchivedBooks } from '../components/ArchiveFilterBar.js';
@@ -918,20 +919,52 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
 // 4. 初始化功能
 export function initBookshelfFeature() {
     // 渲染書籍
+    const BOOKS_PER_PAGE = 24;  // Grid 每頁書數
+    const BOOKS_PER_PAGE_LIST = 20; // List 每頁書數
+
+    // 全部書籍 - 分頁狀態
+    let allBooksCurrentPage = 1;
+
     let currentBooks = BOOKS_DATA.filter(b => !isBookArchived(b));
     const gridContainer = document.getElementById('all-books-grid');
     const listContainer = document.getElementById('all-books-list');
 
     const render = () => {
-        if (gridContainer) gridContainer.innerHTML = currentBooks.map(b => createBookCardHTML(b)).join('');
-        if (listContainer) listContainer.innerHTML = currentBooks.map(createBookListItemHTML).join('');
+        const isListView = listContainer && !listContainer.classList.contains('hidden');
+        const perPage = isListView ? BOOKS_PER_PAGE_LIST : BOOKS_PER_PAGE;
+        const total = currentBooks.length;
+        const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+        // 確保目前頁碼有效
+        if (allBooksCurrentPage > totalPages) allBooksCurrentPage = totalPages;
+
+        const start = (allBooksCurrentPage - 1) * perPage;
+        const pageBooks = currentBooks.slice(start, start + perPage);
+
+        if (gridContainer) gridContainer.innerHTML = pageBooks.map(b => createBookCardHTML(b)).join('');
+        if (listContainer) listContainer.innerHTML = pageBooks.map(createBookListItemHTML).join('');
+
+        // 渲染分頁列
+        renderPagination('all-books-pagination', totalPages, allBooksCurrentPage);
+
         if (window.lucide) window.lucide.createIcons();
     };
+
+    // 初始化全部書籍分頁點擊事件（只初始化一次）
+    initPagination('all-books-pagination', (page) => {
+        allBooksCurrentPage = page;
+        render();
+        // 捲動到書籍列表頂部
+        document.getElementById('all-books')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     // New: Render Archived Books with Filter Support
     let currentArchiveFilter = 'all';
     let currentArchiveView = 'grid';
     let archiveFilterInitialized = false;
+    const ARCHIVE_PER_PAGE = 24;
+    const ARCHIVE_PER_PAGE_LIST = 20;
+    let archiveCurrentPage = 1;
 
     const renderArchivedBooks = (filterType = currentArchiveFilter) => {
         currentArchiveFilter = filterType;
@@ -949,10 +982,12 @@ export function initBookshelfFeature() {
             initArchiveFilterBar({
                 prefix: 'archive-',
                 onFilterChange: (value) => {
+                    archiveCurrentPage = 1; // 篩選後重設頁碼
                     renderArchivedBooks(value);
                 },
                 onViewChange: (view) => {
                     currentArchiveView = view;
+                    archiveCurrentPage = 1;
                     if (gridContainer && listContainer) {
                         if (view === 'grid') {
                             gridContainer.classList.remove('hidden');
@@ -962,27 +997,45 @@ export function initBookshelfFeature() {
                             listContainer.classList.remove('hidden');
                         }
                     }
+                    renderArchivedBooks(currentArchiveFilter);
                 }
             });
 
             archiveFilterInitialized = true;
+
+            // 初始化封存區分頁點擊事件（只初始化一次）
+            initPagination('archived-pagination', (page) => {
+                archiveCurrentPage = page;
+                renderArchivedBooks(currentArchiveFilter);
+                document.getElementById('archived')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
             if (window.lucide) window.lucide.createIcons();
         }
 
         // Filter archived books
         const archivedBooks = filterArchivedBooks(BOOKS_DATA, filterType);
 
+        const isListView = currentArchiveView === 'list';
+        const perPage = isListView ? ARCHIVE_PER_PAGE_LIST : ARCHIVE_PER_PAGE;
+        const total = archivedBooks.length;
+        const totalPages = Math.max(1, Math.ceil(total / perPage));
+        if (archiveCurrentPage > totalPages) archiveCurrentPage = totalPages;
+
+        const start = (archiveCurrentPage - 1) * perPage;
+        const pageArchiveBooks = archivedBooks.slice(start, start + perPage);
+
         // Render Grid
         if (gridContainer) {
-            gridContainer.innerHTML = archivedBooks.length > 0
-                ? archivedBooks.map(b => createBookCardHTML(b, { isArchivedView: true })).join('')
+            gridContainer.innerHTML = pageArchiveBooks.length > 0
+                ? pageArchiveBooks.map(b => createBookCardHTML(b, { isArchivedView: true })).join('')
                 : '';
         }
 
         // Render List
         if (listContainer) {
-            listContainer.innerHTML = archivedBooks.length > 0
-                ? archivedBooks.map(createBookListItemHTML).join('')
+            listContainer.innerHTML = pageArchiveBooks.length > 0
+                ? pageArchiveBooks.map(createBookListItemHTML).join('')
                 : '';
         }
 
@@ -995,6 +1048,9 @@ export function initBookshelfFeature() {
                 listContainer.innerHTML = emptyHTML;
             }
         }
+
+        // 渲染封存區分頁列
+        renderPagination('archived-pagination', totalPages, archiveCurrentPage);
 
         if (window.lucide) window.lucide.createIcons();
     };
@@ -1078,7 +1134,7 @@ export function initBookshelfFeature() {
     // Tab 切換
     const tabs = document.querySelectorAll('.tab-btn');
     const panels = document.querySelectorAll('.tab-panel');
-    const searchContainer = document.getElementById('bookshelf-search-container');
+
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1092,16 +1148,10 @@ export function initBookshelfFeature() {
                 renderArchivedBooks();
             }
 
-            // Toggle search bar visibility
-            if (searchContainer) {
-                if (targetId === 'all-books') {
-                    searchContainer.classList.remove('hidden');
-                } else {
-                    searchContainer.classList.add('hidden');
-                    // Reset batch mode when leaving "All Books"
-                    if (filterControls && filterControls.resetBatchMode) {
-                        filterControls.resetBatchMode();
-                    }
+            // Reset batch mode when leaving "All Books"
+            if (targetId !== 'all-books') {
+                if (filterControls && filterControls.resetBatchMode) {
+                    filterControls.resetBatchMode();
                 }
             }
         });
@@ -1118,6 +1168,7 @@ export function initBookshelfFeature() {
         dataSource: allBooksDataSource,
         render: (filteredBooks) => {
             currentBooks = filteredBooks;
+            allBooksCurrentPage = 1; // 篩選後重設頁碼
             render();
         }
     });
@@ -1210,6 +1261,86 @@ export function initBookshelfFeature() {
             // 可選：顯示一個 Toast 或 Console 訊息
             console.log("Filters applied!");
         });
+    }
+
+    // --- Bookshelf Search ---
+    const searchInput = document.getElementById('bookshelf-search-input');
+    const searchClearBtn = document.getElementById('bookshelf-search-clear');
+    const searchResultsContainer = document.getElementById('bookshelf-search-results');
+    const searchResultsGrid = document.getElementById('search-results-grid');
+    const searchResultsInfo = document.getElementById('search-results-info');
+    const searchResultsEmpty = document.getElementById('search-results-empty');
+    const tabContent = document.getElementById('tab-content');
+    const tabsContainer = document.getElementById('bookshelf-tabs-container');
+
+    const performSearch = (query) => {
+        const trimmed = query.trim().toLowerCase();
+
+        if (!trimmed) {
+            // 清空搜尋，恢復 tab 內容
+            if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
+            if (tabContent) tabContent.classList.remove('hidden');
+            if (tabsContainer) tabsContainer.classList.remove('hidden');
+            if (searchClearBtn) searchClearBtn.classList.add('hidden');
+            return;
+        }
+
+        // 顯示清除按鈕
+        if (searchClearBtn) searchClearBtn.classList.remove('hidden');
+
+        // 搜尋全部書籍（含封存）
+        const results = BOOKS_DATA.filter(book => {
+            return book.title.toLowerCase().includes(trimmed) ||
+                book.author.toLowerCase().includes(trimmed);
+        });
+
+        // 隱藏 tab 內容，顯示搜尋結果
+        if (tabContent) tabContent.classList.add('hidden');
+        if (tabsContainer) tabsContainer.classList.add('hidden');
+        if (searchResultsContainer) searchResultsContainer.classList.remove('hidden');
+
+        if (results.length > 0) {
+            if (searchResultsGrid) {
+                searchResultsGrid.classList.remove('hidden');
+                searchResultsGrid.innerHTML = results.map(b => createBookCardHTML(b, {
+                    isArchivedView: isBookArchived(b)
+                })).join('');
+            }
+            if (searchResultsEmpty) searchResultsEmpty.classList.add('hidden');
+            if (searchResultsInfo) {
+                searchResultsInfo.textContent = `找到 ${results.length} 本相關書籍`;
+            }
+        } else {
+            if (searchResultsGrid) {
+                searchResultsGrid.classList.add('hidden');
+                searchResultsGrid.innerHTML = '';
+            }
+            if (searchResultsEmpty) searchResultsEmpty.classList.remove('hidden');
+            if (searchResultsInfo) searchResultsInfo.textContent = '';
+        }
+
+        if (window.lucide) window.lucide.createIcons();
+    };
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+    }
+
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                performSearch('');
+                searchInput.focus();
+            }
+        });
+    }
+
+    // 搜尋結果點擊事件代理
+    if (searchResultsGrid) {
+        searchResultsGrid.addEventListener('click', handleBookClick);
     }
 }
 

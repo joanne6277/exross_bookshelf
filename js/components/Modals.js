@@ -515,6 +515,79 @@ export function createModalsHTML() {
             </div>
         </div>
     </div>
+    <!-- Bookmark Filter Drawer (Mobile) -->
+    <div id="bookmark-filter-drawer" class="modal-overlay hidden fixed inset-0 z-[70] flex flex-col justify-end"
+         data-modal-close="bookmark-filter-drawer">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 transition-opacity"></div>
+
+        <!-- Sheet Content -->
+        <div class="bg-white w-full rounded-t-2xl transform transition-transform duration-300 flex flex-col max-h-[80vh]"
+             onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-text-primary flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="w-5 h-5 text-accent"></i>
+                    篩選與排序
+                </h3>
+                <button data-modal-close="bookmark-filter-drawer" class="p-2 bg-gray-100 rounded-full text-text-secondary hover:bg-gray-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+
+                <!-- Section 1: 類型 -->
+                <section>
+                    <h4 class="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider">顯示類型</h4>
+                    <div class="flex gap-2">
+                        <button class="bfd-type-btn flex-1 py-2.5 px-4 rounded-xl border text-sm font-bold transition-all" data-type="all">
+                            全部
+                        </button>
+                        <button class="bfd-type-btn flex-1 py-2.5 px-4 rounded-xl border text-sm font-bold transition-all" data-type="highlight">
+                            <span class="flex items-center justify-center gap-1.5">
+                                <i data-lucide="highlighter" class="w-3.5 h-3.5"></i> 劃線
+                            </span>
+                        </button>
+                        <button class="bfd-type-btn flex-1 py-2.5 px-4 rounded-xl border text-sm font-bold transition-all" data-type="note">
+                            <span class="flex items-center justify-center gap-1.5">
+                                <i data-lucide="pencil-line" class="w-3.5 h-3.5"></i> 筆記
+                            </span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 2: 顏色 -->
+                <section id="bfd-color-section">
+                    <h4 class="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider">劃線顏色</h4>
+                    <div class="flex flex-wrap gap-2" id="bfd-color-options">
+                        <!-- Injected by JS -->
+                    </div>
+                </section>
+
+                <!-- Section 3: 排序 -->
+                <section>
+                    <h4 class="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider">排序方式</h4>
+                    <div class="grid grid-cols-3 gap-2" id="bfd-sort-options">
+                        <!-- Injected by JS: buttons with ↑/↓ arrows -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-100 bg-white flex gap-3">
+                <button id="bfd-reset-btn" class="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-text-primary font-bold hover:bg-gray-50 transition-colors text-sm">
+                    清除重設
+                </button>
+                <button id="bfd-apply-btn" class="flex-[2] py-3 px-4 rounded-xl text-white font-bold shadow-sm hover:opacity-90 transition-opacity text-sm"
+                        style="background-color: var(--bg-accent);">
+                    套用
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Share Note Modal -->
     <div id="share-note-modal" class="modal-overlay hidden fixed inset-0 z-[80] flex items-center justify-center p-4"
          data-modal-close="share-note-modal">

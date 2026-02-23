@@ -16,23 +16,20 @@ export function initBookmarkFeature() {
     const container = document.getElementById('note-content-area');
     const sidebarList = document.getElementById('book-notes-list');
     const allNotesBtn = document.getElementById('all-notes-btn');
-    const searchInputs = document.querySelectorAll('#bookmark-search-input-desktop'); // Use querySelectorAll if there's possibly a mobile one with same ID? View says unique ID, but safe to assume 1.
     const searchInput = document.getElementById('bookmark-search-input-desktop');
     const typeFilterButtons = document.querySelectorAll('.note-filter-btn');
-    const colorSelect = document.getElementById('color-filter-select'); // Removed
     const colorDropdownContainer = document.getElementById('color-filter-dropdown-container');
     const colorTrigger = document.getElementById('color-filter-trigger');
     const colorMenu = document.getElementById('color-filter-menu');
     const sortMenuBtn = document.getElementById('notes-sort-menu-btn');
     const sortDropdown = document.getElementById('notes-sort-dropdown');
     const sortDirBtn = document.getElementById('notes-sort-direction-btn');
-    const mobileSortBtn = document.getElementById('mobile-notes-sort-btn');
 
     // Initial Render
     renderContent();
 
-    // Init Mobile Sort
-    initMobileSort(mobileSortBtn);
+    // Init Mobile Filter Panel (replaces individual mobile sort/color buttons)
+    initMobileFilterPanel();
 
     // 1. Search Listener
     if (searchInput) {
@@ -81,47 +78,63 @@ export function initBookmarkFeature() {
     };
 
     // 4. Type Filter (Single-select: highlight, note, or none)
+    const syncDesktopTypeUI = () => {
+        typeFilterButtons.forEach(btn => {
+            const filter = btn.dataset.filter;
+            const isActive = state.selectedTypes.has(filter);
+
+            if (isActive) {
+                btn.style.backgroundColor = 'var(--bg-accent, #629BC1)';
+                btn.style.color = '#FFFFFF';
+                btn.style.boxShadow = '0 2px 4px rgba(98,155,193,0.3)';
+                btn.style.fontWeight = '700';
+            } else {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = 'var(--text-secondary, #666666)';
+                btn.style.boxShadow = 'none';
+                btn.style.fontWeight = '500';
+            }
+        });
+    };
+
+    // Initial render for desktop UI
+    syncDesktopTypeUI();
+
     typeFilterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const filter = btn.dataset.filter;
 
-            // If clicking the already selected filter, deselect it (show all)
             if (state.selectedTypes.has(filter)) {
+                // Deselect: show all
                 state.selectedTypes.clear();
-                btn.classList.remove('bg-gray-800', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-text-primary');
             } else {
-                // Clear previous selection and select new one
                 state.selectedTypes.clear();
                 state.selectedTypes.add(filter);
-
-                // Update all buttons' visual state
-                typeFilterButtons.forEach(b => {
-                    if (b.dataset.filter === filter) {
-                        b.classList.add('bg-gray-800', 'text-white');
-                        b.classList.remove('bg-gray-100', 'text-text-primary');
-                    } else {
-                        b.classList.remove('bg-gray-800', 'text-white');
-                        b.classList.add('bg-gray-100', 'text-text-primary');
-                    }
-                });
             }
 
-            // Update color filter state based on type selection
+            syncDesktopTypeUI();
             updateColorFilterState();
             renderContent();
         });
     });
 
+    // Make sync function available globally or via state if needed for sync (here we use closure for simplicity)
+    window.__syncDesktopTypeUI = syncDesktopTypeUI;
+
+
     // 5. Custom Color Filter Dropdown Logic
     const colors = [
-        { value: 'all', label: '全部顏色', bg: 'bg-gradient-to-tr from-yellow-300 via-red-300 to-blue-300' },
-        { value: 'yellow', label: '黃色', bg: 'bg-yellow-300' },
-        { value: 'green', label: '綠色', bg: 'bg-green-300' },
-        { value: 'blue', label: '藍色', bg: 'bg-blue-300' },
-        { value: 'red', label: '紅色', bg: 'bg-red-300' },
-        { value: 'purple', label: '紫色', bg: 'bg-purple-300' }
+        { value: 'all', label: '全部顏色', hex: null },
+        { value: 'pink', label: '粉色', hex: '#EA8192' },
+        { value: 'blue', label: '藍色', hex: '#86E7D0' },
+        { value: 'purple', label: '紫色', hex: '#B881E7' },
+        { value: 'yellow', label: '黃色', hex: '#FFF500' }
     ];
+
+    const colorSwatchStyle = (c) =>
+        c.hex
+            ? `background-color:${c.hex};opacity:0.5;`
+            : `background:linear-gradient(135deg,#EA8192 0%,#86E7D0 40%,#B881E7 70%,#FFF500 100%);opacity:0.6;`;
 
     const renderColorDropdownUI = () => {
         // Update Trigger
@@ -130,7 +143,7 @@ export function initBookmarkFeature() {
         const labelEl = document.getElementById('color-filter-label');
 
         if (previewEl) {
-            previewEl.innerHTML = `<div class="absolute inset-0 ${selected.bg} opacity-80"></div>`;
+            previewEl.innerHTML = `<div class="absolute inset-0 rounded-full" style="${colorSwatchStyle(selected)}"></div>`;
         }
         if (labelEl) {
             labelEl.textContent = selected.label;
@@ -143,7 +156,7 @@ export function initBookmarkFeature() {
                 return `
                     <button class="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-gray-50 rounded-lg transition-colors ${isSelected ? 'bg-gray-50 font-medium' : ''}"
                         data-value="${c.value}">
-                        <div class="w-4 h-4 rounded-full border border-gray-300 ${c.bg} opacity-80"></div>
+                        <div class="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0" style="${colorSwatchStyle(c)}"></div>
                         <span>${c.label}</span>
                         ${isSelected ? '<i data-lucide="check" class="w-4 h-4 ml-auto text-accent"></i>' : ''}
                     </button>
@@ -155,7 +168,7 @@ export function initBookmarkFeature() {
             // Add Click Listeners to Options
             colorMenu.querySelectorAll('button').forEach(btn => {
                 btn.onclick = (e) => {
-                    e.stopPropagation(); // Prevent closing immediately? No, we want to close.
+                    e.stopPropagation();
                     state.selectedColor = btn.dataset.value;
                     renderColorDropdownUI();
                     renderContent();
@@ -629,7 +642,8 @@ export function initBookmarkFeature() {
     }
 
     // 10. Batch Mode Logic
-    const batchBtn = document.getElementById('notes-batch-select-btn');
+    const batchBtn = document.getElementById('notes-batch-select-btn');           // Desktop
+    const batchBtnMobile = document.getElementById('notes-batch-select-btn-mobile'); // Mobile
     const batchBar = document.getElementById('notes-batch-action-bar');
     const batchSelectAllBtn = document.getElementById('notes-batch-select-all-btn');
     const batchShareBtn = document.getElementById('notes-batch-share-btn');
@@ -645,18 +659,22 @@ export function initBookmarkFeature() {
         }
     };
 
+    const toggleBatchMode = (btn) => {
+        state.isBatchMode = !state.isBatchMode;
+        state.selectedNotes.clear();
+        if (btn) {
+            btn.classList.toggle('ring-2', state.isBatchMode);
+            btn.classList.toggle('ring-offset-2', state.isBatchMode);
+        }
+        updateBatchUI();
+        renderContent();
+    };
+
     if (batchBtn) {
-        batchBtn.addEventListener('click', () => {
-            state.isBatchMode = !state.isBatchMode;
-            state.selectedNotes.clear();
-
-            // Toggle Button Style (keep color, just toggle active state indicator)
-            batchBtn.classList.toggle('ring-2', state.isBatchMode);
-            batchBtn.classList.toggle('ring-offset-2', state.isBatchMode);
-
-            updateBatchUI();
-            renderContent();
-        });
+        batchBtn.addEventListener('click', () => toggleBatchMode(batchBtn));
+    }
+    if (batchBtnMobile) {
+        batchBtnMobile.addEventListener('click', () => toggleBatchMode(batchBtnMobile));
     }
 
     // Select All Logic
@@ -762,6 +780,200 @@ export function initBookmarkFeature() {
             }
         });
     }
+}
+
+
+function initMobileFilterPanel() {
+    const filterPanelBtn = document.getElementById('mobile-filter-panel-btn');
+    if (!filterPanelBtn) return;
+
+    filterPanelBtn.addEventListener('click', () => {
+        openBookmarkFilterDrawer();
+    });
+}
+
+const BOOKMARK_COLORS = [
+    { value: 'all', label: '全部', hex: null },
+    { value: 'pink', label: '粉色', hex: '#EA8192' },
+    { value: 'blue', label: '藍色', hex: '#86E7D0' },
+    { value: 'purple', label: '紫色', hex: '#B881E7' },
+    { value: 'yellow', label: '黃色', hex: '#FFF500' }
+];
+
+function bookmarkColorSwatchStyle(c) {
+    return c.hex
+        ? `background-color:${c.hex};opacity:0.5;`
+        : `background:linear-gradient(135deg,#EA8192 0%,#86E7D0 40%,#B881E7 70%,#FFF500 100%);opacity:0.6;`;
+}
+
+function openBookmarkFilterDrawer() {
+    const drawer = document.getElementById('bookmark-filter-drawer');
+    if (!drawer) return;
+
+    // --- Draft state (local copy while drawer is open) ---
+    let draftTypes = new Set(state.selectedTypes);
+    let draftColor = state.selectedColor;
+    let draftSort = state.sortType;
+    let draftDir = state.sortDirection;
+
+    const renderDrawerUI = () => {
+        // == Type Buttons ==
+        const typeBtns = drawer.querySelectorAll('.bfd-type-btn');
+        const activeTypeClass = ['bg-accent/10', 'border-accent', 'text-accent'];
+        const defaultTypeClass = ['bg-white', 'border-gray-200', 'text-text-primary'];
+
+        typeBtns.forEach(btn => {
+            const t = btn.dataset.type;
+            const isActive =
+                t === 'all'
+                    ? draftTypes.size === 0
+                    : draftTypes.has(t) && draftTypes.size === 1;
+
+            if (isActive) {
+                btn.classList.add('bg-[#629BC1]', 'text-white', 'border-[#629BC1]');
+                btn.classList.remove('bg-white', 'border-gray-200', 'text-text-primary');
+            } else {
+                btn.classList.remove('bg-[#629BC1]', 'text-white', 'border-[#629BC1]');
+                btn.classList.add('bg-white', 'border-gray-200', 'text-text-primary');
+            }
+        });
+
+        // == Color Section: disable when note-only ==
+        const colorSection = document.getElementById('bfd-color-section');
+        const isNoteOnly = draftTypes.has('note') && draftTypes.size === 1;
+        if (colorSection) {
+            colorSection.style.opacity = isNoteOnly ? '0.5' : '1';
+            colorSection.style.pointerEvents = isNoteOnly ? 'none' : '';
+        }
+
+        // == Color Pills ==
+        const colorContainer = document.getElementById('bfd-color-options');
+        if (colorContainer) {
+            colorContainer.innerHTML = BOOKMARK_COLORS.map(c => {
+                const isSelected = c.value === draftColor;
+                return `
+                    <button class="bfd-color-pill flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-bold transition-all ${isSelected ? 'border-accent bg-accent/10 text-accent' : 'border-gray-200 bg-white text-text-primary'}"
+                        data-color="${c.value}">
+                        <span class="inline-block w-3.5 h-3.5 rounded-full border border-gray-300 flex-shrink-0" style="${bookmarkColorSwatchStyle(c)}"></span>
+                        ${c.label}
+                    </button>
+                `;
+            }).join('');
+
+            colorContainer.querySelectorAll('.bfd-color-pill').forEach(btn => {
+                btn.onclick = () => {
+                    draftColor = btn.dataset.color;
+                    renderDrawerUI();
+                };
+            });
+        }
+
+        // == Sort Buttons: Dynamic render with direction arrows ==
+        const sortContainer = document.getElementById('bfd-sort-options');
+        if (sortContainer) {
+            const sorts = [
+                { value: 'date', label: '依時間' },
+                { value: 'title', label: '依書名' },
+                { value: 'page', label: '依位置' }
+            ];
+            const dirArrow = draftDir === 'asc' ? '↑' : '↓';
+            sortContainer.innerHTML = sorts.map(s => {
+                const isActive = s.value === draftSort;
+                const activeClass = 'bg-accent/10 border-accent text-accent';
+                const defaultClass = 'bg-white border-gray-200 text-text-primary';
+                return `
+                    <button class="bfd-sort-btn py-2.5 px-2 rounded-xl border text-sm font-bold transition-all text-center flex items-center justify-center gap-1 ${isActive ? activeClass : defaultClass}"
+                            data-sort="${s.value}">
+                        ${s.label}
+                        ${isActive ? `<span class="text-xs font-bold ml-0.5">${dirArrow}</span>` : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        if (window.lucide) window.lucide.createIcons({ root: drawer });
+    };
+
+    // Initial render
+    renderDrawerUI();
+
+    // --- Bind Type Buttons ---
+    drawer.querySelectorAll('.bfd-type-btn').forEach(btn => {
+        btn.onclick = () => {
+            const t = btn.dataset.type;
+            if (t === 'all') {
+                draftTypes.clear();
+            } else if (draftTypes.has(t) && draftTypes.size === 1) {
+                draftTypes.clear();
+            } else {
+                draftTypes.clear();
+                draftTypes.add(t);
+            }
+            // If note-only, reset color
+            if (draftTypes.has('note') && draftTypes.size === 1) draftColor = 'all';
+            renderDrawerUI();
+        };
+    });
+
+    // --- Bind Sort Buttons (event delegation on container, re-bound after each renderDrawerUI) ---
+    const bindSortBtns = () => {
+        const sortContainer = document.getElementById('bfd-sort-options');
+        if (!sortContainer) return;
+        sortContainer.querySelectorAll('.bfd-sort-btn').forEach(btn => {
+            btn.onclick = () => {
+                const clicked = btn.dataset.sort;
+                if (clicked === draftSort) {
+                    // Toggle direction
+                    draftDir = draftDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    // Switch sort type
+                    draftSort = clicked;
+                    // Keep current direction
+                }
+                renderDrawerUI();
+                bindSortBtns(); // Re-bind after DOM update
+            };
+        });
+    };
+    bindSortBtns();
+
+    // --- Apply ---
+    const applyBtn = document.getElementById('bfd-apply-btn');
+    if (applyBtn) {
+        applyBtn.onclick = () => {
+            state.selectedTypes = new Set(draftTypes);
+            state.selectedColor = draftColor;
+            state.sortType = draftSort;
+            state.sortDirection = draftDir;
+
+            // Sync desktop color trigger UI (inline, since renderColorDropdownUI is a closure)
+            const selected = BOOKMARK_COLORS.find(c => c.value === state.selectedColor) || BOOKMARK_COLORS[0];
+            const previewEl = document.getElementById('color-filter-preview');
+            const labelEl = document.getElementById('color-filter-label');
+            if (previewEl) previewEl.innerHTML = `<div class="absolute inset-0 rounded-full" style="${bookmarkColorSwatchStyle(selected)}"></div>`;
+            if (labelEl) labelEl.textContent = selected.label;
+
+            // Sync Desktop Type UI
+            if (window.__syncDesktopTypeUI) window.__syncDesktopTypeUI();
+
+            renderContent();
+            closeModal('bookmark-filter-drawer');
+        };
+    }
+
+    // --- Reset ---
+    const resetBtn = document.getElementById('bfd-reset-btn');
+    if (resetBtn) {
+        resetBtn.onclick = () => {
+            draftTypes = new Set();
+            draftColor = 'all';
+            draftSort = 'date';
+            draftDir = 'desc';
+            renderDrawerUI();
+        };
+    }
+
+    openModal('bookmark-filter-drawer');
 }
 
 function initMobileSort(btn) {
@@ -924,12 +1136,11 @@ function renderMobileBookCapsules(booksWithNotes) {
     const container = document.getElementById('mobile-book-capsules-container');
     if (!container) return;
 
-    // Hide on desktop or if searching
-    if (window.innerWidth >= 768 || state.searchTerm) {
-        container.classList.add('hidden');
+    // Hide if searching (capsule container is already inside mobile-only toolbar)
+    if (state.searchTerm) {
+        container.innerHTML = '';
         return;
     }
-    container.classList.remove('hidden');
 
     if (booksWithNotes.length === 0) {
         container.innerHTML = '<span class="text-xs text-text-secondary">尚無書籍筆記</span>';

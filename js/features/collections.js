@@ -1,5 +1,6 @@
 import { openModal, closeModal } from '../utils.js';
 import { renderBookshelfDetails } from '../main.js';
+import { renderPagination, initPagination } from '../components/Pagination.js';
 
 // --- DATA ---
 let collectionsData = {
@@ -31,6 +32,9 @@ function createCollectionCardHTML(title, bookCount, cover) {
 }
 
 // --- RENDER ---
+const COLLECTIONS_PER_PAGE = 18;
+let collectionsCurrentPage = 1;
+
 function renderCollections() {
     const playlistList = document.getElementById('playlist-list');
     if (!playlistList) return;
@@ -40,11 +44,22 @@ function renderCollections() {
     playlistList.innerHTML = '';
     playlistList.appendChild(addBtn);
 
-    for (const title in collectionsData) {
+    const allTitles = Object.keys(collectionsData);
+    const totalPages = Math.max(1, Math.ceil(allTitles.length / COLLECTIONS_PER_PAGE));
+    if (collectionsCurrentPage > totalPages) collectionsCurrentPage = totalPages;
+
+    const start = (collectionsCurrentPage - 1) * COLLECTIONS_PER_PAGE;
+    const pageTitles = allTitles.slice(start, start + COLLECTIONS_PER_PAGE);
+
+    for (const title of pageTitles) {
         const collection = collectionsData[title];
         const cardHTML = createCollectionCardHTML(title, collection.books.length, collection.cover);
         addBtn.insertAdjacentHTML('afterend', cardHTML);
     }
+
+    // 渲染分頁列
+    renderPagination('collections-pagination', totalPages, collectionsCurrentPage);
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // --- DATA MANAGEMENT ---
@@ -113,6 +128,13 @@ function initCollectionsFeature() {
 
     // Initial Render
     renderCollections();
+
+    // 初始化自訂書單分頁點擊事件
+    initPagination('collections-pagination', (page) => {
+        collectionsCurrentPage = page;
+        renderCollections();
+        document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     // Edit Modal Elements
     const editModalId = 'edit-collection-modal';
