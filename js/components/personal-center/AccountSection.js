@@ -44,7 +44,7 @@ export function createAccountSectionHTML() {
                         </div>
                     </div>
                     <button class="text-sm px-4 py-2 rounded-full font-medium transition-colors action-btn border border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
-                        管理
+                        登出
                     </button>
                 </div>
 
