@@ -10,8 +10,14 @@
 - [New] 內建處理 RWD，自動生成 Mobile 底部選單觸發按鈕，並統整事件派發邏輯
 - [New] 新增 `initFilterBarEvents` 以統一註冊所有切換與點擊事件
 - [Fix] 修正由 `type: 'custom'` 自定義元件所引發的手機版按鈕 Undefined Property `options` 錯誤，加入型別保護機制以防止無 options 按鈕產生例外。
+- [Feature] 根據回饋實裝 `extraMobileButtons` 與 `sort.hideOnMobile` 等配置進階支援，使得客製化更加彈性。
 
-**2. [MODIFY] [Bookshelf.js](file:///d:/Projects/the-fictional-train/js/views/Bookshelf.js) & [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+**2. [MODIFY] [bookmark.js](file:///d:/Projects/the-fictional-train/js/features/bookmark.js) & [Bookmark.js](file:///d:/Projects/the-fictional-train/js/views/Bookmark.js)**
+- [Fix] 更新因為重構造成 `state.selectedType` 遺失 Set Property (`has`, `size`) 的類型定義問題。
+- [Update] 修改配置 `bookmarkFilterConfig` 並將各個特殊屬性 (類型、顏色、排序) 全部隱藏手機版觸發按鈕，以單一客製化總列表按鈕 `extraMobileButtons` 替代。
+- [Revert] 重新放回原本遭到替換掉的 `openBookmarkFilterDrawer` 與對應的 `#bookmark-filter-drawer` 單一抽屜面板，並串皆回共用的 DOM 事件來觸發桌面版。
+
+**3. [MODIFY] [Bookshelf.js](file:///d:/Projects/the-fictional-train/js/views/Bookshelf.js) & [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
 - [Update] 移除原本寫死的 Toolbar DOM，改用 `createFilterBarHTML(bookshelfFilterConfig)` 生成我的書櫃的篩選列
 - [New] 建立 `bookshelfFilterConfig` 配置檔，定義閱讀狀態、來源、分類、書種等篩選條件
 - [New] 建立 `archiveFilterConfig`，將封存區專屬篩選器也改用通用 FilterBar

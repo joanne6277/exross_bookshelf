@@ -78,7 +78,12 @@ export function initBookmarkFeature() {
         if (action === 'filter') {
             if (data.id === 'type') {
                 state.selectedType = data.value;
-                updateColorFilterState();
+                const colorTrigger = document.getElementById('color-filter-trigger');
+                if (state.selectedType === 'note') {
+                    if (colorTrigger) { colorTrigger.disabled = true; colorTrigger.classList.add('opacity-50', 'cursor-not-allowed'); }
+                } else {
+                    if (colorTrigger) { colorTrigger.disabled = false; colorTrigger.classList.remove('opacity-50', 'cursor-not-allowed'); }
+                }
                 renderContent();
             }
         } else if (action === 'sort') {
@@ -87,6 +92,8 @@ export function initBookmarkFeature() {
             renderContent();
         }
     });
+
+    initMobileFilterPanel();
 
 
     // 5. Custom Color Filter Dropdown Logic
@@ -924,6 +931,164 @@ function openBookCapsuleSheet(booksWithNotes) {
     openModal('mobile-filter-sheet');
 }
 
+// === Mobile Filter Drawer Logic ===
+function initMobileFilterPanel() {
+    const panelBtn = document.getElementById('mobile-filter-panel-btn');
+    if (panelBtn) {
+        panelBtn.onclick = openBookmarkFilterDrawer;
+    }
+}
+
+async function openBookmarkFilterDrawer() {
+    const { openModal, closeModal } = await import('../utils.js');
+
+    let draftFilterState = {
+        type: state.selectedType,
+        color: state.selectedColor,
+        sortType: state.sortType,
+        sortDirection: state.sortDirection
+    };
+
+    const drawer = document.getElementById('bookmark-filter-drawer');
+    if (!drawer) return;
+
+    const typeBtns = drawer.querySelectorAll('.bfd-type-btn');
+    const colorOptions = document.getElementById('bfd-color-options');
+    const sortOptions = document.getElementById('bfd-sort-options');
+    const resetBtn = document.getElementById('bfd-reset-btn');
+    const applyBtn = document.getElementById('bfd-apply-btn');
+    const colorSection = document.getElementById('bfd-color-section');
+
+    const colors = [
+        { value: 'all', label: '全部顏色', hex: null },
+        { value: 'pink', label: '粉色', hex: '#EA8192' },
+        { value: 'blue', label: '藍色', hex: '#86E7D0' },
+        { value: 'purple', label: '紫色', hex: '#B881E7' },
+        { value: 'yellow', label: '黃色', hex: '#FFF500' }
+    ];
+
+    const renderDrawerUI = () => {
+        // Type Buttons
+        typeBtns.forEach(btn => {
+            const type = btn.dataset.type;
+            if (type === draftFilterState.type) {
+                btn.classList.add('bg-accent/10', 'border-accent', 'text-accent');
+                btn.classList.remove('border-gray-200', 'text-text-secondary');
+            } else {
+                btn.classList.add('border-gray-200', 'text-text-secondary');
+                btn.classList.remove('bg-accent/10', 'border-accent', 'text-accent');
+            }
+        });
+
+        // Color Section
+        if (draftFilterState.type === 'highlight' || draftFilterState.type === 'all') {
+            colorSection.style.display = 'block';
+            colorOptions.innerHTML = colors.map(c => {
+                const isSelected = c.value === draftFilterState.color;
+                return `
+                    <button class="bfd-color-btn flex items-center justify-center h-10 w-10 bg-white border ${isSelected ? 'border-accent ring-2 ring-accent/20' : 'border-gray-200 hover:border-accent'} rounded-xl transition-all" data-color="${c.value}">
+                        <div class="w-5 h-5 rounded-full border border-gray-300 relative overflow-hidden flex items-center justify-center">
+                            ${c.value === 'all'
+                        ? '<div class="absolute inset-0 bg-gradient-to-tr from-yellow-300 via-red-300 to-blue-300 opacity-80"></div>'
+                        : `<div class="absolute inset-0 opacity-80" style="background-color:${c.hex}"></div>`}
+                            ${isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white absolute inset-0 m-auto z-10" style="drop-shadow: 0 1px 1px rgba(0,0,0,0.5);"></i>' : ''}
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            if (window.lucide) window.lucide.createIcons({ root: colorOptions });
+
+            colorOptions.querySelectorAll('.bfd-color-btn').forEach(btn => {
+                btn.onclick = () => { draftFilterState.color = btn.dataset.color; renderDrawerUI(); };
+            });
+        } else {
+            colorSection.style.display = 'none';
+            draftFilterState.color = 'all';
+        }
+
+        // Sort Options
+        const sortConfigs = [
+            { id: 'date', label: '依新增時間' },
+            { id: 'title', label: '依書名' },
+            { id: 'page', label: '依閱讀位置' }
+        ];
+
+        sortOptions.innerHTML = sortConfigs.map(s => {
+            const isActive = draftFilterState.sortType === s.id;
+            const dirIcon = isActive ? (draftFilterState.sortDirection === 'desc' ? 'arrow-down' : 'arrow-up') : 'arrow-down-up';
+            return `
+                <button class="bfd-sort-btn flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg border text-xs font-bold transition-all ${isActive ? 'bg-accent/10 border-accent text-accent' : 'border-gray-200 text-text-secondary w-full'}" data-sort="${s.id}">
+                    <span>${s.label}</span>
+                    <i data-lucide="${dirIcon}" class="w-3 h-3 text-current"></i>
+                </button>
+            `;
+        }).join('');
+
+        if (window.lucide) window.lucide.createIcons({ root: sortOptions });
+
+        sortOptions.querySelectorAll('.bfd-sort-btn').forEach(btn => {
+            btn.onclick = () => {
+                const sortId = btn.dataset.sort;
+                if (draftFilterState.sortType === sortId) draftFilterState.sortDirection = draftFilterState.sortDirection === 'desc' ? 'asc' : 'desc';
+                else { draftFilterState.sortType = sortId; draftFilterState.sortDirection = 'desc'; }
+                renderDrawerUI();
+            };
+        });
+    };
+
+    typeBtns.forEach(btn => {
+        btn.onclick = () => { draftFilterState.type = btn.dataset.type; renderDrawerUI(); };
+    });
+
+    resetBtn.onclick = () => {
+        draftFilterState = { type: 'all', color: 'all', sortType: 'date', sortDirection: 'desc' };
+        renderDrawerUI();
+    };
+
+    applyBtn.onclick = () => {
+        state.selectedType = draftFilterState.type;
+        state.selectedColor = draftFilterState.color;
+        state.sortType = draftFilterState.sortType;
+        state.sortDirection = draftFilterState.sortDirection;
+
+        // update Desktop UI 
+        document.querySelectorAll('.generic-filter-btn[data-filter-id="type"]').forEach(b => {
+            if (b.dataset.value === state.selectedType) {
+                b.classList.add('bg-accent/10', 'border-accent', 'text-accent');
+                b.classList.remove('bg-white', 'border-gray-200', 'text-text-secondary');
+            } else {
+                b.classList.remove('bg-accent/10', 'border-accent', 'text-accent');
+                b.classList.add('bg-white', 'border-gray-200', 'text-text-secondary');
+            }
+        });
+
+        // Render globally
+        renderContent();
+        const colorTrigger = document.getElementById('color-filter-trigger');
+        if (state.selectedType === 'note') {
+            if (colorTrigger) { colorTrigger.disabled = true; colorTrigger.classList.add('opacity-50', 'cursor-not-allowed'); }
+        } else {
+            if (colorTrigger) { colorTrigger.disabled = false; colorTrigger.classList.remove('opacity-50', 'cursor-not-allowed'); }
+        }
+
+        // Find existing renderColorDropdownUI call, or let bookmark.js rely on state directly
+        // actually updateColorFilterState doesn't exist explicitly locally except inside initBookmarkFeature. We will trigger manually.
+        const previewEl = document.getElementById('color-filter-preview');
+        const colorTitle = document.getElementById('color-filter-label');
+        if (previewEl && colors.find(c => c.value === state.selectedColor)) {
+            const c = colors.find(color => color.value === state.selectedColor);
+            previewEl.innerHTML = '<div class="absolute inset-0 rounded-full" style="' + (c.hex ? 'background-color:' + c.hex + ';opacity:0.5;' : 'background:linear-gradient(135deg,#EA8192 0%,#86E7D0 40%,#B881E7 70%,#FFF500 100%);opacity:0.6;') + '"></div>';
+            if (colorTitle) colorTitle.textContent = c.label;
+        }
+
+        closeModal('bookmark-filter-drawer');
+    };
+
+    renderDrawerUI();
+    openModal('bookmark-filter-drawer');
+}
+
 function renderContent() {
     const container = document.getElementById('note-content-area');
     if (!container) return;
@@ -980,15 +1145,15 @@ function renderContent() {
 
     let resultNotes = sourceNotes.filter(note => {
         // Type Filter
-        if (state.selectedTypes.size === 1) {
+        if (state.selectedType !== 'all') {
             const hasQuote = note.quote && note.quote.trim().length > 0;
             const hasComment = note.comment && note.comment.trim().length > 0;
 
-            if (state.selectedTypes.has('highlight')) {
+            if (state.selectedType === 'highlight') {
                 // Exclusive Highlight: Quote only, no comment
                 return hasQuote && !hasComment;
             }
-            if (state.selectedTypes.has('note')) {
+            if (state.selectedType === 'note') {
                 // Exclusive Note: Comment only, no quote
                 return !hasQuote && hasComment;
             }

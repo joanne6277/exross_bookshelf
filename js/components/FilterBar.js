@@ -93,7 +93,7 @@ export function createFilterBarHTML(config) {
             </div>
         </div>
         
-        <div class="block md:hidden flex-shrink-0">
+        <div class="${sort.hideOnMobile ? 'hidden' : 'block md:hidden'} flex-shrink-0">
              <button id="${prefix}mobile-sort-btn" 
                 class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-sm text-text-secondary border border-gray-200 whitespace-nowrap shadow-sm"
                 data-filter-type="sort">
@@ -106,6 +106,14 @@ export function createFilterBarHTML(config) {
 
     if (viewToggle || extraMobileButtons.length > 0) {
         html += `<div class="flex-1"></div>`;
+    }
+
+    if (extraMobileButtons.length > 0) {
+        html += `<div class="md:hidden flex items-center gap-2 flex-shrink-0">`;
+        extraMobileButtons.forEach(btnHTML => {
+            html += btnHTML;
+        });
+        html += `</div>`;
     }
 
     if (viewToggle) {

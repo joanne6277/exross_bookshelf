@@ -125,11 +125,17 @@ export function createBookshelfHTML() {
                             <button id="batch-select-all-btn" class="text-accent font-bold text-sm hover:underline">全選</button>
                             <span id="selected-count" class="text-sm font-bold">已選取 0 本書</span>
                         </div>
-                        <div class="flex gap-4">
+                        <div class="flex gap-3">
                             <button id="batch-add-to-playlist-btn"
-                                class="px-4 py-2 bg-blue-100 text-black text-sm font-bold rounded-lg hover:bg-opacity-90">新增到自訂書單</button>
+                                class="px-4 py-2 bg-blue-100 text-black text-sm font-bold rounded-lg hover:bg-blue-200 flex items-center gap-1.5">
+                                <i data-lucide="list-plus" class="w-4 h-4"></i>
+                                新增到自訂書單
+                            </button>
                             <button id="batch-archive-btn"
-                                class="px-4 py-2 bg-gray-200 text-text-primary text-sm font-bold rounded-lg hover:bg-gray-300">移至封存區</button>
+                                class="px-4 py-2 bg-gray-200 text-text-primary text-sm font-bold rounded-lg hover:bg-gray-300 flex items-center gap-1.5">
+                                <i data-lucide="archive" class="w-4 h-4"></i>
+                                移至封存區
+                            </button>
                         </div>
                     </div>
                 </div>
