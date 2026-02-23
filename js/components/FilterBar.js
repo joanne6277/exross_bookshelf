@@ -195,7 +195,7 @@ export function initFilterBarEvents(config, callback) {
     };
 
     filters.forEach(filter => {
-        if (filter.hideOnMobile) return;
+        if (filter.hideOnMobile || filter.type === 'custom' || !filter.options) return;
         const mobileBtn = document.getElementById(`${prefix}mobile-${filter.id}-btn`);
         if (mobileBtn) {
             mobileBtn.addEventListener('click', () => {
