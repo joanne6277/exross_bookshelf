@@ -2,6 +2,33 @@
 
 ## 2026-02-23
 
+### 通用篩選列 (FilterBar) 模組化重構
+
+**1. [MODIFY] [FilterBar.js](file:///d:/Projects/the-fictional-train/js/components/FilterBar.js)**
+- [Update] 將 `FilterBar.js` 重構為純配置驅動 (config-driven) 的通用元件
+- [New] 支援 `type: 'select'`, `type: 'buttons'`, `type: 'custom'` 等多種篩選器配置
+- [New] 內建處理 RWD，自動生成 Mobile 底部選單觸發按鈕，並統整事件派發邏輯
+- [New] 新增 `initFilterBarEvents` 以統一註冊所有切換與點擊事件
+
+**2. [MODIFY] [Bookshelf.js](file:///d:/Projects/the-fictional-train/js/views/Bookshelf.js) & [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+- [Update] 移除原本寫死的 Toolbar DOM，改用 `createFilterBarHTML(bookshelfFilterConfig)` 生成我的書櫃的篩選列
+- [New] 建立 `bookshelfFilterConfig` 配置檔，定義閱讀狀態、來源、分類、書種等篩選條件
+- [New] 建立 `archiveFilterConfig`，將封存區專屬篩選器也改用通用 FilterBar
+- [Remove] 移除舊有的自訂過濾器邏輯，改由 `initFilterBarEvents` 處理事件派發
+
+**3. [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)**
+- [Fix] 修正 `bookshelf.js` 移除 `initFilterBar` 後，於 main 中造成的 import SyntaxError，將 BookDetails 畫面也一併切換至使用 `initFilterBarEvents` 架構。
+
+**3. [MODIFY] [Bookmark.js](file:///d:/Projects/the-fictional-train/js/views/Bookmark.js) & [bookmark.js](file:///d:/Projects/the-fictional-train/js/features/bookmark.js)**
+- [Update] 完全汰除原有的手寫行動版巨大 Drawer UI 及龐雜的事件邏輯
+- [New] 透過 `bookmarkFilterConfig` 整合劃線筆記頁面的批次、顏色(Custom)、類型、排序篩選按鈕
+- [Update] 行動版顏色選擇、排序、類型切換全面改用共用的 Bottom Sheet 元件
+- [Fix] 修正批次選取按鈕在行動版的顯示邏輯與樣式問題
+- [Update] 統一以狀態 `state.selectedType`（單一值取代 Set）簡化判斷邏輯
+
+**4. [DELETE] [ArchiveFilterBar.js](file:///d:/Projects/the-fictional-train/js/components/ArchiveFilterBar.js)**
+- [Remove] 將冗餘的專屬 Archive UI 廢棄，並將封存區專屬工具函式搬移回 `bookshelf.js` 模組內，減少元件碎片化
+
 ### 劃線筆記篩選與排序 Panel UI 修正
 
 **1. [MODIFY] [bookmark.js](file:///d:/Projects/the-fictional-train/js/features/bookmark.js)**

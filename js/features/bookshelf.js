@@ -3,7 +3,8 @@ import { BOOKS_DATA } from '../data/books.js';
 import { renderPagination, initPagination } from '../components/Pagination.js';
 
 import { getCollections, toggleBookInCollection, addCollection } from './collections.js';
-import { createArchiveFilterBarHTML, initArchiveFilterBar, filterArchivedBooks } from '../components/ArchiveFilterBar.js';
+import { initFilterBarEvents } from '../components/FilterBar.js';
+import { bookshelfFilterConfig, archiveFilterConfig } from '../views/Bookshelf.js';
 
 let currentEditingBookIds = []; // Changed to array
 
@@ -12,6 +13,30 @@ function areAllBooksInCollection(collectionTitle, bookIds) {
     const collection = getCollections()[collectionTitle];
     if (!collection) return false;
     return bookIds.every(id => collection.books.includes(id));
+}
+
+export function isBookExpired(book) {
+    if (book.type !== '教科書' || !book.expiryDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiryParts = book.expiryDate.split(' ')[0].split('/');
+    if (expiryParts.length === 3) {
+        const expiry = new Date(expiryParts[0], expiryParts[1] - 1, expiryParts[2]);
+        return expiry < today;
+    }
+    return false;
+}
+
+export function isBookManuallyArchived(book) {
+    return book.isArchived === true;
+}
+
+export function filterArchivedBooks(books, filterType = 'all') {
+    const archivedBooks = books.filter(book => isBookExpired(book) || isBookManuallyArchived(book));
+    if (filterType === 'all') return archivedBooks;
+    if (filterType === 'expired') return archivedBooks.filter(book => isBookExpired(book));
+    if (filterType === 'archived') return archivedBooks.filter(book => isBookManuallyArchived(book));
+    return archivedBooks;
 }
 
 // Helper: Check if a book is archived
@@ -391,222 +416,13 @@ export function showBookDetails(bookId) {
     }
 }
 
-export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
-    console.log(`[FilterBar] Initializing for prefix: "${prefix}"`);
-
-    let localSortType = 'recently-read';
-    let localSortDirection = 'desc';
-
-    // 視圖切換 (Grid/List)
-    const gridBtn = document.getElementById(`${prefix}grid-view-btn`);
-    const listBtn = document.getElementById(`${prefix}list-view-btn`);
+export function initBookshelfBatchMode(prefix, gridViewId, listViewId) {
     const gridView = document.getElementById(gridViewId);
     const listView = document.getElementById(listViewId);
 
-    if (gridBtn && listBtn && gridView && listView) {
-        gridBtn.addEventListener('click', () => {
-            gridBtn.classList.add('active');
-            listBtn.classList.remove('active');
-            gridView.classList.remove('hidden');
-            listView.classList.add('hidden');
-        });
-
-        listBtn.addEventListener('click', () => {
-            listBtn.classList.add('active');
-            gridBtn.classList.remove('active');
-            gridView.classList.add('hidden');
-            listView.classList.remove('hidden');
-        });
-    }
-
-    // --- Mobile Filter Logic ---
-    const mobileStatusBtn = document.getElementById(`${prefix}mobile-status-btn`);
-    const mobileSourceBtn = document.getElementById(`${prefix}mobile-source-btn`);
-    const mobileCategoryBtn = document.getElementById(`${prefix}mobile-category-btn`);
-    const mobileSortBtn = document.getElementById(`${prefix}mobile-sort-btn`);
-
-    // Enhanced openSheet to support direction
-    const openSheet = (title, options, onSelect, currentValue, currentDirection = null) => {
-        const sheet = document.getElementById('mobile-filter-sheet');
-        const sheetTitle = document.getElementById('mobile-sheet-title');
-        const sheetOptions = document.getElementById('mobile-sheet-options');
-
-        if (!sheet || !sheetTitle || !sheetOptions) return;
-
-        sheetTitle.textContent = title;
-        sheetOptions.innerHTML = '';
-
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            const isSelected = opt.value === currentValue || opt.label === currentValue;
-
-            let iconHtml = '';
-            if (isSelected) {
-                if (currentDirection) {
-                    // Sort Mode: Show Arrow
-                    iconHtml = currentDirection === 'asc'
-                        ? '<i data-lucide="arrow-up" class="w-4 h-4"></i>'
-                        : '<i data-lucide="arrow-down" class="w-4 h-4"></i>';
-                } else {
-                    // Normal Mode: Show Check
-                    iconHtml = '<i data-lucide="check" class="w-4 h-4"></i>';
-                }
-            }
-
-            btn.className = `w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors ${isSelected ? 'bg-accent/10 text-accent font-bold' : 'text-text-primary hover:bg-gray-50'}`;
-            btn.innerHTML = `<span>${opt.label}</span>${iconHtml}`;
-
-            btn.onclick = () => {
-                onSelect(opt.value);
-                // Only close if NOT in sort toggling mode
-                if (currentDirection) {
-                    // Sort Mode: Do not close. 
-                    // The handler (onSelect) is responsible for refreshing the UI (re-calling openSheet).
-                } else {
-                    closeModal('mobile-filter-sheet');
-                }
-            };
-            sheetOptions.appendChild(btn);
-        });
-
-        if (window.lucide) window.lucide.createIcons();
-        openModal('mobile-filter-sheet');
-    };
-
-    // 1. Status
-    if (mobileStatusBtn) {
-        mobileStatusBtn.addEventListener('click', () => {
-            const select = document.getElementById(`${prefix}status-filter`);
-            const currentVal = select ? select.value : '全部';
-            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
-
-            openSheet('篩選狀態', options, (val) => {
-                if (select) {
-                    select.value = val;
-                    select.dispatchEvent(new Event('change'));
-                    const label = document.getElementById(`${prefix}mobile-status-label`);
-                    if (label) label.textContent = val;
-                }
-            }, currentVal);
-        });
-    }
-
-    // 2. Source
-    if (mobileSourceBtn) {
-        mobileSourceBtn.addEventListener('click', () => {
-            const select = document.getElementById(`${prefix}source-filter`);
-            const currentVal = select ? select.value : '全部來源';
-            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
-
-            openSheet('篩選來源', options, (val) => {
-                if (select) {
-                    select.value = val;
-                    select.dispatchEvent(new Event('change'));
-                    const label = document.getElementById(`${prefix}mobile-source-label`);
-                    if (label) label.textContent = val;
-                }
-            }, currentVal);
-        });
-    }
-
-    // 3. Category
-    if (mobileCategoryBtn) {
-        mobileCategoryBtn.addEventListener('click', () => {
-            const select = document.getElementById(`${prefix}category-filter`);
-            const currentVal = select ? select.value : 'all';
-            // Need check map because value vs label can differ
-            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
-
-            openSheet('篩選類別', options, (val) => {
-                if (select) {
-                    select.value = val;
-                    select.dispatchEvent(new Event('change'));
-                    // Find selected option label
-                    const selectedOpt = Array.from(select.options).find(o => o.value === val);
-                    const label = document.getElementById(`${prefix}mobile-category-label`);
-                    if (label && selectedOpt) label.textContent = selectedOpt.text;
-                }
-            }, currentVal);
-        });
-    }
-
-    // 4. Type (New)
-    const mobileTypeBtn = document.getElementById(`${prefix}mobile-type-btn`);
-    if (mobileTypeBtn) {
-        mobileTypeBtn.addEventListener('click', () => {
-            const select = document.getElementById(`${prefix}type-filter`);
-            const currentVal = select ? select.value : 'all';
-            const options = Array.from(select ? select.options : []).map(o => ({ label: o.text, value: o.value }));
-
-            openSheet('篩選類型與功能', options, (val) => {
-                if (select) {
-                    select.value = val;
-                    select.dispatchEvent(new Event('change'));
-                    const selectedOpt = Array.from(select.options).find(o => o.value === val);
-                    const label = document.getElementById(`${prefix}mobile-type-label`);
-                    if (label && selectedOpt) label.textContent = selectedOpt.text;
-                }
-            }, currentVal);
-        });
-    }
-
-    // 5. Sort (Updated)
-    if (mobileSortBtn) {
-        mobileSortBtn.addEventListener('click', () => {
-            const options = [
-                { label: '最近閱讀', value: 'recently-read' },
-                { label: '最近取得', value: 'purchase-date' },
-                { label: '書名', value: 'title' },
-                { label: '出版日期', value: 'publish-date' }
-            ];
-
-            const handleMobileSortSelect = (val) => {
-                if (val === localSortType) {
-                    // Toggle direction
-                    localSortDirection = localSortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    // New type, default desc
-                    localSortType = val;
-                    localSortDirection = 'desc';
-                }
-
-                // Update Desktop UI (Sort Button Text)
-                const sortLabel = document.getElementById(`${prefix}sort-menu-label`);
-                const selectedOpt = options.find(o => o.value === localSortType);
-                if (sortLabel && selectedOpt) {
-                    sortLabel.textContent = `排序: ${selectedOpt.label}`;
-                }
-
-                // Update Desktop Direction Button
-                const dirBtn = document.getElementById(`${prefix}sort-direction-btn`);
-                if (dirBtn) {
-                    const icon = dirBtn.querySelector('i');
-                    if (icon) {
-                        // Lucide icons are replaced, so we toggle innerHTML or class?
-                        // Re-creating is safer if icon lib is generic.
-                        // Or using class replace if lucide is active (lucide uses specific svg).
-                        // Simplest: replace innerHTML with new lucide data attribute and call createIcons? 
-                        // No, lucide.createIcons() scans entire DOM or specific root.
-                        // Just replace innerHTML.
-                        dirBtn.innerHTML = localSortDirection === 'asc'
-                            ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
-                            : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
-                        if (window.lucide) window.lucide.createIcons({ root: dirBtn });
-                    }
-                }
-
-                if (onSort) onSort(localSortType, localSortDirection);
-
-                // Re-render sheet to show updated arrow without closing
-                openSheet('排序方式', options, handleMobileSortSelect, localSortType, localSortDirection);
-            };
-
-            openSheet('排序方式', options, handleMobileSortSelect, localSortType, localSortDirection);
-        });
-    }
-
     // 批次選取 (簡易版：僅支援 Grid)
     const batchBtn = document.getElementById(`${prefix}batch-select-btn`);
+    const batchBtnMobile = document.getElementById(`${prefix}batch-select-btn-mobile`);
     // Batch Action Bar Logic
     const batchBar = document.getElementById(`${prefix}batch-action-bar`);
     const batchSelectAllBtn = document.getElementById(`${prefix}batch-select-all-btn`);
@@ -617,10 +433,8 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
     let isBatchMode = false;
     let selectedCount = 0;
 
-    // Helper to toggle batch UI
     const updateBatchUI = () => {
-        // Recalculate count
-        const activeContainer = !gridView.classList.contains('hidden') ? gridView : listView;
+        const activeContainer = (gridView && !gridView.classList.contains('hidden')) ? gridView : listView;
         if (!activeContainer) return;
 
         const checkedBoxes = activeContainer.querySelectorAll('input[type="checkbox"]:checked');
@@ -630,290 +444,166 @@ export function initFilterBar(prefix, gridViewId, listViewId, onSort) {
             selectedCountEl.textContent = `已選取 ${selectedCount} 本書`;
         }
 
-        // Show/Hide Batch Bar
         if (isBatchMode) {
             if (batchBar) batchBar.classList.remove('hidden');
         } else {
             if (batchBar) batchBar.classList.add('hidden');
         }
 
-        // Disable hover effects if in batch mode (optional UX choice)
         document.body.classList.toggle('batch-mode-active', isBatchMode);
     };
 
-    if (batchBtn) {
-        batchBtn.addEventListener('click', () => {
-            isBatchMode = !isBatchMode;
+    const toggleBatchMode = () => {
+        isBatchMode = !isBatchMode;
 
-            // Toggle Visuals
+        if (batchBtn) {
             batchBtn.classList.toggle('text-accent');
-            batchBtn.classList.toggle('bg-accent/10'); // Add active bg
+            batchBtn.classList.toggle('bg-accent/10');
+        }
+        if (batchBtnMobile) {
+            batchBtnMobile.classList.toggle('text-accent');
+            batchBtnMobile.classList.toggle('bg-accent/10');
+        }
 
-            // Handle BOTH Grid and List views
-            // We need to target the containers for THIS prefix/view specifically?
-            // Actually, calling initFilterBar with 'details-' passes the specific grid/list views.
-            // So 'gridView' and 'listView' are already scoped to the view we want if we passed them correctly?
-            // Wait, initFilterBar assumes global IDs for 'all-books-grid' etc inside it?
-            // Let's check initFilterBar definition.
-            // It selects:
-            // const gridView = document.getElementById(`${prefix}books-grid`) || document.getElementById('all-books-grid');
-            // const listView = document.getElementById(`${prefix}books-list`) || document.getElementById('all-books-list');
-            // So if prefix is set, it selects specific grids.
-
-            [gridView, listView].forEach(container => {
-                if (!container) return;
-
-                const checkboxes = container.querySelectorAll('.batch-checkbox');
-                checkboxes.forEach(cb => {
-                    cb.classList.toggle('hidden', !isBatchMode);
-                    cb.checked = false; // Reset checking when toggling
-                });
-
-                // Toggle 'group' class (Grid uses it for hover overlay)
-                // If batch mode ON -> remove group (disable hover)
-                // If batch mode OFF -> add group
-                const bookItems = container.querySelectorAll('.book-item, .book-list-item');
-                bookItems.forEach(item => {
-                    if (isBatchMode) {
-                        item.classList.remove('group'); // Disable hover
-                    } else {
-                        item.classList.add('group'); // Enable hover
-                    }
-                    item.classList.remove('ring-2', 'ring-accent');
-                });
-            });
-
-            selectedCount = 0;
-            updateBatchUI();
-        });
-
-        // Delegate Checkbox Click
-        // Attach listener to containers
         [gridView, listView].forEach(container => {
             if (!container) return;
-            // Remove previous listeners if any (to avoid duplicates if re-inited)? 
-            // Simple way: rely on clean init or replace node. For now, just add.
-            // Better: Check if already attached? Hard to do.
-            // Assuming initFilterBar is called once per view lifecycle or view is static.
 
-            container.addEventListener('change', (e) => {
-                if (e.target.matches('input[type="checkbox"]')) {
-                    const cb = e.target;
-                    const item = cb.closest('.book-item') || cb.closest('.book-list-item');
-
-                    if (cb.checked) {
-                        if (item) item.classList.add('ring-2', 'ring-accent');
-                    } else {
-                        if (item) item.classList.remove('ring-2', 'ring-accent');
-                    }
-                    updateBatchUI();
-                }
+            const checkboxes = container.querySelectorAll('.batch-checkbox');
+            checkboxes.forEach(cb => {
+                cb.classList.toggle('hidden', !isBatchMode);
+                cb.checked = false;
             });
 
-            // Handle click on card in batch mode to toggle checkbox
-            container.addEventListener('click', (e) => {
-                if (!isBatchMode) return;
-                const item = e.target.closest('.book-item') || e.target.closest('.book-list-item');
-                if (!item) return;
-
-                // If clicked strictly on checkbox or its label, let it be.
-                if (e.target.matches('input[type="checkbox"]')) return;
-
-                // Toggle checkbox
-                const cb = item.querySelector('input[type="checkbox"]');
-                if (cb) {
-                    cb.checked = !cb.checked;
-                    // Trigger change event manually if needed or just update UI
-                    if (cb.checked) {
-                        item.classList.add('ring-2', 'ring-accent');
-                    } else {
-                        item.classList.remove('ring-2', 'ring-accent');
-                    }
-                    updateBatchUI();
+            const bookItems = container.querySelectorAll('.book-item, .book-list-item');
+            bookItems.forEach(item => {
+                if (isBatchMode) {
+                    item.classList.remove('group');
+                } else {
+                    item.classList.add('group');
                 }
+                item.classList.remove('ring-2', 'ring-accent');
             });
         });
 
-        // Select All Logic
-        if (batchSelectAllBtn) {
-            batchSelectAllBtn.addEventListener('click', () => {
-                // Determine active container
-                const activeContainer = !gridView.classList.contains('hidden') ? gridView : listView;
-                if (!activeContainer) return;
+        selectedCount = 0;
+        updateBatchUI();
+    };
 
-                const checkboxes = activeContainer.querySelectorAll('input[type="checkbox"]');
-                const total = checkboxes.length;
+    if (batchBtn) batchBtn.addEventListener('click', toggleBatchMode);
+    if (batchBtnMobile) batchBtnMobile.addEventListener('click', toggleBatchMode);
 
-                if (selectedCount === total) {
-                    // Deselect All
-                    checkboxes.forEach(cb => {
-                        cb.checked = false;
-                        const item = cb.closest('.book-item') || cb.closest('.book-list-item');
-                        if (item) item.classList.remove('ring-2', 'ring-accent');
-                    });
-                    selectedCount = 0;
+    [gridView, listView].forEach(container => {
+        if (!container) return;
+
+        container.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="checkbox"]')) {
+                const cb = e.target;
+                const item = cb.closest('.book-item') || cb.closest('.book-list-item');
+
+                if (cb.checked) {
+                    if (item) item.classList.add('ring-2', 'ring-accent');
                 } else {
-                    // Select All
-                    checkboxes.forEach(cb => {
-                        cb.checked = true;
-                        const item = cb.closest('.book-item') || cb.closest('.book-list-item');
-                        if (item) item.classList.add('ring-2', 'ring-accent');
-                    });
-                    selectedCount = total;
+                    if (item) item.classList.remove('ring-2', 'ring-accent');
                 }
                 updateBatchUI();
-            });
-        }
-
-        // Batch Add Logic
-        if (batchAddBtn) {
-            batchAddBtn.addEventListener('click', () => {
-                const activeContainer = !gridView.classList.contains('hidden') ? gridView : listView;
-                if (!activeContainer) return;
-
-                const selectedIds = Array.from(activeContainer.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => {
-                        const item = cb.closest('.book-item') || cb.closest('.book-list-item');
-                        return item.dataset.bookId;
-                    });
-
-                if (selectedIds.length === 0) {
-                    alert('請先選取書籍！');
-                    return;
-                }
-
-                renderShelfModal(selectedIds);
-                openModal('add-shelf-modal');
-            });
-        }
-
-        // Batch Archive Logic
-        if (batchArchiveBtn) {
-            batchArchiveBtn.addEventListener('click', () => {
-                const activeContainer = !gridView.classList.contains('hidden') ? gridView : listView;
-                if (!activeContainer) return;
-
-                const selectedIds = Array.from(activeContainer.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => {
-                        const item = cb.closest('.book-item') || cb.closest('.book-list-item');
-                        return item.dataset.bookId;
-                    });
-
-                if (selectedIds.length === 0) {
-                    alert('請先選取書籍！');
-                    return;
-                }
-
-                if (confirm(`確定要封存這 ${selectedIds.length} 本書嗎？`)) {
-                    alert(`[Feature Stub]\n已將 ${selectedIds.length} 本書移至封存區。`);
-                    // In real app, call archive API and re-render
-                }
-            });
-        }
-    }
-
-    // 排序下拉選單
-    const sortBtn = document.getElementById(`${prefix}sort-menu-btn`);
-    const sortDropdown = document.getElementById(`${prefix}sort-dropdown`);
-    const sortLabel = document.getElementById(`${prefix}sort-menu-label`);
-    const sortDirBtn = document.getElementById(`${prefix}sort-direction-btn`); // New
-
-    // Desktop Direction Button Logic
-    if (sortDirBtn) {
-        sortDirBtn.addEventListener('click', () => {
-            localSortDirection = localSortDirection === 'asc' ? 'desc' : 'asc';
-
-            // Update Icon
-            sortDirBtn.innerHTML = localSortDirection === 'asc'
-                ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
-                : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
-            if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
-
-            if (onSort) onSort(localSortType, localSortDirection);
+            }
         });
-    }
 
-    if (sortBtn && sortDropdown) {
-        sortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        container.addEventListener('click', (e) => {
+            if (!isBatchMode) return;
+            const item = e.target.closest('.book-item') || e.target.closest('.book-list-item');
+            if (!item) return;
 
-            // Toggle visibility
-            const isHidden = sortDropdown.classList.contains('hidden');
-            if (!isHidden) {
-                sortDropdown.classList.add('hidden');
+            if (e.target.matches('input[type="checkbox"]')) return;
+
+            const cb = item.querySelector('input[type="checkbox"]');
+            if (cb) {
+                cb.checked = !cb.checked;
+                if (cb.checked) {
+                    item.classList.add('ring-2', 'ring-accent');
+                } else {
+                    item.classList.remove('ring-2', 'ring-accent');
+                }
+                updateBatchUI();
+            }
+        });
+    });
+
+    if (batchSelectAllBtn) {
+        batchSelectAllBtn.addEventListener('click', () => {
+            const activeContainer = (gridView && !gridView.classList.contains('hidden')) ? gridView : listView;
+            if (!activeContainer) return;
+
+            const checkboxes = activeContainer.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+
+            if (selectedCount === total) {
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    const item = cb.closest('.book-item') || cb.closest('.book-list-item');
+                    if (item) item.classList.remove('ring-2', 'ring-accent');
+                });
+                selectedCount = 0;
             } else {
-                sortDropdown.classList.remove('hidden');
-
-                // Apply fixed positioning
-                const rect = sortBtn.getBoundingClientRect();
-
-                // Calculate position: align right edge of dropdown with right edge of button
-                // Default width of dropdown is w-48 (12rem = 192px)
-                const dropdownWidth = 192;
-
-                sortDropdown.style.position = 'fixed';
-                sortDropdown.style.top = `${rect.bottom + 4}px`;
-                sortDropdown.style.left = `${rect.right - dropdownWidth}px`;
-                sortDropdown.style.width = `${dropdownWidth}px`; // Ensure width is explicit
-                sortDropdown.style.zIndex = '100';
-                sortDropdown.style.right = 'auto'; // Override css right:0
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    const item = cb.closest('.book-item') || cb.closest('.book-list-item');
+                    if (item) item.classList.add('ring-2', 'ring-accent');
+                });
+                selectedCount = total;
             }
-        });
-
-        window.addEventListener('click', (e) => {
-            if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
-                sortDropdown.classList.add('hidden');
-            }
-        });
-
-        // Handle scrolling and resizing to close dropdown (simple way to handle fixed pos detachment)
-        window.addEventListener('scroll', () => {
-            if (!sortDropdown.classList.contains('hidden')) {
-                sortDropdown.classList.add('hidden');
-            }
-        }, true);
-
-        window.addEventListener('resize', () => {
-            if (!sortDropdown.classList.contains('hidden')) {
-                sortDropdown.classList.add('hidden');
-            }
-        });
-
-        // 排序項目點擊事件
-        const sortItems = sortDropdown.querySelectorAll('[data-sort]');
-
-        sortItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const sortType = item.dataset.sort;
-                const sortName = item.textContent;
-
-                localSortType = sortType;
-                // Reset direction to desc on type change? Or keep?
-                // Let's reset to desc for consistency.
-                localSortDirection = 'desc';
-
-                // Update Icon
-                if (sortDirBtn) {
-                    sortDirBtn.innerHTML = `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
-                    if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
-                }
-
-                // 更新按鈕文字
-                if (sortLabel) {
-                    sortLabel.textContent = `排序: ${sortName}`;
-                }
-
-                // 執行排序回調
-                if (onSort) {
-                    onSort(localSortType, localSortDirection);
-                }
-
-                // 關閉選單
-                sortDropdown.classList.add('hidden');
-            });
+            updateBatchUI();
         });
     }
+
+    if (batchAddBtn) {
+        batchAddBtn.addEventListener('click', () => {
+            const activeContainer = (gridView && !gridView.classList.contains('hidden')) ? gridView : listView;
+            if (!activeContainer) return;
+
+            const selectedIds = Array.from(activeContainer.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => {
+                    const item = cb.closest('.book-item') || cb.closest('.book-list-item');
+                    return item.dataset.bookId;
+                });
+
+            if (selectedIds.length === 0) {
+                alert('請先選取書籍！');
+                return;
+            }
+
+            renderShelfModal(selectedIds);
+            openModal('add-shelf-modal');
+        });
+    }
+
+    if (batchArchiveBtn) {
+        batchArchiveBtn.addEventListener('click', () => {
+            const activeContainer = (gridView && !gridView.classList.contains('hidden')) ? gridView : listView;
+            if (!activeContainer) return;
+
+            const selectedIds = Array.from(activeContainer.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => {
+                    const item = cb.closest('.book-item') || cb.closest('.book-list-item');
+                    return item.dataset.bookId;
+                });
+
+            if (selectedIds.length === 0) {
+                alert('請先選取書籍！');
+                return;
+            }
+
+            if (confirm(`確定要封存這 ${selectedIds.length} 本書嗎？`)) {
+                alert(`[Feature Stub]\n已將 ${selectedIds.length} 本書移至封存區。`);
+            }
+        });
+    }
+
+    return {
+        resetBatchMode: () => {
+            if (isBatchMode) toggleBatchMode();
+        }
+    };
 }
 
 // 4. 初始化功能
@@ -976,20 +666,16 @@ export function initBookshelfFeature() {
         if (!gridContainer) return;
 
         // Initialize filter bar (only once)
-        if (filterContainer && !archiveFilterInitialized) {
-            filterContainer.innerHTML = createArchiveFilterBarHTML('archive-');
-
-            initArchiveFilterBar({
-                prefix: 'archive-',
-                onFilterChange: (value) => {
+        if (!archiveFilterInitialized) {
+            initFilterBarEvents(archiveFilterConfig, (action, data) => {
+                if (action === 'filter' && data.id === 'type') {
                     archiveCurrentPage = 1; // 篩選後重設頁碼
-                    renderArchivedBooks(value);
-                },
-                onViewChange: (view) => {
-                    currentArchiveView = view;
+                    renderArchivedBooks(data.value);
+                } else if (action === 'view') {
+                    currentArchiveView = data;
                     archiveCurrentPage = 1;
                     if (gridContainer && listContainer) {
-                        if (view === 'grid') {
+                        if (data === 'grid') {
                             gridContainer.classList.remove('hidden');
                             listContainer.classList.add('hidden');
                         } else {
@@ -1174,94 +860,35 @@ export function initBookshelfFeature() {
     });
 
     // 設定 All Books 篩選列功能 (UI & View toggle)
-    // Pass a callback that forwards the sort request to our filter logic
-    const filterControls = initFilterBar('', 'all-books-grid', 'all-books-list', (sortType, direction) => {
-        if (filterLogic) filterLogic.handleSort(sortType, direction);
-    });
+    const filterControls = initBookshelfBatchMode('', 'all-books-grid', 'all-books-list');
 
+    initFilterBarEvents(bookshelfFilterConfig, (action, data) => {
+        if (action === 'sort') {
+            if (filterLogic) filterLogic.handleSort(data.type, data.direction);
+        } else if (action === 'filter') {
+            if (filterLogic) filterLogic.handleFilter(data.id, data.value);
+        } else if (action === 'view') {
+            const gridView = document.getElementById('all-books-grid');
+            const listView = document.getElementById('all-books-list');
+            if (gridView && listView) {
+                if (data === 'grid') {
+                    gridView.classList.remove('hidden');
+                    listView.classList.add('hidden');
+                } else {
+                    gridView.classList.add('hidden');
+                    listView.classList.remove('hidden');
+                }
+            }
+            if (filterControls && filterControls.resetBatchMode) {
+                filterControls.resetBatchMode();
+            }
+        }
+    });
 
     // 初始化圖示
     if (window.lucide) window.lucide.createIcons();
 
-    // --- Mobile Filter Modal Logic ---
-    const mobileFilterTrigger = document.getElementById('mobile-filter-trigger');
-
-    if (mobileFilterTrigger) {
-        mobileFilterTrigger.addEventListener('click', () => {
-            openModal('mobile-filter-modal');
-        });
-    }
-
-    // 處理 Filter Chips (單選邏輯: 閱讀狀態)
-    document.querySelectorAll('.mobile-filter-chip').forEach(chip => {
-        chip.addEventListener('click', (e) => {
-            const group = e.target.dataset.group;
-            // 移除同組其他按鈕的 active 樣式
-            document.querySelectorAll(`.mobile-filter-chip[data-group="${group}"]`).forEach(c => {
-                c.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'active');
-                c.classList.add('text-text-secondary');
-            });
-            // 加上自己的 active 樣式
-            e.target.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'active');
-            e.target.classList.remove('text-text-secondary');
-        });
-    });
-
-    // 處理 Toggle Buttons (多選邏輯: 類型)
-    document.querySelectorAll('.mobile-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const button = e.currentTarget;
-            button.classList.toggle('active');
-
-            if (button.classList.contains('active')) {
-                button.classList.add('bg-accent', 'text-white', 'border-accent');
-                button.classList.remove('bg-white', 'text-text-secondary', 'hover:text-accent');
-            } else {
-                button.classList.remove('bg-accent', 'text-white', 'border-accent');
-                button.classList.add('bg-white', 'text-text-secondary', 'hover:text-accent');
-            }
-        });
-    });
-
-    // 處理重設按鈕
-    const resetBtn = document.getElementById('mobile-filter-reset');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            // 重設 Radio
-            const defaultSort = document.querySelector('input[name="mobile-sort"][value="recently-read"]');
-            if (defaultSort) defaultSort.checked = true;
-
-            const defaultSource = document.querySelector('input[name="mobile-source"][value="all"]');
-            if (defaultSource) defaultSource.checked = true;
-
-            // 重設 Chips
-            document.querySelectorAll('.mobile-filter-chip').forEach(c => {
-                c.classList.remove('bg-accent/10', 'text-accent', 'border-accent', 'active');
-                c.classList.add('text-text-secondary');
-            });
-            const defaultStatus = document.querySelector('.mobile-filter-chip[data-value="all"]');
-            if (defaultStatus) defaultStatus.classList.add('bg-accent/10', 'text-accent', 'border-accent', 'active');
-
-            // 重設 Toggles
-            document.querySelectorAll('.mobile-toggle-btn').forEach(b => {
-                b.classList.remove('active', 'bg-accent', 'text-white', 'border-accent');
-                b.classList.add('bg-white', 'text-text-secondary');
-            });
-        });
-    }
-
-    // 處理套用按鈕
-    const applyBtn = document.getElementById('mobile-filter-apply');
-    if (applyBtn) {
-        applyBtn.addEventListener('click', () => {
-            // 這裡可以加入實際的篩選邏輯，目前先關閉視窗
-            const modal = document.getElementById('mobile-filter-modal');
-            if (modal) modal.classList.add('hidden');
-
-            // 可選：顯示一個 Toast 或 Console 訊息
-            console.log("Filters applied!");
-        });
-    }
+    // Old mobile filter modal logic has been removed.
 
     // --- Bookshelf Search ---
     const searchInput = document.getElementById('bookshelf-search-input');
@@ -1346,29 +973,16 @@ export function initBookshelfFeature() {
 
 // 5. Reusable Filter Logic
 export function setupFilterLogic({ containerId, dataSource, render }) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    // Selects
-    // Assumption: Order is Status, Source, Category. 
-    const statusSelect = container.querySelector(`select[id$="status-filter"]`) || container.querySelector('select:nth-of-type(1)');
-    const sourceSelect = container.querySelector(`select[id$="source-filter"]`) || container.querySelector('select:nth-of-type(2)');
-    const categorySelect = container.querySelector(`select[id$="category-filter"]`) || container.querySelector('select:nth-of-type(3)');
-    const typeSelect = container.querySelector(`select[id$="type-filter"]`);
-
-    // const typeButtons = container.querySelectorAll('.filter-toggle'); // Removed
-
     let activeFilters = {
         status: '全部',
-        source: '全部來源',
+        source: '全部',
         category: 'all',
-        type: 'all' // Changed from types (Set) to type (String)
+        type: 'all'
     };
 
     let currentSortType = 'recently-read';
-    let currentSortDirection = 'desc'; // 'asc' or 'desc'
+    let currentSortDirection = 'desc';
 
-    // Sort Logic Wrapper
     const applySort = (books) => {
         const sorted = [...books];
         if (currentSortType === 'recently-read') {
@@ -1378,8 +992,6 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
                 return currentSortDirection === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
             });
         } else if (currentSortType === 'purchase-date') {
-            // Default order (usually) - assuming data is already in default order or we have a date field?
-            // Books data doesn't have explicit purchase date. Using original index or fallback.
             if (currentSortDirection === 'asc') sorted.reverse();
         } else if (currentSortType === 'title') {
             sorted.sort((a, b) => {
@@ -1400,15 +1012,13 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
     const applyFilters = () => {
         const fullData = dataSource();
         let filtered = fullData.filter(book => {
-            // Context: Status
             if (activeFilters.status !== '全部') {
                 if (activeFilters.status === '未閱讀' && book.progress > 0) return false;
                 if (activeFilters.status === '閱讀中' && (book.progress === 0 || book.progress === 100)) return false;
                 if (activeFilters.status === '已讀完' && book.progress !== 100) return false;
             }
 
-            // Context: Source
-            if (activeFilters.source !== '全部來源') {
+            if (activeFilters.source !== '全部' && activeFilters.source !== '全部來源') {
                 if (!book.source.includes(activeFilters.source) && activeFilters.source !== book.source) {
                     let target = activeFilters.source;
                     if (target.includes('讀冊')) target = '讀冊';
@@ -1418,19 +1028,16 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
                 }
             }
 
-            // Context: Category
             if (activeFilters.category !== 'all') {
                 if (book.category !== activeFilters.category) return false;
             }
 
-            // Context: Type & Features (Consolidated)
             if (activeFilters.type !== 'all') {
                 if (activeFilters.type === 'audiobook') {
                     if (!book.isAudiobook) return false;
                 } else if (activeFilters.type === 'tts') {
                     if (!book.isTTSEnabled) return false;
                 } else {
-                    // "中文書", "外文書", "教科書" -> match book.type
                     if (book.type !== activeFilters.type) return false;
                 }
             }
@@ -1442,56 +1049,18 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
         render(sortedAndFiltered);
     };
 
-    if (categorySelect) {
-        categorySelect.addEventListener('change', (e) => {
-            activeFilters.category = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (statusSelect) {
-        statusSelect.addEventListener('change', (e) => {
-            activeFilters.status = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (sourceSelect) {
-        sourceSelect.addEventListener('change', (e) => {
-            activeFilters.source = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (typeSelect) {
-        typeSelect.addEventListener('change', (e) => {
-            activeFilters.type = e.target.value;
-            applyFilters();
-        });
-    }
-
     return {
         handleSort: (sortType, direction) => {
             currentSortType = sortType;
             if (direction) currentSortDirection = direction;
             applyFilters();
         },
+        handleFilter: (filterId, value) => {
+            if (activeFilters.hasOwnProperty(filterId)) {
+                activeFilters[filterId] = value;
+                applyFilters();
+            }
+        },
         triggerFilter: applyFilters
-    };
-
-    return {
-        resetBatchMode: () => {
-            if (isBatchMode) {
-                // Trigger click to toggle off
-                if (batchBtn) batchBtn.click();
-            } else {
-                // Ensure UI is clean even if flag is false (e.g. if forcibly hidden)
-                // However, clicking button is the safest way to trigger the full teardown logic.
-            }
-            // Double check: if batch bar is visible but isBatchMode is false (the bug state), force hide
-            if (!isBatchMode && batchBar && !batchBar.classList.contains('hidden')) {
-                batchBar.classList.add('hidden');
-            }
-        }
     };
 }

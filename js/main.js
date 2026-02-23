@@ -1,7 +1,7 @@
 import { initRouter } from './router.js';
 import { initUtils } from './utils.js';
 import { initStoreFeature } from './features/store.js';
-import { initBookshelfFeature, initFilterBar, createBookCardHTML, createBookListItemHTML, setupFilterLogic, showBookDetails, openShelfModalForBook, isBookArchived } from './features/bookshelf.js';
+import { initBookshelfFeature, createBookCardHTML, createBookListItemHTML, setupFilterLogic, showBookDetails, openShelfModalForBook, isBookArchived } from './features/bookshelf.js';
 import { BOOKS_DATA } from './data/books.js';
 import { initBookmarkFeature } from './features/bookmark.js';
 import { initReadingGoal } from './features/readingGoal.js';
@@ -11,10 +11,11 @@ import { initCollectionsFeature, getCollections, renameCollection, deleteCollect
 import { createHeaderHTML, initHeaderEvents } from './components/Header.js';
 import { createMobileNavHTML } from './components/MobileNav.js';
 import { createModalsHTML } from './components/Modals.js';
+import { initFilterBarEvents } from './components/FilterBar.js';
 
 // Views
 import { createHomepageHTML } from './views/Homepage.js';
-import { createBookshelfHTML } from './views/Bookshelf.js';
+import { createBookshelfHTML, bookshelfFilterConfig } from './views/Bookshelf.js';
 import { createBookmarkHTML } from './views/Bookmark.js';
 import { createBookDetailsHTML } from './views/BookDetails.js';
 import { createPersonalCenterHTML, initPersonalCenterEvents } from './views/PersonalCenter.js';
@@ -64,8 +65,26 @@ function initDetailsView() {
         }
     });
 
-    initFilterBar('details-', 'bookshelf-books-grid', 'bookshelf-books-list', (sortType) => {
-        if (detailsFilterLogic) detailsFilterLogic.handleSort(sortType);
+    initFilterBarEvents({ ...bookshelfFilterConfig, prefix: 'details-' }, (action, data) => {
+        if (!detailsFilterLogic) return;
+
+        if (action === 'filter') {
+            detailsFilterLogic.handleFilter(data.id, data.value);
+        } else if (action === 'sort') {
+            detailsFilterLogic.handleSort(data.type, data.direction);
+        } else if (action === 'view') {
+            const grid = document.getElementById('bookshelf-books-grid');
+            const list = document.getElementById('bookshelf-books-list');
+            if (grid && list) {
+                if (data === 'grid') {
+                    grid.classList.remove('hidden');
+                    list.classList.add('hidden');
+                } else {
+                    grid.classList.add('hidden');
+                    list.classList.remove('hidden');
+                }
+            }
+        }
     });
 
     // Event Delegation for Details View (Grid Click)

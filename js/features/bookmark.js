@@ -1,15 +1,17 @@
 import { BOOKS_DATA } from '../data/books.js';
 import { openModal, closeModal } from '../utils.js';
+import { bookmarkFilterConfig } from '../views/Bookmark.js';
+import { initFilterBarEvents } from '../components/FilterBar.js';
 
 const state = {
     searchTerm: '',
     selectedBooks: new Set(),
-    selectedTypes: new Set(),
-    selectedColor: 'all', // Single select string
+    selectedType: 'all', // Changed from selectedTypes Set
+    selectedColor: 'all',
     sortType: 'date',
     sortDirection: 'desc',
     isBatchMode: false,
-    selectedNotes: new Set() // Stores "bookId:noteId" strings
+    selectedNotes: new Set()
 };
 
 export function initBookmarkFeature() {
@@ -27,9 +29,6 @@ export function initBookmarkFeature() {
 
     // Initial Render
     renderContent();
-
-    // Init Mobile Filter Panel (replaces individual mobile sort/color buttons)
-    initMobileFilterPanel();
 
     // 1. Search Listener
     if (searchInput) {
@@ -59,67 +58,35 @@ export function initBookmarkFeature() {
     }
 
     const updateColorFilterState = () => {
-        const isNoteOnly = state.selectedTypes.has('note') && state.selectedTypes.size === 1;
+        const isNoteOnly = state.selectedType === 'note';
 
         if (colorTrigger) {
             if (isNoteOnly) {
-                // Disable color filter when "note" is selected
                 colorTrigger.disabled = true;
                 colorTrigger.classList.add('opacity-50', 'cursor-not-allowed');
-                // Reset to all
                 state.selectedColor = 'all';
                 renderColorDropdownUI();
             } else {
-                // Enable color filter
                 colorTrigger.disabled = false;
                 colorTrigger.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
     };
 
-    // 4. Type Filter (Single-select: highlight, note, or none)
-    const syncDesktopTypeUI = () => {
-        typeFilterButtons.forEach(btn => {
-            const filter = btn.dataset.filter;
-            const isActive = state.selectedTypes.has(filter);
-
-            if (isActive) {
-                btn.style.backgroundColor = 'var(--bg-accent, #629BC1)';
-                btn.style.color = '#FFFFFF';
-                btn.style.boxShadow = '0 2px 4px rgba(98,155,193,0.3)';
-                btn.style.fontWeight = '700';
-            } else {
-                btn.style.backgroundColor = 'transparent';
-                btn.style.color = 'var(--text-secondary, #666666)';
-                btn.style.boxShadow = 'none';
-                btn.style.fontWeight = '500';
+    // 初始化 FilterBar 泛用事件
+    initFilterBarEvents(bookmarkFilterConfig, (action, data) => {
+        if (action === 'filter') {
+            if (data.id === 'type') {
+                state.selectedType = data.value;
+                updateColorFilterState();
+                renderContent();
             }
-        });
-    };
-
-    // Initial render for desktop UI
-    syncDesktopTypeUI();
-
-    typeFilterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filter = btn.dataset.filter;
-
-            if (state.selectedTypes.has(filter)) {
-                // Deselect: show all
-                state.selectedTypes.clear();
-            } else {
-                state.selectedTypes.clear();
-                state.selectedTypes.add(filter);
-            }
-
-            syncDesktopTypeUI();
-            updateColorFilterState();
+        } else if (action === 'sort') {
+            state.sortType = data.type;
+            state.sortDirection = data.direction;
             renderContent();
-        });
+        }
     });
-
-    // Make sync function available globally or via state if needed for sync (here we use closure for simplicity)
-    window.__syncDesktopTypeUI = syncDesktopTypeUI;
 
 
     // 5. Custom Color Filter Dropdown Logic
@@ -263,107 +230,33 @@ export function initBookmarkFeature() {
         });
     }
 
-    // 6. Sort Menu
-    if (sortMenuBtn && sortDropdown) {
-
-        const renderDropdown = () => {
-            const options = [
-                { id: 'date', label: '依新增時間', icon: 'clock' },
-                { id: 'title', label: '依書名', icon: 'book' },
-                { id: 'page', label: '依閱讀位置', icon: 'bookmark' } // or file-text
-            ];
-
-            const html = options.map(opt => {
-                const isActive = state.sortType === opt.id;
-                const activeClass = isActive
-                    ? 'bg-accent/10 text-accent font-bold'
-                    : 'text-text-primary hover:bg-gray-50';
-
-                return `
-                    <button class="w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors ${activeClass} first:rounded-t-xl last:rounded-b-xl"
-                        data-sort="${opt.id}">
-                        <span class="flex-1">${opt.label}</span>
-                    </button>
-                `;
-            }).join('');
-
-            sortDropdown.innerHTML = `<div class="">${html}</div>`;
-            // Removed lucide creation as no icons are used
-
-            // Re-bind listeners
-            const sortButtons = sortDropdown.querySelectorAll('[data-sort]');
-            sortButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // prevent bubbling to window click
-                    const sortId = btn.dataset.sort;
-                    const sortLabel = options.find(o => o.id === sortId)?.label;
-
-                    state.sortType = sortId;
-                    if (sortLabel) {
-                        const labelEl = document.getElementById('notes-sort-menu-label');
-                        if (labelEl) labelEl.textContent = `排序: ${sortLabel}`;
-                    }
-
-                    sortDropdown.classList.add('hidden');
-                    renderContent();
-                });
-            });
-        };
-
-        sortMenuBtn.addEventListener('click', (e) => {
+    // 5.1 Mobile Color Sheet Binding
+    const mobileColorBtn = document.getElementById('mobile-color-btn');
+    if (mobileColorBtn) {
+        mobileColorBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isHidden = sortDropdown.classList.contains('hidden');
+            if (colorTrigger && colorTrigger.disabled) return;
 
-            if (!isHidden) {
-                sortDropdown.classList.add('hidden');
-            } else {
-                // Render content fresh every time to show correct active state
-                renderDropdown();
-                sortDropdown.classList.remove('hidden');
+            const sheetOptions = colors.map(c => ({
+                value: c.value,
+                label: `<span class="inline-block w-4 h-4 rounded-full border border-gray-300 align-middle mr-2 opacity-80" style="${colorSwatchStyle(c)}"></span>${c.label}`
+            }));
 
-                // Fixed Positioning
-                const rect = sortMenuBtn.getBoundingClientRect();
-                sortDropdown.style.position = 'fixed';
-                sortDropdown.style.top = `${rect.bottom + 4}px`; // tighter gap
-                sortDropdown.style.right = `${window.innerWidth - rect.right}px`;
-                sortDropdown.style.left = 'auto';
-                sortDropdown.style.minWidth = `${rect.width}px`; // Match button width at minimum
-                sortDropdown.style.width = 'auto'; // allow expansion if needed, but min matches button
-                sortDropdown.style.height = 'auto';
-                sortDropdown.style.maxHeight = 'none';
-                sortDropdown.style.overflow = 'visible';
-                sortDropdown.style.zIndex = '9999';
-                // Add soft shadow/border for popover feel
-                sortDropdown.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
-                sortDropdown.style.border = '1px solid rgba(0,0,0,0.05)';
-            }
-        });
+            const handleColorSelect = (val) => {
+                state.selectedColor = val;
+                renderColorDropdownUI();
+                renderContent();
+                // Close modal
+                import('../utils.js').then(({ closeModal }) => {
+                    closeModal('mobile-filter-sheet');
+                });
+            };
 
-        window.addEventListener('click', () => {
-            if (!sortDropdown.classList.contains('hidden')) {
-                sortDropdown.classList.add('hidden');
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            if (!sortDropdown.classList.contains('hidden')) {
-                sortDropdown.classList.add('hidden');
-            }
+            openSheet('劃線顏色', sheetOptions, handleColorSelect, state.selectedColor);
         });
     }
 
-    // 7. Sort Direction
-    if (sortDirBtn) {
-        sortDirBtn.addEventListener('click', () => {
-            state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
-            sortDirBtn.innerHTML = state.sortDirection === 'asc'
-                ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
-                : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
-            if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
-            renderContent();
-        });
-    }
-
+    // (保留供其它擴充用)
     // 8. Note Actions (Share / Delete) - Delegation on Container
     // State for actions
     let noteToDelete = null;
@@ -783,250 +676,6 @@ export function initBookmarkFeature() {
 }
 
 
-function initMobileFilterPanel() {
-    const filterPanelBtn = document.getElementById('mobile-filter-panel-btn');
-    if (!filterPanelBtn) return;
-
-    filterPanelBtn.addEventListener('click', () => {
-        openBookmarkFilterDrawer();
-    });
-}
-
-const BOOKMARK_COLORS = [
-    { value: 'all', label: '全部', hex: null },
-    { value: 'pink', label: '粉色', hex: '#EA8192' },
-    { value: 'blue', label: '藍色', hex: '#86E7D0' },
-    { value: 'purple', label: '紫色', hex: '#B881E7' },
-    { value: 'yellow', label: '黃色', hex: '#FFF500' }
-];
-
-function bookmarkColorSwatchStyle(c) {
-    return c.hex
-        ? `background-color:${c.hex};opacity:0.5;`
-        : `background:linear-gradient(135deg,#EA8192 0%,#86E7D0 40%,#B881E7 70%,#FFF500 100%);opacity:0.6;`;
-}
-
-function openBookmarkFilterDrawer() {
-    const drawer = document.getElementById('bookmark-filter-drawer');
-    if (!drawer) return;
-
-    // --- Draft state (local copy while drawer is open) ---
-    let draftTypes = new Set(state.selectedTypes);
-    let draftColor = state.selectedColor;
-    let draftSort = state.sortType;
-    let draftDir = state.sortDirection;
-
-    const renderDrawerUI = () => {
-        // == Type Buttons ==
-        const typeBtns = drawer.querySelectorAll('.bfd-type-btn');
-        const activeTypeClass = ['bg-accent/10', 'border-accent', 'text-accent'];
-        const defaultTypeClass = ['bg-white', 'border-gray-200', 'text-text-primary'];
-
-        typeBtns.forEach(btn => {
-            const t = btn.dataset.type;
-            const isActive =
-                t === 'all'
-                    ? draftTypes.size === 0
-                    : draftTypes.has(t) && draftTypes.size === 1;
-
-            if (isActive) {
-                btn.classList.add('bg-[#629BC1]', 'text-white', 'border-[#629BC1]');
-                btn.classList.remove('bg-white', 'border-gray-200', 'text-text-primary');
-            } else {
-                btn.classList.remove('bg-[#629BC1]', 'text-white', 'border-[#629BC1]');
-                btn.classList.add('bg-white', 'border-gray-200', 'text-text-primary');
-            }
-        });
-
-        // == Color Section: disable when note-only ==
-        const colorSection = document.getElementById('bfd-color-section');
-        const isNoteOnly = draftTypes.has('note') && draftTypes.size === 1;
-        if (colorSection) {
-            colorSection.style.opacity = isNoteOnly ? '0.5' : '1';
-            colorSection.style.pointerEvents = isNoteOnly ? 'none' : '';
-        }
-
-        // == Color Pills ==
-        const colorContainer = document.getElementById('bfd-color-options');
-        if (colorContainer) {
-            colorContainer.innerHTML = BOOKMARK_COLORS.map(c => {
-                const isSelected = c.value === draftColor;
-                return `
-                    <button class="bfd-color-pill flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-bold transition-all ${isSelected ? 'border-accent bg-accent/10 text-accent' : 'border-gray-200 bg-white text-text-primary'}"
-                        data-color="${c.value}">
-                        <span class="inline-block w-3.5 h-3.5 rounded-full border border-gray-300 flex-shrink-0" style="${bookmarkColorSwatchStyle(c)}"></span>
-                        ${c.label}
-                    </button>
-                `;
-            }).join('');
-
-            colorContainer.querySelectorAll('.bfd-color-pill').forEach(btn => {
-                btn.onclick = () => {
-                    draftColor = btn.dataset.color;
-                    renderDrawerUI();
-                };
-            });
-        }
-
-        // == Sort Buttons: Dynamic render with direction arrows ==
-        const sortContainer = document.getElementById('bfd-sort-options');
-        if (sortContainer) {
-            const sorts = [
-                { value: 'date', label: '依時間' },
-                { value: 'title', label: '依書名' },
-                { value: 'page', label: '依位置' }
-            ];
-            const dirArrow = draftDir === 'asc' ? '↑' : '↓';
-            sortContainer.innerHTML = sorts.map(s => {
-                const isActive = s.value === draftSort;
-                const activeClass = 'bg-accent/10 border-accent text-accent';
-                const defaultClass = 'bg-white border-gray-200 text-text-primary';
-                return `
-                    <button class="bfd-sort-btn py-2.5 px-2 rounded-xl border text-sm font-bold transition-all text-center flex items-center justify-center gap-1 ${isActive ? activeClass : defaultClass}"
-                            data-sort="${s.value}">
-                        ${s.label}
-                        ${isActive ? `<span class="text-xs font-bold ml-0.5">${dirArrow}</span>` : ''}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        if (window.lucide) window.lucide.createIcons({ root: drawer });
-    };
-
-    // Initial render
-    renderDrawerUI();
-
-    // --- Bind Type Buttons ---
-    drawer.querySelectorAll('.bfd-type-btn').forEach(btn => {
-        btn.onclick = () => {
-            const t = btn.dataset.type;
-            if (t === 'all') {
-                draftTypes.clear();
-            } else if (draftTypes.has(t) && draftTypes.size === 1) {
-                draftTypes.clear();
-            } else {
-                draftTypes.clear();
-                draftTypes.add(t);
-            }
-            // If note-only, reset color
-            if (draftTypes.has('note') && draftTypes.size === 1) draftColor = 'all';
-            renderDrawerUI();
-        };
-    });
-
-    // --- Bind Sort Buttons (event delegation on container, re-bound after each renderDrawerUI) ---
-    const bindSortBtns = () => {
-        const sortContainer = document.getElementById('bfd-sort-options');
-        if (!sortContainer) return;
-        sortContainer.querySelectorAll('.bfd-sort-btn').forEach(btn => {
-            btn.onclick = () => {
-                const clicked = btn.dataset.sort;
-                if (clicked === draftSort) {
-                    // Toggle direction
-                    draftDir = draftDir === 'asc' ? 'desc' : 'asc';
-                } else {
-                    // Switch sort type
-                    draftSort = clicked;
-                    // Keep current direction
-                }
-                renderDrawerUI();
-                bindSortBtns(); // Re-bind after DOM update
-            };
-        });
-    };
-    bindSortBtns();
-
-    // --- Apply ---
-    const applyBtn = document.getElementById('bfd-apply-btn');
-    if (applyBtn) {
-        applyBtn.onclick = () => {
-            state.selectedTypes = new Set(draftTypes);
-            state.selectedColor = draftColor;
-            state.sortType = draftSort;
-            state.sortDirection = draftDir;
-
-            // Sync desktop color trigger UI (inline, since renderColorDropdownUI is a closure)
-            const selected = BOOKMARK_COLORS.find(c => c.value === state.selectedColor) || BOOKMARK_COLORS[0];
-            const previewEl = document.getElementById('color-filter-preview');
-            const labelEl = document.getElementById('color-filter-label');
-            if (previewEl) previewEl.innerHTML = `<div class="absolute inset-0 rounded-full" style="${bookmarkColorSwatchStyle(selected)}"></div>`;
-            if (labelEl) labelEl.textContent = selected.label;
-
-            // Sync Desktop Type UI
-            if (window.__syncDesktopTypeUI) window.__syncDesktopTypeUI();
-
-            renderContent();
-            closeModal('bookmark-filter-drawer');
-        };
-    }
-
-    // --- Reset ---
-    const resetBtn = document.getElementById('bfd-reset-btn');
-    if (resetBtn) {
-        resetBtn.onclick = () => {
-            draftTypes = new Set();
-            draftColor = 'all';
-            draftSort = 'date';
-            draftDir = 'desc';
-            renderDrawerUI();
-        };
-    }
-
-    openModal('bookmark-filter-drawer');
-}
-
-function initMobileSort(btn) {
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
-        const options = [
-            { label: '依新增時間', value: 'date' },
-            { label: '依書名', value: 'title' },
-            { label: '依閱讀位置', value: 'page' }
-        ];
-
-        const handleMobileSortSelect = (val) => {
-            if (val === state.sortType) {
-                state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                state.sortType = val;
-                // Default directions
-                if (val === 'page') state.sortDirection = 'asc';
-                else state.sortDirection = 'desc';
-            }
-
-            // Sync Desktop UI
-            const sortLabel = document.getElementById('notes-sort-menu-label');
-            const selectedOpt = options.find(o => o.value === state.sortType);
-            if (sortLabel && selectedOpt) {
-                sortLabel.textContent = `排序: ${selectedOpt.label}`;
-            }
-
-            // Sync Mobile Label
-            const mobileLabel = document.getElementById('mobile-notes-sort-label');
-            if (mobileLabel && selectedOpt) {
-                mobileLabel.textContent = `排序: ${selectedOpt.label}`;
-            }
-
-            // Sync Direction Icon (Desktop)
-            const sortDirBtn = document.getElementById('notes-sort-direction-btn');
-            if (sortDirBtn) {
-                sortDirBtn.innerHTML = state.sortDirection === 'asc'
-                    ? `<i data-lucide="arrow-up" class="w-4 h-4"></i>`
-                    : `<i data-lucide="arrow-down" class="w-4 h-4"></i>`;
-                if (window.lucide) window.lucide.createIcons({ root: sortDirBtn });
-            }
-
-            renderContent();
-
-            // Re-open/Update Sheet (to show updated direction/selection)
-            openSheet('排序方式', options, handleMobileSortSelect, state.sortType, state.sortDirection);
-        };
-
-        openSheet('排序方式', options, handleMobileSortSelect, state.sortType, state.sortDirection);
-    });
-}
 
 function openSheet(title, options, onSelect, currentValue, currentDirection = null) {
     const sheet = document.getElementById('mobile-filter-sheet');

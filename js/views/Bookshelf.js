@@ -1,5 +1,66 @@
 import { createFilterBarHTML } from '../components/FilterBar.js';
 
+export const bookshelfFilterConfig = {
+    prefix: '',
+    batchSelect: true,
+    filters: [
+        {
+            id: 'status', label: '閱讀狀態', type: 'select',
+            options: [
+                { value: '全部', label: '全部' }, { value: '未閱讀', label: '未閱讀' },
+                { value: '閱讀中', label: '閱讀中' }, { value: '已讀完', label: '已讀完' }
+            ]
+        },
+        {
+            id: 'source', label: '購書來源', type: 'select',
+            options: [
+                { value: '全部', label: '全部' }, { value: 'TAAZE 讀冊', label: 'TAAZE 讀冊' },
+                { value: '三民書局', label: '三民書局' }, { value: 'iRead 灰熊', label: 'iRead 灰熊' }
+            ]
+        },
+        {
+            id: 'category', label: '分類', type: 'select',
+            options: [
+                { value: 'all', label: '全部' }, { value: '商業', label: '商業' },
+                { value: '文學', label: '文學' }, { value: '設計', label: '設計' },
+                { value: '科技', label: '科技' }
+            ]
+        },
+        {
+            id: 'type', label: '書種', type: 'select',
+            options: [
+                { value: 'all', label: '全部' }, { value: '中文書', label: '中文書' },
+                { value: '外文書', label: '外文書' }, { value: '教科書', label: '教科書' },
+                { value: 'audiobook', label: '有聲書' }, { value: 'tts', label: '可朗讀' }
+            ]
+        }
+    ],
+    sort: {
+        options: [
+            { value: 'recently-read', label: '最近閱讀' }, { value: 'purchase-date', label: '最近取得' },
+            { value: 'title', label: '書名' }, { value: 'publish-date', label: '出版日期' }
+        ],
+        defaultVal: 'recently-read',
+        defaultDir: 'desc'
+    },
+    viewToggle: true
+};
+
+export const archiveFilterConfig = {
+    prefix: 'archive-',
+    filters: [
+        {
+            id: 'type', label: '類型', type: 'select',
+            options: [
+                { value: 'all', label: '全部' },
+                { value: 'expired', label: '已過期' },
+                { value: 'archived', label: '已封存' }
+            ]
+        }
+    ],
+    viewToggle: true
+};
+
 export function createBookshelfHTML() {
     return `
     <div id="view-books" class="view-section hidden">
@@ -44,7 +105,7 @@ export function createBookshelfHTML() {
         </div>
         <div id="tab-content">
             <div id="all-books" class="tab-panel">
-                ${createFilterBarHTML('')}
+                ${createFilterBarHTML(bookshelfFilterConfig)}
 
                 <div id="all-books-grid"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
@@ -124,7 +185,7 @@ export function createBookshelfHTML() {
                 <div id="collections-pagination" class="mt-8"></div>
             </div>
             <div id="archived" class="tab-panel hidden">
-                <div id="archive-filter-container"></div>
+                ${createFilterBarHTML(archiveFilterConfig)}
                 <div id="archived-grid"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
                 </div>

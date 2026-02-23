@@ -1,4 +1,5 @@
 import { createFilterBarHTML } from '../components/FilterBar.js';
+import { bookshelfFilterConfig } from './Bookshelf.js';
 
 export function createBookDetailsHTML() {
     return `
@@ -11,7 +12,7 @@ export function createBookDetailsHTML() {
         </div>
         <div id="bookshelf-details-filter-bar"
             class="flex items-center gap-3 mb-4 md:mb-8 overflow-x-auto no-scrollbar w-full pb-2">
-             ${createFilterBarHTML('details-')}
+             ${createFilterBarHTML({ ...bookshelfFilterConfig, prefix: 'details-' })}
         </div>
         <div id="bookshelf-books-grid"
             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-8">
