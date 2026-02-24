@@ -1,5 +1,62 @@
 # Daily Log
 
+## 2026-02-24
+
+### 閱讀目標改版：移除自訂目標，改為紀錄與顯示成就
+
+**1. [MODIFY] [Homepage.js](file:///d:/Projects/the-fictional-train/js/views/Homepage.js)**
+- [UIUX] 調整首頁閱讀目標區塊內容：標題改為「今日閱讀時間」，並移除目標設定按鈕與原有進度條機制。
+- [Feature] 區塊內新增「本月已讀完幾本書」統計數字顯示，以取代舊有設定。
+
+**2. [DELETE] [ReadingGoalSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/ReadingGoalSection.js)**
+- [Remove] 刪除原設定閱讀目標的元件。
+
+**3. [MODIFY] [PersonalCenter.js](file:///d:/Projects/the-fictional-train/js/views/PersonalCenter.js)**
+- [Remove] 移除 `SECTIONS` 陣列中的 `reading-goal` 區塊宣告與相關匯入。
+
+**4. [MODIFY] [readingGoal.js](file:///d:/Projects/the-fictional-train/js/features/readingGoal.js)**
+- [Remove] 刪除與設定 `goal` 相關的狀態與儲存邏輯。
+- [Feature] 匯入 `BOOKS_DATA`，計算並在首頁更新「本月已讀完幾本書」（過濾 `progress === 100` 且 `lastRead` 為本月的書籍）。
+
+**5. [MODIFY] [books.js](file:///d:/Projects/the-fictional-train/js/data/books.js)**
+- [New] 新增兩筆 `progress: 100` 且 `lastRead` 落在本月（2026/02）的模擬資料以供前端展示統計值。
+
+
+### 單一書店登入模式 - 登出與切換流程及登入頁面建置
+
+**1. [NEW] [Login.js](file:///d:/Projects/the-fictional-train/js/views/Login.js)**
+- [New] 新建平台通用登入頁面元件，提供「單一書店登入」與「載具登入 (多帳號)」兩種獨立分支選擇的視覺入口。
+- [UIUX] 調整登入方式按鈕順序：將「載具登入 (多帳號)」置於上方，「單一書店登入」置於下方。
+- [UIUX] 採用毛玻璃特效、置中卡片式設計。為符合強制登入邏輯，已移除原有的「回到首頁」退出連結。
+- [New] 擴充「單一書店登入」流程分支：點擊後會以水平滑動轉場進入「選擇登入書店」的子視窗，提供讀冊、三民、iRead 三間書店卡片供選擇跳轉。
+- [Update] 調整 Login 視窗為獨立情境頁面：在 `openLoginView()` 被呼叫時會隱藏全域的 Desktop Header, Mobile Header 與 Bottom Navbar，退出時（透過路由在 `router.js` 切換時）自動恢復顯示，達到真正的全螢幕沉浸體驗。
+
+**2. [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)**
+- [UIUX] 重新設計個人頭像下拉選單 (`DROPDOWN_CONTENT`)，將「載具登入模式」與「單一書店登入模式」分為兩個獨立的節點區塊 (`header-carrier-content`, `header-single-content`)。
+- [Feature] 匯出 `updateHeaderLoginMode(mode)` 函式，供外部（如帳號管理）根據當下綁定狀態動態切換 Header 中顯示的登入模式。
+
+**3. [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)**
+- [Update] 於主程式中注入 `createLoginHTML` 與 `initLoginEvents`，使新建立的登入頁面加入視圖切換系統中。
+
+**4. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [UIUX] 更新單一書店登入模式下的按鈕文案及行為：將尚未連結的書店卡片按鈕改為「切換」（原本為「連結」）；若為已連結且目前所在的書店，按鈕改為紅色的「登出」。
+- [UIUX] 預設狀態設為主動呈現「單一書店登入（三民）」，並在初始化時呼叫 Header 函式同步選單狀態。
+- [UIUX] 將「單一書店登入」與「載具登入 (多帳號)」按鈕的位置對調，載具登入移至左側，單一書店登入移至右側。
+- [UIUX] 載具登入頁籤中，當使用者點選「進行載具驗證」後，除了切換該頁籤內的 UI，同步更新 Header 個人頭像下拉選單為「載具登入模式」。
+- [UIUX] 當載具驗證成功後，切換回「單一書店登入」頁籤時，三間書店卡片上的按鈕皆會連動變成綠底的「登入」狀態。
+- [Feature] 將以上單一書店按鈕的點擊事件均導向新建立的 `Login.js` 視圖，模擬回歸登出/切換/登入帳號狀態。
+  - 目前登入的書店（已登入）：按鈕文字維持「登出」（樣式改為紅色警告色 hover 效果）。
+- [Logic] 將「登出」或「切換」的點擊事件全部導向匯入的 `openLoginView()`，以回到登入前狀態的頁面。
+
+### 支援平行帳號登入模式 (單一書店 / 手機條碼載具)
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [UIUX] 實作平行帳號登入模式，讓使用者可以選擇「單一書店登入」或「載具登入 (多帳號)」。
+- [New] 新增頂部模式切換按鈕 (`.mode-btn`)，點擊可切換兩種不同的登入流程畫面。
+- [Update] 將原有的各家書店連結卡片（讀冊、三民、iRead）移入「單一帳號登入模式容器」內。
+- [New] 新增「載具登入模式」UI 流程：包含未綁定狀態的提示說明與認證按鈕，以及已綁定後自動帶入多筆書店帳號的畫面狀態。
+- [Update] 更新 `initAccountSectionEvents`，加入模式切換的 UI 更新事件，以及模擬載具驗證/解除綁定的行為提示。
+
 ## 2026-02-23
 
 ### 濾選列 (FilterBar) 重構缺失修正

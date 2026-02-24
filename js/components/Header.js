@@ -2,29 +2,71 @@ import { NOTIFICATIONS_DATA } from '../data/notifications.js';
 import { openPersonalCenter } from '../views/PersonalCenter.js';
 
 const DROPDOWN_CONTENT = `
-    <div class="p-5">
-        <div class="mb-4">
-            <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">主帳號</p>
-            <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                <span class="text-sm font-medium text-gray-700">[灰熊] abcd123@gmail.com</span>
-            </div>
-        </div>
-        
-        <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider">已連結書店</p>
-                <button id="btn-link-other-accounts" class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
-                    連結其他帳號
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    <div class="p-5" id="header-user-dropdown-content">
+        <!-- 載具登入模式內容 -->
+        <div id="header-carrier-content" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md flex items-center gap-1">
+                    <i data-lucide="smartphone" class="w-3 h-3"></i> 載具登入模式
+                </span>
+                <button class="btn-link-other-accounts text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
+                    帳號管理
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
                 </button>
             </div>
-            <div class="flex flex-wrap gap-2">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    [讀冊]
+
+            <div class="mb-4">
+                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">已連結載具</p>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-gray-900 truncate">/AB12345</p>
+                        <p class="text-xs text-gray-500 truncate">王大明</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-2">
+                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">同步書店帳號</p>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600 shrink-0">S</div>
+                        <span class="text-sm font-medium text-gray-700 flex-1 truncate">三民書局</span>
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 shrink-0"></i>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 shrink-0">T</div>
+                        <span class="text-sm font-medium text-gray-700 flex-1 truncate">讀冊生活</span>
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 shrink-0"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 單一書店登入模式內容 -->
+        <div id="header-single-content">
+            <div class="flex items-center justify-between mb-4">
+                <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-md flex items-center gap-1">
+                    <i data-lucide="store" class="w-3 h-3"></i> 單一書店登入
                 </span>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    [三民]
-                </span>
+                <button class="btn-link-other-accounts text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
+                    帳號管理
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">目前登入</p>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0 font-bold text-lg">
+                        S
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-gray-900 truncate">三民書局</p>
+                        <p class="text-xs text-gray-500 truncate">abcd123@gmail.com</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -232,7 +274,7 @@ export function initHeaderEvents() {
     });
 
     // Link Other Accounts Button
-    const linkOtherAccountsBtns = document.querySelectorAll('#btn-link-other-accounts');
+    const linkOtherAccountsBtns = document.querySelectorAll('.btn-link-other-accounts');
     linkOtherAccountsBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -246,5 +288,27 @@ export function initHeaderEvents() {
             // Open personal center with account section
             openPersonalCenter('account');
         });
+    });
+}
+
+/**
+ * 更新 Header 的登入模式顯示
+ * @param {string} mode 'single' 或 'carrier'
+ */
+export function updateHeaderLoginMode(mode) {
+    document.querySelectorAll('#header-carrier-content').forEach(el => {
+        if (mode === 'carrier') {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
+
+    document.querySelectorAll('#header-single-content').forEach(el => {
+        if (mode === 'single') {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
     });
 }

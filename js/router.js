@@ -42,6 +42,15 @@ function switchView(viewName) {
     const targetView = document.getElementById(viewId);
     if (targetView) targetView.classList.remove('hidden');
 
+    // 還原 Navbar 和 Header 的顯示狀態 (如果是從 Login 頁面切換過來)
+    const desktopHeader = document.getElementById('desktop-header');
+    const mobileHeader = document.getElementById('mobile-header');
+    const mobileBottomNav = document.getElementById('mobile-bottom-nav');
+
+    if (desktopHeader) desktopHeader.style.display = '';
+    if (mobileHeader) mobileHeader.style.display = '';
+    if (mobileBottomNav) mobileBottomNav.style.display = '';
+
     // Sync Active States (Desktop & Mobile)
     document.querySelectorAll('.nav-link').forEach(nav => {
         if (nav.dataset.view === viewName) {

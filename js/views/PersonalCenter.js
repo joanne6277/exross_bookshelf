@@ -3,13 +3,12 @@
 
 import { createAccountSectionHTML, initAccountSectionEvents } from '../components/personal-center/AccountSection.js';
 import { createNotificationsSectionHTML, initNotificationsSectionEvents } from '../components/personal-center/NotificationsSection.js';
-import { createReadingGoalSectionHTML, initReadingGoalSectionEvents } from '../components/personal-center/ReadingGoalSection.js';
+
 
 // 區塊定義（可擴充）
 const SECTIONS = [
     { id: 'account', label: '帳號管理', icon: 'user-circle', createHTML: createAccountSectionHTML, initEvents: initAccountSectionEvents },
     { id: 'notifications', label: '全部通知', icon: 'bell', createHTML: createNotificationsSectionHTML, initEvents: initNotificationsSectionEvents },
-    { id: 'reading-goal', label: '閱讀目標', icon: 'target', createHTML: createReadingGoalSectionHTML, initEvents: initReadingGoalSectionEvents },
 ];
 
 let currentSectionId = 'account';

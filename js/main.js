@@ -19,6 +19,7 @@ import { createBookshelfHTML, bookshelfFilterConfig } from './views/Bookshelf.js
 import { createBookmarkHTML } from './views/Bookmark.js';
 import { createBookDetailsHTML } from './views/BookDetails.js';
 import { createPersonalCenterHTML, initPersonalCenterEvents } from './views/PersonalCenter.js';
+import { createLoginHTML, initLoginEvents } from './views/Login.js';
 
 let activeCollectionTitle = '';
 let detailsFilterLogic;
@@ -280,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${createBookmarkHTML()}
             ${createBookDetailsHTML()}
             ${createPersonalCenterHTML()}
+            ${createLoginHTML()}
         </main>
         ${createModalsHTML()}
     `;
@@ -308,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDetailsView();
     initGlobalListeners(); // Attach the delegating listener for details view
     initPersonalCenterEvents(); // Initialize personal center events
+    initLoginEvents(); // Initialize login events
 
     // Homepage Reading Goal Setting Button -> Redirects to Personal Center
     // This needs to be attached after createHomepageHTML is called (which it is)

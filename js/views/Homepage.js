@@ -106,27 +106,30 @@ export function createHomepageHTML() {
                 <div id="reading-goal-display">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-bold text-text-primary mb-2 flex items-center gap-2">
-                            <i data-lucide="target" class="w-5 h-5 text-accent"></i>今日閱讀目標
+                            <i data-lucide="clock" class="w-5 h-5 text-accent"></i>今日閱讀時間
                         </h2>
-                        <button id="reading-goal-setting-btn" tabindex="0" role="button"
-                            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                            aria-label="設定閱讀目標">
-                            <i data-lucide="settings-2" class="w-5 h-5 text-gray-600"></i>
-                        </button>
                     </div>
                     <p class="text-text-secondary text-sm mb-6">保持每日閱讀習慣，累積知識複利</p>
-                    <div class="flex items-baseline space-x-2 mb-4">
+                    <div class="flex items-baseline space-x-2 mb-6">
                         <span id="current-reading-time" class="text-6xl font-bold tracking-tight"
-                            style="color: var(--bg-accent);">45</span>
-                        <span class="text-xl text-text-secondary font-medium">/ <span
-                                id="total-reading-goal">60</span> 分鐘</span>
+                            style="color: var(--bg-accent);">0</span>
+                        <span class="text-xl text-text-secondary font-medium">分鐘</span>
                     </div>
-                    <div>
-                        <div class="w-full bg-gray-100 rounded-full h-3 mb-3 overflow-hidden">
-                            <div id="reading-progress-bar" class="h-3 rounded-full transition-all duration-1000"
-                                style="width: 75%; background-color: var(--bg-accent);"></div>
+                    
+                    <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                                <i data-lucide="book-check" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-text-primary">本月已讀完</p>
+                                <p class="text-xs text-text-secondary">累積閱讀成就</p>
+                            </div>
                         </div>
-                        <p id="reading-progress-text" class="text-sm text-text-secondary text-right font-medium">已達成 75%</p>
+                        <div class="flex items-baseline gap-1">
+                            <span id="completed-books-count" class="text-2xl font-bold text-gray-800">0</span>
+                            <span class="text-sm text-text-secondary">本</span>
+                        </div>
                     </div>
                 </div>
             </section>

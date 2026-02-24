@@ -1,13 +1,13 @@
 // js/features/readingGoal.js
 // 閱讀目標功能（狀態管理與事件）
 
+import { BOOKS_DATA } from '../data/books.js';
+
 // 預設值
-const DEFAULT_GOAL = 60;
 const DEFAULT_PROGRESS = 45; // 模擬數據：今日已閱讀時間
 
 // State
 let state = {
-    goal: DEFAULT_GOAL,
     current: DEFAULT_PROGRESS
 };
 
@@ -63,30 +63,35 @@ function notifyUpdate() {
  */
 function updateHomepageUI() {
     const currentEl = document.getElementById('current-reading-time');
-    const totalEl = document.getElementById('total-reading-goal');
-    const progressBar = document.getElementById('reading-progress-bar');
-    const progressText = document.getElementById('reading-progress-text');
+    const completedBooksEl = document.getElementById('completed-books-count');
 
-    if (!currentEl || !totalEl || !progressBar || !progressText) return;
+    if (currentEl) {
+        currentEl.textContent = state.current;
+    }
 
-    currentEl.textContent = state.current;
-    totalEl.textContent = state.goal;
+    if (completedBooksEl) {
+        // 計算本月已讀完的書籍數量
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // 1-12
 
-    const percentage = Math.min(Math.round((state.current / state.goal) * 100), 100);
-    progressBar.style.width = `${percentage}%`;
-    progressText.textContent = `已達成 ${percentage}%`;
+        const completedCount = BOOKS_DATA.filter(book => {
+            if (book.progress !== 100) return false;
+
+            // 解析 lastRead, 預期格式如 '2026/02/15'
+            if (!book.lastRead || book.lastRead === '-') return false;
+
+            const [year, month] = book.lastRead.split('/').map(Number);
+            return year === currentYear && month === currentMonth;
+        }).length;
+
+        completedBooksEl.textContent = completedCount;
+    }
 }
 
 // API
 export const readingGoalStore = {
     get state() { return { ...state }; },
-
-    setGoal(newGoal) {
-        if (newGoal > 0) {
-            state.goal = newGoal;
-            saveState();
-        }
-    },
 
     setCurrent(newCurrent) {
         if (newCurrent >= 0) {
