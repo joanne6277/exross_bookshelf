@@ -12,7 +12,7 @@ export function createFilterBarHTML(config) {
         sort = null,
         viewToggle = false,
         extraMobileButtons = [],
-        containerClass = "flex p-3 md:p-4 border-b border-border-color bg-white items-center gap-2 md:gap-4 sticky top-0 z-10 overflow-x-auto md:overflow-visible no-scrollbar whitespace-nowrap md:whitespace-normal md:flex-wrap"
+        containerClass = "flex p-3 md:p-4 border-b border-border-color bg-white items-center gap-2 md:gap-4 z-30 overflow-x-auto md:overflow-visible no-scrollbar whitespace-nowrap md:whitespace-normal md:flex-wrap"
     } = config;
 
     let html = `<div id="${prefix}filter-bar" class="${containerClass}">`;

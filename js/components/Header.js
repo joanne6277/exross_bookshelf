@@ -175,23 +175,17 @@ export function createHeaderHTML() {
         </div>
         <div class="flex items-center gap-3">
              <div class="relative group">
-                <button id="notification-btn-mobile" class="relative notification-trigger">
+                <button id="notification-btn-mobile" class="relative p-1">
                     <i data-lucide="bell" class="w-5 h-5 text-gray-500"></i>
                     ${badgeHTMLMobile}
                 </button>
-                <div class="notification-dropdown hidden absolute top-full right-[-50px] mt-3 z-50 animate-fade-in-down origin-top-right max-w-[90vw]">
-                     ${createNotificationDropdownHTML()}
-                </div>
             </div>
 
             <div class="relative group">
                 <button id="user-menu-btn-mobile"
-                    class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-text-secondary user-menu-trigger">
+                    class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-text-secondary">
                     <i data-lucide="user" class="w-4 h-4"></i>
                 </button>
-                <div class="user-dropdown hidden absolute top-full right-0 mt-3 w-80 max-w-[90vw] bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
-                    ${DROPDOWN_CONTENT}
-                </div>
             </div>
         </div>
     </header>
@@ -289,6 +283,28 @@ export function initHeaderEvents() {
             openPersonalCenter('account');
         });
     });
+
+    // Mobile direct navigation
+    const mobileNotifBtn = document.getElementById('notification-btn-mobile');
+    if (mobileNotifBtn) {
+        mobileNotifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Hide badge on click
+            const badgeMobile = document.getElementById('notification-badge-mobile');
+            if (badgeMobile) badgeMobile.style.display = 'none';
+
+            openPersonalCenter('notifications');
+        });
+    }
+
+    const mobileUserBtn = document.getElementById('user-menu-btn-mobile');
+    if (mobileUserBtn) {
+        mobileUserBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openPersonalCenter('account');
+        });
+    }
 }
 
 /**

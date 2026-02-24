@@ -21,6 +21,16 @@
 **5. [MODIFY] [books.js](file:///d:/Projects/the-fictional-train/js/data/books.js)**
 - [New] 新增兩筆 `progress: 100` 且 `lastRead` 落在本月（2026/02）的模擬資料以供前端展示統計值。
 
+### 行動版 Header UI 行為調整
+
+**1. [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)**
+- [UIUX] 調整手機版 Header 頂部的「通知按鈕」與「帳號按鈕」行為：移除這兩個按鈕原有的下拉選單（Dropdown），點擊後改為直接跳轉至「個人中心 - 全部通知」與「個人中心 - 帳號管理」頁面。
+
+### 書櫃 FilterBar (篩選列) 佈局修正
+
+**1. [MODIFY] [FilterBar.js](file:///d:/Projects/the-fictional-train/js/components/FilterBar.js)**
+- [Fix] 修正「我的書櫃」往下滾動時篩選列會與 Header 重疊/破版的問題。將原先 `sticky top-0 z-10` 調整為 `sticky top-14 md:top-16 z-30`，確保篩選列在行動版及桌面版均能正確吸附於 Header 下方。
+
 
 ### 單一書店登入模式 - 登出與切換流程及登入頁面建置
 
