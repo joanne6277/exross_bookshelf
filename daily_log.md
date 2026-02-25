@@ -2,6 +2,15 @@
 
 ## 2026-02-25
 
+### 新增全域 Footer 頁尾區塊
+
+**1. [NEW] [Footer.js](file:///d:/Projects/the-fictional-train/js/components/Footer.js)**
+- [UIUX] 新增共用的 Footer 頁尾元件，提供「關於我們」(連結至官方網站) 與「客服信箱」(mailto 連結) 兩個基本超連結。
+- [Style] 設計為簡潔的底部留白區塊，文字置中，符合整體響應式 (RWD) 佈局，於手機版與桌面版均能置底顯示。
+
+**2. [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)**
+- [Update] 於主程式中匯入 `createFooterHTML` 並將其注入至 `id="main-content"` 容器的最下方，使其能跟隨所有主畫面內容一起滾動置底。
+
 ### 帳號管理視圖流程重構
 
 **1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**

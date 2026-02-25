@@ -12,6 +12,7 @@ import { createHeaderHTML, initHeaderEvents } from './components/Header.js';
 import { createMobileNavHTML } from './components/MobileNav.js';
 import { createModalsHTML } from './components/Modals.js';
 import { initFilterBarEvents } from './components/FilterBar.js';
+import { createFooterHTML } from './components/Footer.js';
 
 // Views
 import { createHomepageHTML } from './views/Homepage.js';
@@ -275,13 +276,14 @@ document.addEventListener('DOMContentLoaded', () => {
     app.innerHTML = `
         ${createHeaderHTML()}
         ${createMobileNavHTML()}
-        <main id="main-content" class="flex-1 overflow-y-auto bg-primary p-4 pt-20 pb-24 md:p-8 md:pt-8 md:pb-8 scroll-smooth w-full max-w-[1600px] mx-auto h-screen">
+        <main id="main-content" class="flex-1 overflow-y-auto bg-primary p-4 pt-20 pb-24 md:p-8 md:pt-8 md:pb-8 scroll-smooth w-full max-w-[1600px] mx-auto h-screen relative">
             ${createHomepageHTML()}
             ${createBookshelfHTML()}
             ${createBookmarkHTML()}
             ${createBookDetailsHTML()}
             ${createPersonalCenterHTML()}
             ${createLoginHTML()}
+            ${createFooterHTML()}
         </main>
         ${createModalsHTML()}
     `;
