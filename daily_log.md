@@ -1,5 +1,22 @@
 # Daily Log
 
+## 2026-02-25
+
+### 帳號管理視圖流程重構
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [UIUX] 移除原先在頂部使用按鈕切換「單一書店登入」與「裝置登入」頁籤的設計，改為直接依據當前的登入狀態（單一書店 / 載具綁定）顯示對應的專屬視圖。
+- [UIUX] 單一書店登入模式下，畫面會整合顯示「目前的書店（三民）」、「其他可切換的書店」，並將「裝置驗證入口」置於最下方。
+- [UIUX] 裝置登入模式下，隱藏所有單一書店的登出與切換按鈕，專注顯示目前連結的手機裝置資訊以及被該裝置所同步的所有書店列表。
+- [Logic] 簡化切換邏輯。完成 QR Code 模擬驗證成功後，會隱藏 `single-mode-view` 並顯示 `carrier-mode-view`；點擊解除連結後則反之。同步移除原本按鈕內文字替換的舊邏輯。
+
+### 載具驗證流程體驗優化 (QR Code 模擬視窗)
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [UIUX] 點擊「進行裝置驗證」後不再直接跳出原生 `alert`，而是彈出一個模擬的 QR Code 掃描視窗 (`#qr-code-modal`)。
+- [Style] 使用 Backdrop Blur (毛玻璃) 與 Tailwind 轉場動畫 (`scale-95` 到 `scale-100` 以及 `opacity` 漸變) 使彈出視窗更加平滑流暢。
+- [Feature] 視窗內提供假 QR Code 圖示與「取消」、「模擬掃描成功」兩顆按鈕以供操作互動。點擊取消會關閉視窗，點擊模擬成功則會帶出原先的裝置連結成功狀態。
+
 ## 2026-02-24
 
 ### 閱讀目標改版：移除自訂目標，改為紀錄與顯示成就

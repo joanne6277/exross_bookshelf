@@ -3,11 +3,11 @@ import { openPersonalCenter } from '../views/PersonalCenter.js';
 
 const DROPDOWN_CONTENT = `
     <div class="p-5" id="header-user-dropdown-content">
-        <!-- 載具登入模式內容 -->
+        <!-- 裝置登入模式內容 -->
         <div id="header-carrier-content" class="hidden">
             <div class="flex items-center justify-between mb-4">
                 <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md flex items-center gap-1">
-                    <i data-lucide="smartphone" class="w-3 h-3"></i> 載具登入模式
+                    <i data-lucide="smartphone" class="w-3 h-3"></i> 裝置登入模式
                 </span>
                 <button class="btn-link-other-accounts text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
                     帳號管理
@@ -16,13 +16,13 @@ const DROPDOWN_CONTENT = `
             </div>
 
             <div class="mb-4">
-                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">已連結載具</p>
+                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">已連結裝置</p>
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                     <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
                         <i data-lucide="user" class="w-4 h-4"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-bold text-gray-900 truncate">/AB12345</p>
+                        <p class="text-sm font-bold text-gray-900 truncate">iPhone 17 Pro</p>
                         <p class="text-xs text-gray-500 truncate">王大明</p>
                     </div>
                 </div>
