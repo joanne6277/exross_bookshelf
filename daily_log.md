@@ -1,5 +1,20 @@
 # Daily Log
 
+## 2026-03-02
+
+### Footer 新增問題回報彈窗
+
+**1. [MODIFY] [Footer.js](file:///d:/Projects/the-fictional-train/js/components/Footer.js)**
+- [UIUX] 將 Footer 頁尾的「客服信箱」連結更改為「問題回報」按鈕。
+- [Logic] 取消原有的 `mailto:` 連結，改為綁定 `data-modal-target="issue-report-modal"` 以觸發問題回報彈窗。
+
+**2. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [New] 於 `createModalsHTML` 中新增 `#issue-report-modal` 結構，提供使用者填寫問題回報。
+- [UIUX] 彈窗內包含「系統資訊」區塊（裝置名稱、系統版本、APP版本預設值帶入）。
+- [UIUX] 提供單選按鈕讓使用者選擇「問題類型」（系統問題、書本問題）以及「涉及書店」（灰熊、讀冊、三民）。
+- [UIUX] 提供文字輸入框讓使用者簡述問題內容，並包含一個點擊上傳截圖的拖曳/上傳區塊。
+- [UIUX] 於表單底部附上客服信箱資訊，供進階協助使用。
+
 ## 2026-02-26
 
 ### 移除教學資源更新相關功能

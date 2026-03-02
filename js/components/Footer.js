@@ -8,9 +8,9 @@ export function createFooterHTML() {
                     <a href="https://www.ebookxross.com" target="_blank" rel="noopener noreferrer" class="text-sm text-text-secondary hover:text-blue-600 transition-colors">
                         關於我們
                     </a>
-                    <a href="mailto:service@ebookxross.com" class="text-sm text-text-secondary hover:text-blue-600 transition-colors">
-                        客服信箱
-                    </a>
+                    <button data-modal-target="issue-report-modal" class="text-sm text-text-secondary hover:text-blue-600 transition-colors cursor-pointer outline-none">
+                        問題回報
+                    </button>
                 </div>
                 <!-- 多語系切換選單 -->
                 <div class="flex items-center gap-2">

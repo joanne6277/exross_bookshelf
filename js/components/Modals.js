@@ -655,5 +655,113 @@ export function createModalsHTML() {
             </div>
         </div>
     </div>
+
+    <!-- Issue Report Modal -->
+    <div id="issue-report-modal" class="modal-overlay hidden fixed inset-0 z-[100] flex items-center justify-center p-4"
+         data-modal-close="issue-report-modal">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden modal-content flex flex-col max-h-[90vh]"
+             onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-5 border-b border-border-color bg-gray-50 flex-shrink-0">
+                <h3 class="text-xl font-bold text-text-primary flex items-center gap-2">
+                    <i data-lucide="message-square-warning" class="w-5 h-5 text-accent"></i> 問題回報
+                </h3>
+                <button data-modal-close="issue-report-modal" class="text-text-secondary hover:text-text-primary transition-colors p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-6 overflow-y-auto flex-1">
+                <!-- System Info -->
+                <section class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <h4 class="text-sm font-bold text-text-secondary mb-3 flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4"></i> 系統資訊
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <span class="block text-xs text-text-secondary mb-1">裝置名稱</span>
+                            <span class="text-sm font-medium text-text-primary" id="issue-device-name">iPhone 13 Pro (預設)</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-text-secondary mb-1">系統版本</span>
+                            <span class="text-sm font-medium text-text-primary" id="issue-os-version">iOS 16.5 (預設)</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-text-secondary mb-1">APP版本</span>
+                            <span class="text-sm font-medium text-text-primary" id="issue-app-version">v1.2.3 (預設)</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Issue Type -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">問題類型 <span class="text-red-500">*</span></h4>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-type" value="system" class="w-4 h-4 text-accent focus:ring-accent" checked>
+                            <span class="text-sm font-medium text-text-primary">系統問題</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-type" value="book" class="w-4 h-4 text-accent focus:ring-accent">
+                            <span class="text-sm font-medium text-text-primary">書本問題</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Bookstore Selection -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">涉及書店 <span class="text-red-500">*</span></h4>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-bookstore" value="iread" class="w-4 h-4 text-accent focus:ring-accent" checked>
+                            <span class="text-sm font-medium text-text-primary">灰熊</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-bookstore" value="taaze" class="w-4 h-4 text-accent focus:ring-accent">
+                            <span class="text-sm font-medium text-text-primary">讀冊</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-bookstore" value="sanmin" class="w-4 h-4 text-accent focus:ring-accent">
+                            <span class="text-sm font-medium text-text-primary">三民</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Description -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-2">問題描述</h4>
+                    <textarea class="w-full h-24 border border-border-color rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow resize-none" placeholder="請簡述您遇到的問題..."></textarea>
+                </section>
+
+                <!-- Screenshot Upload -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">上傳截圖</h4>
+                    <div class="border-2 border-dashed border-border-color rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer" onclick="document.getElementById('issue-screenshot-upload').click()">
+                        <i data-lucide="image-plus" class="w-8 h-8 text-gray-400 mb-2"></i>
+                        <span class="text-sm text-text-secondary mb-1">點擊上傳圖片</span>
+                        <span class="text-xs text-gray-400">支援 JPG, PNG 格式</span>
+                        <input type="file" id="issue-screenshot-upload" class="hidden" accept="image/png, image/jpeg">
+                    </div>
+                </section>
+                
+                <!-- Customer Service Info -->
+                <section class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
+                    <i data-lucide="mail-search" class="w-5 h-5 text-blue-500 mt-0.5"></i>
+                    <div>
+                        <span class="block text-sm font-bold text-text-primary mb-1">客服信箱</span>
+                        <span class="text-sm text-text-secondary">若有其他疑問，歡迎聯繫：<br><a href="mailto:service@ebookxross.com" class="text-accent hover:underline font-medium">service@ebookxross.com</a></span>
+                    </div>
+                </section>
+            </div>
+
+            <div class="p-5 border-t border-border-color bg-gray-50 flex justify-end gap-3 flex-shrink-0">
+                <button data-modal-close="issue-report-modal" class="px-5 py-2.5 rounded-lg border border-border-color text-sm font-bold text-text-primary hover:bg-gray-100 transition-colors">
+                    取消
+                </button>
+                <button class="px-5 py-2.5 rounded-lg text-white text-sm font-bold shadow-sm hover:opacity-90 transition-opacity" style="background-color: var(--bg-accent);" onclick="alert('已送出回報！'); document.getElementById('issue-report-modal').querySelector('[data-modal-close]').click()">
+                    送出回報
+                </button>
+            </div>
+        </div>
+    </div>
     `;
 }
