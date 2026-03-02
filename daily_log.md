@@ -1,5 +1,35 @@
 # Daily Log
 
+## 2026-02-26
+
+### 移除教學資源更新相關功能
+
+**1. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [UIUX] 於書籍資訊彈窗標籤列中，將原本的「新教學資源」標籤更名為「有教學資源」，並將背景色由紅色 (`bg-red-100`) 調整為藍色 (`bg-blue-100`)。
+
+**2. [MODIFY] [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+- [Logic] 取消判斷 `teachingResources.hasNew` 來決定標籤顯示的邏輯，改為只要該書籍有 `teachingResources` 即顯示該「有教學資源」標籤。
+- [UIUX] 移除了在附件與參考連結卡片中顯示紅底白字 `NEW` 標記的邏輯。
+
+**3. [MODIFY] [books.js](file:///d:/Projects/the-fictional-train/js/data/books.js)**
+- [Data] 刪除了 `BOOKS_DATA` 模擬資料中，`teachingResources` 內的 `hasNew` 與陣列項目內的 `isNew` 屬性。
+
+**4. [MODIFY] [notifications.js](file:///d:/Projects/the-fictional-train/js/data/notifications.js)**
+- [Data] 從 `NOTIFICATIONS_DATA` 模擬資料中移除 ID 為 7 的「教學資源更新」假通知設定。
+
+### 調整通知類型與簡化分類
+
+**1. [MODIFY] [notifications.js](file:///d:/Projects/the-fictional-train/js/data/notifications.js)**
+- [Logic] 將 `NOTIFICATION_CATEGORIES` 陣列精簡，僅保留「全部」、「系統訊息 (system)」與「到期提醒 (expiry)」。
+- [Data] 從 `NOTIFICATIONS_DATA` 模擬資料中移除原屬於 `reading-goal` 分類的所有假資料（目標達成與本週報告），貫徹功能改版後單純依靠圖表與成就顯示而非推播通知的設計。
+
+### 新增多語系切換選單
+
+**1. [MODIFY] [Footer.js](file:///d:/Projects/the-fictional-train/js/components/Footer.js)**
+- [UIUX] 於 Footer 區域新增多語系切換選單 (Language Switcher)，提供繁體中文、English、日本語等選項，目前僅作 UI 展示，尚未實質綁定切換邏輯。
+- [Style] 調整原有的「關於我們」與「客服信箱」佈局，使其與語系切換選單在桌面與手機版都能保持良好的間距與對齊方式。
+
+
 ## 2026-02-25
 
 ### 新增全域 Footer 頁尾區塊

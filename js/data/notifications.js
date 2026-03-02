@@ -27,15 +27,6 @@ export const NOTIFICATIONS_DATA = [
         category: 'system'
     },
     {
-        id: 4,
-        title: '閱讀目標達成',
-        content: '恭喜！您昨日的閱讀時間達到了設定的 30 分鐘目標。',
-        date: '2026/01/16 08:00',
-        isRead: false,
-        type: 'success',
-        category: 'reading-goal'
-    },
-    {
         id: 5,
         title: '租借即將到期',
         content: '您的《設計模式》將於 3 天後到期，如需延長請前往書櫃操作。',
@@ -43,24 +34,6 @@ export const NOTIFICATIONS_DATA = [
         isRead: false,
         type: 'alert',
         category: 'expiry'
-    },
-    {
-        id: 6,
-        title: '本週閱讀報告',
-        content: '您本週共閱讀 150 分鐘，比上週增加 20%！繼續保持！',
-        date: '2026/01/19 10:00',
-        isRead: true,
-        type: 'info',
-        category: 'reading-goal'
-    },
-    {
-        id: 7,
-        title: '教學資源更新',
-        content: '您的教科書《設計系統實戰》有新的教學資源上傳囉！',
-        date: '2026/02/23 15:00',
-        isRead: false,
-        type: 'info',
-        category: 'system'
     }
 ];
 
@@ -68,7 +41,6 @@ export const NOTIFICATIONS_DATA = [
 export const NOTIFICATION_CATEGORIES = [
     { id: 'all', label: '全部' },
     { id: 'system', label: '系統訊息' },
-    { id: 'expiry', label: '到期提醒' },
-    { id: 'reading-goal', label: '閱讀目標' }
+    { id: 'expiry', label: '到期提醒' }
 ];
 

@@ -20,7 +20,7 @@ export function createModalsHTML() {
                 <span id="modal-book-format" class="bg-gray-800 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden">EPUB</span>
                 <span id="modal-book-audiobook-icon" class="bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="volume-2" class="w-3 h-3"></i> 有聲書</span>
                 <span id="modal-book-tts-icon" class="bg-teal-500 text-white text-xs font-bold px-2.5 py-1 rounded-full hidden flex items-center gap-1"><i data-lucide="speech" class="w-3 h-3"></i> 可朗讀</span>
-                <span id="modal-book-new-resource-tag" class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full hidden">新教學資源</span>
+                <span id="modal-book-new-resource-tag" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full hidden">有教學資源</span>
             </div>
 
             <div class="flex-1 overflow-y-auto p-6">

@@ -18,13 +18,12 @@ export const BOOKS_DATA = [
         description: '本書深入淺出地介紹了如何從零開始建置一套完整的設計系統，適合設計師與工程師閱讀。',
         expiryDate: '2028/12/09 10:00',
         teachingResources: {
-            hasNew: true,
             attachments: [
                 { name: '課程大綱.pdf', size: '1.2 MB', url: '#' },
-                { name: '補充教材.zip', size: '15 MB', url: '#', isNew: true }
+                { name: '補充教材.zip', size: '15 MB', url: '#' }
             ],
             links: [
-                { title: '官方 Figma 設計稿', url: '#', isNew: true },
+                { title: '官方 Figma 設計稿', url: '#' },
                 { title: '參考範例網站', url: '#' }
             ]
         },

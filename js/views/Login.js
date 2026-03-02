@@ -33,8 +33,8 @@ export function createLoginHTML() {
                                     <i data-lucide="smartphone" class="w-5 h-5"></i>
                                 </div>
                                 <div class="text-left">
-                                    <p class="text-sm font-bold text-text-primary group-hover:text-green-900">載具登入 (多帳號)</p>
-                                    <p class="text-xs text-text-secondary">綁定手機條碼，同步所有書櫃</p>
+                                    <p class="text-sm font-bold text-text-primary group-hover:text-green-900">裝置登入 (多帳號)</p>
+                                    <p class="text-xs text-text-secondary">綁定裝置，同步所有書櫃</p>
                                 </div>
                             </div>
                             <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors"></i>
