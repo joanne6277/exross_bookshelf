@@ -1,5 +1,12 @@
 # Daily Log
 
+## 2026-03-03
+
+### 書櫃書封顯示來源標籤
+
+**1. [MODIFY] [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+- [UIUX] 在書櫃的網格視圖與列表視圖中，將書籍來源（如：讀冊、三民）標籤疊加顯示於書封圖片的左下角。
+
 ## 2026-03-02
 
 ### Footer 新增問題回報彈窗

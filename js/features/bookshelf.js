@@ -191,6 +191,9 @@ export function createBookCardHTML(book, options = {}) {
         ${topLabel}
         <div class="relative overflow-hidden aspect-[2/3] viewer-trigger">
             <img src="${book.cover}" alt="${book.title}" class="${imgClasses}">
+            <div class="absolute bottom-2 left-2 z-10 pointer-events-none">
+                <span class="bg-blue-100/90 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">${book.source}</span>
+            </div>
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
                 <div class="h-full" style="width: ${book.progress}%; background-color: var(--bg-accent);"></div>
             </div>
@@ -227,7 +230,12 @@ export function createBookListItemHTML(book) {
         <div class="batch-checkbox hidden flex-shrink-0">
             <input type="checkbox" class="w-5 h-5 rounded text-accent focus:ring-accent cursor-pointer">
         </div>
-        <img src="${book.cover}" alt="${book.title}" class="w-16 md:w-20 h-30 object-cover rounded-md shadow-sm flex-shrink-0 cursor-pointer info-trigger">
+        <div class="relative flex-shrink-0 cursor-pointer info-trigger">
+            <img src="${book.cover}" alt="${book.title}" class="w-16 md:w-20 h-30 object-cover rounded-md shadow-sm block">
+            <div class="absolute bottom-1 left-1 z-10 pointer-events-none">
+                <span class="bg-blue-100/90 text-blue-800 text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">${book.source}</span>
+            </div>
+        </div>
         <div class="flex-1 min-w-0 cursor-pointer info-trigger">
             <h3 class="font-bold text-base md:text-lg text-text-primary mb-1 hover:text-accent">${book.title}</h3>
             <p class="text-xs md:text-sm text-text-secondary mb-1">${book.author}</p>
