@@ -672,7 +672,7 @@ export function createModalsHTML() {
             
             <div class="p-6 space-y-6 overflow-y-auto flex-1">
                 <!-- System Info -->
-                <section class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <section class="bg-gray-50 p-4 rounded-xl border border-gray-100 hidden">
                     <h4 class="text-sm font-bold text-text-secondary mb-3 flex items-center gap-2">
                         <i data-lucide="info" class="w-4 h-4"></i> 系統資訊
                     </h4>
@@ -723,7 +723,17 @@ export function createModalsHTML() {
                             <input type="radio" name="issue-bookstore" value="sanmin" class="w-4 h-4 text-accent focus:ring-accent">
                             <span class="text-sm font-medium text-text-primary">三民</span>
                         </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="issue-bookstore" value="none" class="w-4 h-4 text-accent focus:ring-accent">
+                            <span class="text-sm font-medium text-text-primary">無</span>
+                        </label>
                     </div>
+                </section>
+
+                <!-- Book Name / ISBN -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">書本名稱/ISBN編碼</h4>
+                    <input type="text" id="issue-book-isbn" class="w-full border border-border-color rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow" placeholder="請輸入書本名稱或 ISBN 編碼">
                 </section>
 
                 <!-- Description -->

@@ -1,5 +1,24 @@
 # Daily Log
 
+## 2026-03-04
+
+### 問題回報彈窗欄位調整
+
+**1. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [UIUX] 於「問題回報」彈窗的「涉及書店」區塊新增「無」的選項。
+- [UIUX] 於「問題回報」彈窗新增「書本名稱/ISBN編碼」之文字輸入框。
+- [UIUX] 隱藏「問題回報」彈窗中的「系統資訊」區塊。
+
+### 登入頁面調整
+
+**1. [MODIFY] [Login.js](file:///d:/Projects/the-fictional-train/js/views/Login.js)**
+- [UIUX] 桌面版改為左右分割佈局：左側新增 App 下載引導區塊（品牌 Logo、主標題文案、功能亮點列表、App Store / Google Play 下載按鈕），右側放置原有登入卡片。
+- [UIUX] 重新整合手機版版面：將主要登入卡片與 App 下載引導區塊合併為單一卡片視覺，並隱藏手機版重複的品牌圖示與功能亮點，簡化畫面長度以提升行動端體驗。
+- [UIUX] 桌面版登入卡片內隱藏品牌圖示（已於左側呈現），手機版仍正常顯示。
+- [Logic] 點擊「裝置登入 (多帳號)」按鈕後，不再使用 `alert()`，改為彈出 QR Code 掃描視窗 (`#login-qr-modal`)。
+- [New] 新增 QR Code 掃描彈窗，包含掃描說明、QR Code 圖示、「取消」及「模擬掃描成功」按鈕，成功後導回首頁。
+- [New] 在登入頁左側的 App Store 與 Google Play 下載按鈕旁，各新增一個桌機版專屬的 QR Code 圖示，方便電腦使用者直接掃描下載應用程式。
+
 ## 2026-03-03
 
 ### 書櫃書封顯示來源標籤
