@@ -2,6 +2,30 @@
 
 ## 2026-03-04
 
+### 文件更新 (PRD & Sitemap)
+
+**1. [MODIFY] [PRD](file:///d:/Projects/the-fictional-train/doc/PRD)**
+- [Update] 更新首頁段落：移除每日閱讀目標設定，改為描述今日閱讀時間與閱讀成就（本月讀完本數）。
+- [Update] 更新帳號與登入機制段落：詳述「雙軌登入模式」（單一書店與載具登入）及個人帳號管理、新版獨立登入頁面（左右分割/垂直佈局與 QR Code）。
+- [New] 新增全域元件段落：記錄新加入的底部頁尾 (Footer) 與問題回報 (Issue Report) 彈窗邏輯（如：系統問題連動書本來源）。
+
+**2. [MODIFY] [SITEMAP.md](file:///d:/Projects/the-fictional-train/doc/SITEMAP.md)**
+- [Update] 主要頁面結構中新增「登入頁面 (Login)」，包含單一書店與載具驗證分支。
+- [Update] 在全域架構中加入「全域底部頁尾 (Footer)」。
+- [Update] 首頁架構更新，以「閱讀成就統計」取代原有的設定目標按鈕。
+- [Update] 個人中心架構重構，細分帳號管理區塊的「模式切換」與「載具/單一書店視圖」，並移除靜態寫死的閱讀目標設定。
+- [Update] 彈出視窗 (Modals) 表格新增 `issue-report-modal` 與 `login-qr-modal`。
+
+### 問題回報彈窗欄位與邏輯調整
+
+**1. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
+- [UIUX] 於「問題回報」彈窗新增「聯絡信箱」文字輸入框。
+- [UIUX] 將「涉及書店」文字修改為「書本來源」，並取消必填設定。
+- [UIUX] 將「問題描述」設定為必填欄位 (標示 `*` 與 `required` 屬性)。
+
+**2. [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)**
+- [Logic] 新增「問題回報」彈窗的表單互動邏輯：當「問題類型」選擇「系統問題」時，自動將「書本來源」鎖定為「無」，且其餘選項轉為不可選狀態（加上半透明與禁止點擊樣式）；選擇「書本問題」時則恢復正常。
+
 ### 問題回報彈窗欄位調整
 
 **1. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**

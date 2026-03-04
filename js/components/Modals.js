@@ -692,6 +692,12 @@ export function createModalsHTML() {
                     </div>
                 </section>
 
+                <!-- Contact Email -->
+                <section>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">聯絡信箱</h4>
+                    <input type="email" id="issue-contact-email" class="w-full border border-border-color rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow" placeholder="請輸入聯絡信箱">
+                </section>
+
                 <!-- Issue Type -->
                 <section>
                     <h4 class="text-sm font-bold text-text-secondary mb-3">問題類型 <span class="text-red-500">*</span></h4>
@@ -709,7 +715,7 @@ export function createModalsHTML() {
 
                 <!-- Bookstore Selection -->
                 <section>
-                    <h4 class="text-sm font-bold text-text-secondary mb-3">涉及書店 <span class="text-red-500">*</span></h4>
+                    <h4 class="text-sm font-bold text-text-secondary mb-3">書本來源</h4>
                     <div class="flex flex-wrap gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="issue-bookstore" value="iread" class="w-4 h-4 text-accent focus:ring-accent" checked>
@@ -738,8 +744,8 @@ export function createModalsHTML() {
 
                 <!-- Description -->
                 <section>
-                    <h4 class="text-sm font-bold text-text-secondary mb-2">問題描述</h4>
-                    <textarea class="w-full h-24 border border-border-color rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow resize-none" placeholder="請簡述您遇到的問題..."></textarea>
+                    <h4 class="text-sm font-bold text-text-secondary mb-2">問題描述 <span class="text-red-500">*</span></h4>
+                    <textarea class="w-full h-24 border border-border-color rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-shadow resize-none" placeholder="請簡述您遇到的問題..." required></textarea>
                 </section>
 
                 <!-- Screenshot Upload -->

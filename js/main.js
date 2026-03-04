@@ -336,6 +336,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Issue Report Modal Logic
+    const issueTypeRadios = document.querySelectorAll('input[name="issue-type"]');
+    const issueBookstoreRadios = document.querySelectorAll('input[name="issue-bookstore"]');
+
+    if (issueTypeRadios.length > 0) {
+        issueTypeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const type = e.target.value;
+                if (type === 'system') {
+                    issueBookstoreRadios.forEach(br => {
+                        if (br.value === 'none') {
+                            br.checked = true;
+                            br.disabled = false;
+                        } else {
+                            br.disabled = true;
+                            br.closest('label').classList.add('opacity-50', 'pointer-events-none');
+                        }
+                    });
+                } else {
+                    issueBookstoreRadios.forEach(br => {
+                        br.disabled = false;
+                        br.closest('label').classList.remove('opacity-50', 'pointer-events-none');
+                    });
+                }
+            });
+        });
+
+        // Trigger initial state setup
+        const checkedType = document.querySelector('input[name="issue-type"]:checked');
+        if (checkedType) {
+            // Delay slightly to ensure DOM is fully ready
+            setTimeout(() => {
+                checkedType.dispatchEvent(new Event('change'));
+            }, 0);
+        }
+    }
+
     // Fix: Router expects 'view-section' classes to handle switching. 
     // They are included in component HTMLs.
 
