@@ -268,7 +268,7 @@ export const BOOKS_DATA = [
         expiryDate: '',
         duration: '12 小時 40 分',
         lastRead: '2026/02/20',
-        format: 'MP3',
+        format: 'EPUB',
         notes: []
     }
 ];
