@@ -1038,7 +1038,7 @@ export function setupFilterLogic({ containerId, dataSource, render }) {
                 if (!book.source.includes(activeFilters.source) && activeFilters.source !== book.source) {
                     let target = activeFilters.source;
                     if (target.includes('讀冊')) target = '讀冊';
-                    if (target.includes('灰熊')) target = 'iRead';
+                    if (target.includes('灰熊愛讀書')) target = 'iRead';
 
                     if (book.source !== target && !target.includes(book.source)) return false;
                 }

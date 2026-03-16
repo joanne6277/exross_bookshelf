@@ -1,5 +1,107 @@
 # Daily Log
 
+## 2026-03-16
+
+### 品牌正名：iRead 灰熊更名為「灰熊愛讀書」
+
+- 全專案正名：將所有程式碼、模擬資料、UI 標籤及文件中的「iRead 灰熊」、「灰熊 iRead」及單獨的「灰熊」字樣統一正名為「灰熊愛讀書」。
+- 涉及文件：
+    - `js/views/Login.js`
+    - `js/views/Bookshelf.js`
+    - `js/data/books.js`
+    - `js/features/bookshelf.js`
+    - `js/components/Modals.js`
+    - `js/components/personal-center/AccountSection.js`
+    - `doc/PRD`
+    - `daily_log.md`
+
+### Header 調整：登入模式標籤與帳號管理按鈕優化
+(其餘內容保持不變，但在內容中將灰熊相關稱呼正名)
+
+**1. [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)**
+- **[Update] 登入模式標籤 (`updateHeaderLoginMode`)**：
+    - 將「裝置登入」更名為「裝置登入模式」。
+    - 將登入模式標籤（裝置登入模式、書店登入）改為純文字顯示，移除點選效果、懸停樣式及右側箭頭圖示，使其符合純資訊展示之需求。
+- **[Refactor] 帳號管理按鈕 (`createHeaderHTML`)**：
+    - 移除原本頭像按鈕的下拉選單功能。
+    - 將按鈕樣式改為「圖示 + 文字（帳號管理）」，提升功能辨識度。
+- **[Update] 右側元件排序**：
+    - 調整 Header 右側元件順序為：登入方式標籤、通知按鈕、帳號管理按鈕。
+- **[Clean] 程式碼清理**：
+    - 移除不再使用的 `DROPDOWN_CONTENT` 常數及其相關的事件綁定邏輯。
+    - 更新 `initHeaderEvents`，將帳號管理按鈕改為直接點擊跳轉至個人中心的帳號設定頁面。
+
+---
+
+
+### 帳號管理：單一書店模式新增切換書店區塊與 QR 掃描跳轉首頁
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+
+- **[New] `ALL_STORES` 常數**：統一定義平台支援的四家書店（三民書局、讀冊生活、灰熊愛讀書、HyRead），供切換書店按鈕生成使用。
+- **[New] `createSwitchStoreBlockHTML(currentStore)`**：在 `single` 模式帳號管理頁新增「區塊二：切換書店登入」，動態排除目前已登入書店，以 3 欄 Grid 呈現其他可切換的書店卡片。
+- **[Update] `createSingleModeHTML(authState)`**：調整三區塊排版：
+  - 區塊一：目前登入方式（維持原狀）
+  - 區塊二：切換書店（新增，FR-ACCT-SWITCH）
+  - 區塊三：同步多家書櫃 QR Code（維持原狀）
+- **[Fix] QR Code 掃描成功後跳轉首頁**：`#acct-qr-simulate-btn` 點擊後呼叫 `loginWithDevice()`，再呼叫 `switchView('homepage')` 跳回首頁（原本停留在帳號頁重新渲染）。
+- **[New] 切換書店事件**：`bindInternalEvents()` 中新增 `.acct-switch-store-btn` 點擊事件，彈出確認對話框後呼叫 `loginWithStore(storeName)`，`auth-state-changed` 事件觸發帳號管理區塊自動重新渲染。
+- **[New] import `switchView`**：從 `../../router.js` 引入 `switchView`，供 QR 掃描成功後跳轉使用。
+
+---
+
+### 登入頁面進入流程保護（路由守衛）
+
+**1. [MODIFY] [auth.js](file:///d:/Projects/the-fictional-train/js/features/auth.js)**
+- **[New] `isLoggedIn()`**：新增輔助函數，方便 router 快速查詢登入狀態，避免每次解構 `getAuthState()`。
+
+**2. [MODIFY] [router.js](file:///d:/Projects/the-fictional-train/js/router.js)**
+- **[Refactor] `switchView` 改為 `export`**：讓其他模組（Login.js、AccountSection.js）可直接呼叫。
+- **[Feature] 初始路由守衛**：`initRouter()` 時若 `!isLoggedIn()`，改呼叫 `openLoginView()` 而非預設進入首頁。
+- **[Feature] switchView 路由守衛**：每次 `switchView()` 執行前先檢查 `isLoggedIn()`，未登入則攔截導向登入頁。
+- **[New] import `openLoginView` 與 `isLoggedIn`**：從 `Login.js` 與 `auth.js` 引入。
+
+**3. [MODIFY] [Login.js](file:///d:/Projects/the-fictional-train/js/views/Login.js)**
+- **[Update] 書店登入成功後**：改用 `switchView('homepage')` 取代 `nav-link.click()`，確保流程一致。
+- **[Update] QR Code 掃描成功後**：同上，改用 `switchView('homepage')`。
+- **[New] import `switchView`**：從 `../router.js` 引入。
+
+**4. [MODIFY] [main.js](file:///d:/Projects/the-fictional-train/js/main.js)**
+- **[Fix] 初始化順序調整**：將 `initAuthFeature()` 移至 `initRouter()` 之前，確保路由初始化時 `isLoggedIn()` 可讀到正確的 localStorage 狀態。
+
+
+
+### 帳號管理頁面（Account Management）三狀態 UI 改寫
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+
+完整改寫 `createAccountSectionHTML`、`renderAccountSection` 與事件綁定邏輯，依 `loginMethod` 動態渲染三種完全不同的帳號管理畫面：
+
+- **[Feature] 未登入狀態**：
+  - 顯示「未登入」狀態標頭。
+  - 提供「使用其他書店帳號連結」區塊（含前往登入頁按鈕）。
+  - 提供「使用書紐 App 一鍵同步」QR Code 區塊。
+
+- **[Feature] 書店帳號登入 (`single`) 狀態（FR-ACCT-01, 02, 03）**：
+  - 顯示「透過 {linkedStores[0]} 帳號登入」及已連結書店清單。
+  - 顯示 QR Code 區塊（含 90 秒倒數計時、重新整理按鈕、模擬掃描按鈕），掃描後 `loginMethod` 升級為 `device`，合併現有書店清單。
+  - 顯示紅色「登出」按鈕，點擊後彈出確認對話框「確定要安全登出您的帳號嗎？」，確認後清除狀態並導回登入頁。
+
+- **[Feature] 裝置登入 (`device`) 狀態（FR-ACCT-04, 05, 06）**：
+  - 顯示「透過信任裝置登入」狀態標頭（藍色主題）。
+  - 以唯讀 tag 形式呈現所有 `linkedStores`（依書店名稱對應顏色標籤）；無書店時顯示「尚無同步紀錄」。
+  - 顯示注意說明「書店連結由 App 端管理，如需變更請至書紐 App 操作」。
+  - 隱藏所有連結操作入口，僅保留「解除此裝置連結」按鈕，點擊後彈出確認對話框「確定要解除此裝置的信任連結嗎？解除後需重新登入。」，確認後清除狀態並導回登入頁。
+
+- **[Refactor] QR Code 計時器模組**：
+  - 新增模組層級 `qrTimerInterval`、`qrTimeLeft`、`qrExpired` 狀態管理。
+  - `startQrTimer(container)` 重置並啟動倒數；`stopQrTimer()` 清除計時器（切換頁面或登入狀態改變時呼叫）。
+  - `updateQrDisplay(container)` 依計時狀態更新倒數文字、狀態訊息、掃描線顯示與按鈕禁用狀態（規格對應 FR-LOGIN-02 與 FR-ACCT-02）。
+
+- **[Style] 掃描線動畫**：使用 `animation: scan 2.5s ease-in-out infinite`，與 Login.js 同一套 `@keyframes scan` 定義，確保視覺一致性。
+
+- **[Refactor] 事件重構**：移除舊有的 `createStoresListHTML`、`store-status-btn` 委派邏輯，改為各狀態各自獨立的 `#acct-logout-btn`、`#acct-unlink-btn`、`#acct-qr-refresh-btn`、`#acct-qr-simulate-btn`、`#acct-goto-login-btn` 精確選取，避免跨狀態污染。
+
 ## 2026-03-04
 
 ### 文件更新 (PRD & Sitemap)
@@ -61,7 +163,7 @@
 **2. [MODIFY] [Modals.js](file:///d:/Projects/the-fictional-train/js/components/Modals.js)**
 - [New] 於 `createModalsHTML` 中新增 `#issue-report-modal` 結構，提供使用者填寫問題回報。
 - [UIUX] 彈窗內包含「系統資訊」區塊（裝置名稱、系統版本、APP版本預設值帶入）。
-- [UIUX] 提供單選按鈕讓使用者選擇「問題類型」（系統問題、書本問題）以及「涉及書店」（灰熊、讀冊、三民）。
+- [UIUX] 提供單選按鈕讓使用者選擇「問題類型」（系統問題、書本問題）以及「涉及書店」（灰熊愛讀書、讀冊、三民）。
 - [UIUX] 提供文字輸入框讓使用者簡述問題內容，並包含一個點擊上傳截圖的拖曳/上傳區塊。
 - [UIUX] 於表單底部附上客服信箱資訊，供進階協助使用。
 
@@ -159,7 +261,7 @@
 - [New] 新建平台通用登入頁面元件，提供「單一書店登入」與「載具登入 (多帳號)」兩種獨立分支選擇的視覺入口。
 - [UIUX] 調整登入方式按鈕順序：將「載具登入 (多帳號)」置於上方，「單一書店登入」置於下方。
 - [UIUX] 採用毛玻璃特效、置中卡片式設計。為符合強制登入邏輯，已移除原有的「回到首頁」退出連結。
-- [New] 擴充「單一書店登入」流程分支：點擊後會以水平滑動轉場進入「選擇登入書店」的子視窗，提供讀冊、三民、iRead 三間書店卡片供選擇跳轉。
+- [New] 擴充「單一書店登入」流程分支：點擊後會以水平滑動轉場進入「選擇登入書店」的子視窗，提供讀冊、三民、灰熊愛讀書三間書店卡片供選擇跳轉。
 - [Update] 調整 Login 視窗為獨立情境頁面：在 `openLoginView()` 被呼叫時會隱藏全域的 Desktop Header, Mobile Header 與 Bottom Navbar，退出時（透過路由在 `router.js` 切換時）自動恢復顯示，達到真正的全螢幕沉浸體驗。
 
 **2. [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)**
@@ -184,7 +286,7 @@
 **1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
 - [UIUX] 實作平行帳號登入模式，讓使用者可以選擇「單一書店登入」或「載具登入 (多帳號)」。
 - [New] 新增頂部模式切換按鈕 (`.mode-btn`)，點擊可切換兩種不同的登入流程畫面。
-- [Update] 將原有的各家書店連結卡片（讀冊、三民、iRead）移入「單一帳號登入模式容器」內。
+- [Update] 將原有的各家書店連結卡片（讀冊、三民、灰熊愛讀書）移入「單一帳號登入模式容器」內。
 - [New] 新增「載具登入模式」UI 流程：包含未綁定狀態的提示說明與認證按鈕，以及已綁定後自動帶入多筆書店帳號的畫面狀態。
 - [Update] 更新 `initAccountSectionEvents`，加入模式切換的 UI 更新事件，以及模擬載具驗證/解除綁定的行為提示。
 
@@ -237,7 +339,7 @@
 
 **2. [MODIFY] [bookmark.js](file:///d:/Projects/the-fictional-train/js/features/bookmark.js) & [Bookmark.js](file:///d:/Projects/the-fictional-train/js/views/Bookmark.js)**
 - [Fix] 更新因為重構造成 `state.selectedType` 遺失 Set Property (`has`, `size`) 的類型定義問題。
-- [Update] 修改配置 `bookmarkFilterConfig` 並將各個特殊屬性 (類型、顏色、排序) 全部隱藏手機版觸發按鈕，以單一客製化總列表按鈕 `extraMobileButtons` 替代。
+- [Update] 修改配置 `bookmarkFilterConfig` 並將各個特殊屬性 (類型、顏色、排序) 全部隱藏手機版觸發按鈕，以單一客製化總列表按鈕 `extraMobileButtons` ?代??
 - [Revert] 重新放回原本遭到替換掉的 `openBookmarkFilterDrawer` 與對應的 `#bookmark-filter-drawer` 單一抽屜面板，並串皆回共用的 DOM 事件來觸發桌面版。
 - [Style] 調整 Drawer 中「顯示類型」與「排序方式」按鈕選中時的樣式，改為和「劃線顏色」相同的藍色框線，並修正選取「筆記」時顏色篩選僅 Disable 非隱藏，及排序方向無選擇時預設不顯示箭頭。
 
@@ -430,7 +532,7 @@
 
 ##### [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)
 - 更新下拉選單內容結構：
-  - [Update] 主帳號顯示格式：`[灰熊] abcd123@gmail.com`
+  - [Update] 主帳號顯示格式：`[灰熊愛讀書] abcd123@gmail.com`
   - [New] 新增「已連結書店」區塊，以膠囊標籤顯示（`[讀冊]`、`[三民]`）
   - [Update] 「連結其他帳號」改為標題列右側的文字連結，減少視覺干擾
 - [New] 新增按鈕事件監聽，支援跳轉功能
@@ -447,7 +549,7 @@
 
 ##### [NEW] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)
 - 帳號管理區塊元件
-- 顯示書店帳號連結卡片（讀冊生活、三民書局、iRead 灰熊）
+- 顯示書店帳號連結卡片（讀冊生活、三民書局、灰熊愛讀書）
 - 包含連結說明區塊
 - 支援篩選：系統訊息、到期提醒、閱讀目標。
 

@@ -15,7 +15,7 @@ export const bookshelfFilterConfig = {
             id: 'source', label: '購書來源', type: 'select',
             options: [
                 { value: '全部', label: '全部' }, { value: 'TAAZE 讀冊', label: 'TAAZE 讀冊' },
-                { value: '三民書局', label: '三民書局' }, { value: 'iRead 灰熊', label: 'iRead 灰熊' }
+                { value: '三民書局', label: '三民書局' }, { value: '灰熊愛讀書', label: '灰熊愛讀書' }
             ]
         },
         {

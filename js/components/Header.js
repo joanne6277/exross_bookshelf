@@ -1,76 +1,7 @@
 import { NOTIFICATIONS_DATA } from '../data/notifications.js';
 import { openPersonalCenter } from '../views/PersonalCenter.js';
-
-const DROPDOWN_CONTENT = `
-    <div class="p-5" id="header-user-dropdown-content">
-        <!-- 裝置登入模式內容 -->
-        <div id="header-carrier-content" class="hidden">
-            <div class="flex items-center justify-between mb-4">
-                <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md flex items-center gap-1">
-                    <i data-lucide="smartphone" class="w-3 h-3"></i> 裝置登入模式
-                </span>
-                <button class="btn-link-other-accounts text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
-                    帳號管理
-                    <i data-lucide="external-link" class="w-3 h-3"></i>
-                </button>
-            </div>
-
-            <div class="mb-4">
-                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">已連結裝置</p>
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-                        <i data-lucide="user" class="w-4 h-4"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-gray-900 truncate">iPhone 17 Pro</p>
-                        <p class="text-xs text-gray-500 truncate">王大明</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mb-2">
-                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">同步書店帳號</p>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600 shrink-0">S</div>
-                        <span class="text-sm font-medium text-gray-700 flex-1 truncate">三民書局</span>
-                        <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 shrink-0"></i>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 shrink-0">T</div>
-                        <span class="text-sm font-medium text-gray-700 flex-1 truncate">讀冊生活</span>
-                        <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 shrink-0"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 單一書店登入模式內容 -->
-        <div id="header-single-content">
-            <div class="flex items-center justify-between mb-4">
-                <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-md flex items-center gap-1">
-                    <i data-lucide="store" class="w-3 h-3"></i> 單一書店登入
-                </span>
-                <button class="btn-link-other-accounts text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center gap-1">
-                    帳號管理
-                    <i data-lucide="external-link" class="w-3 h-3"></i>
-                </button>
-            </div>
-            <div class="mb-4">
-                <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">目前登入</p>
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0 font-bold text-lg">
-                        S
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-gray-900 truncate">三民書局</p>
-                        <p class="text-xs text-gray-500 truncate">abcd123@gmail.com</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-`;
+import { openLoginView } from '../views/Login.js';
+import { getAuthState, logout } from '../features/auth.js';
 
 function createNotificationDropdownHTML() {
     return `
@@ -96,14 +27,6 @@ function createNotificationDropdownHTML() {
             </div>
         </div>
     `;
-}
-
-function getNotificationColor(type) {
-    switch (type) {
-        case 'alert': return 'bg-red-500';
-        case 'success': return 'bg-green-500';
-        default: return 'bg-blue-500';
-    }
 }
 
 export function createHeaderHTML() {
@@ -143,6 +66,8 @@ export function createHeaderHTML() {
         </nav>
 
         <div class="flex items-center gap-4">
+            <div id="desktop-login-mode-container"></div>
+            
             <div class="relative group">
                 <button id="notification-btn-desktop" class="p-2 rounded-full hover:bg-gray-100 transition-colors relative notification-trigger">
                     <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
@@ -151,15 +76,13 @@ export function createHeaderHTML() {
                 ${notificationDropdown}
             </div>
             
-            <div class="relative group">
-                <button id="user-menu-btn-desktop"
-                    class="rounded-full w-9 h-9 bg-gray-200 flex items-center justify-center overflow-hidden hover:bg-gray-300 transition-all border border-gray-200 user-menu-trigger">
-                    <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
-                </button>
-                <div class="user-dropdown hidden absolute top-full right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left text-text-primary animate-fade-in-down">
-                    ${DROPDOWN_CONTENT}
+            <button id="user-menu-btn-desktop"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-all text-text-secondary hover:text-text-primary group">
+                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                    <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
-            </div>
+                <span class="text-sm font-medium">帳號管理</span>
+            </button>
         </div>
     </header>
 
@@ -228,10 +151,13 @@ export function initHeaderEvents() {
         });
     };
 
-    // User Menu
-    document.querySelectorAll('.user-menu-trigger').forEach(trigger => {
-        toggleDropdown(trigger, '.user-dropdown');
-    });
+    // User Menu Desktop (Direct Navigation)
+    const userMenuBtnDesktop = document.getElementById('user-menu-btn-desktop');
+    if (userMenuBtnDesktop) {
+        userMenuBtnDesktop.addEventListener('click', () => {
+            openPersonalCenter('account');
+        });
+    }
 
     // Notification Menu
     document.querySelectorAll('.notification-trigger').forEach(trigger => {
@@ -240,12 +166,10 @@ export function initHeaderEvents() {
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.user-dropdown') &&
-            !e.target.closest('.notification-dropdown') &&
-            !e.target.closest('.user-menu-trigger') &&
+        if (!e.target.closest('.notification-dropdown') &&
             !e.target.closest('.notification-trigger')) {
 
-            document.querySelectorAll('.user-dropdown, .notification-dropdown').forEach(d => {
+            document.querySelectorAll('.notification-dropdown').forEach(d => {
                 d.classList.add('hidden');
             });
         }
@@ -264,23 +188,6 @@ export function initHeaderEvents() {
 
             // Open personal center with notifications section
             openPersonalCenter('notifications');
-        });
-    });
-
-    // Link Other Accounts Button
-    const linkOtherAccountsBtns = document.querySelectorAll('.btn-link-other-accounts');
-    linkOtherAccountsBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Close user dropdown
-            document.querySelectorAll('.user-dropdown').forEach(d => {
-                d.classList.add('hidden');
-            });
-
-            // Open personal center with account section
-            openPersonalCenter('account');
         });
     });
 
@@ -305,26 +212,59 @@ export function initHeaderEvents() {
             openPersonalCenter('account');
         });
     }
+
+    // Listen to global changes
+    document.addEventListener('auth-state-changed', (e) => {
+        const authState = e.detail;
+        // Update mode tag
+        updateHeaderLoginMode(authState);
+    });
+
+    // Initial display
+    updateHeaderLoginMode(getAuthState());
 }
 
 /**
  * 更新 Header 的登入模式顯示
- * @param {string} mode 'single' 或 'carrier'
+ * @param {object} authState 
  */
-export function updateHeaderLoginMode(mode) {
-    document.querySelectorAll('#header-carrier-content').forEach(el => {
-        if (mode === 'carrier') {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
-    });
+export function updateHeaderLoginMode(authState) {
+    const defaultTag = document.getElementById('desktop-login-mode-tag');
+    const container = document.getElementById('desktop-login-mode-container');
+    
+    if (!container) return;
 
-    document.querySelectorAll('#header-single-content').forEach(el => {
-        if (mode === 'single') {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
-    });
+    // 清除舊狀態
+    if (defaultTag) defaultTag.remove();
+    container.innerHTML = '';
+
+    if (!authState.isLoggedIn || authState.loginMethod === 'null') {
+        return; // 未登入不顯示標籤
+    }
+
+    // 更新 Tag HTML
+    let tagHtml = '';
+    
+    if (authState.loginMethod === 'device') {
+        tagHtml = `
+            <div id="desktop-login-mode-tag" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-100 rounded-full">
+                <i data-lucide="smartphone" class="w-4 h-4 text-green-500"></i>
+                <span class="text-xs font-bold text-green-700">裝置登入模式</span>
+            </div>
+        `;
+    } else if (authState.loginMethod === 'single' && authState.linkedStores.length > 0) {
+        // 取第一個作為主要顯示
+        const primaryStoreStr = authState.linkedStores[0];
+        tagHtml = `
+            <div id="desktop-login-mode-tag" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-100 rounded-full">
+                <i data-lucide="store" class="w-4 h-4 text-green-500"></i>
+                <span class="text-xs font-bold text-green-700">${primaryStoreStr}登入</span>
+            </div>
+        `;
+    }
+
+    container.innerHTML = tagHtml;
+    if (window.lucide) {
+        window.lucide.createIcons({ root: container });
+    }
 }

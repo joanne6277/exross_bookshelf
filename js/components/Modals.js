@@ -457,7 +457,7 @@ export function createModalsHTML() {
                             class="flex items-center gap-3 p-3 rounded-lg border border-border-color cursor-pointer hover:bg-gray-50">
                             <input type="radio" name="mobile-source" value="iread"
                                 class="w-4 h-4 text-accent focus:ring-accent">
-                            <span class="text-sm font-medium text-text-primary">iRead 灰熊</span>
+                            <span class="text-sm font-medium text-text-primary">灰熊愛讀書</span>
                         </label>
                     </div>
                 </section>
@@ -719,7 +719,7 @@ export function createModalsHTML() {
                     <div class="flex flex-wrap gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="issue-bookstore" value="iread" class="w-4 h-4 text-accent focus:ring-accent" checked>
-                            <span class="text-sm font-medium text-text-primary">灰熊</span>
+                            <span class="text-sm font-medium text-text-primary">灰熊愛讀書</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="issue-bookstore" value="taaze" class="w-4 h-4 text-accent focus:ring-accent">

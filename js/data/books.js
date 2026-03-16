@@ -74,7 +74,7 @@ export const BOOKS_DATA = [
         remainingTime: '',
         publisher: "Flag",
         publishDate: "2023/11/15",
-        source: '灰熊',
+        source: '灰熊愛讀書',
         description: '探討設計主管如何帶領團隊，建立高效的設計文化與流程。',
         expiryDate: '',
         duration: '1 小時 05 分',

@@ -1,7 +1,9 @@
 // js/router.js
+import { isLoggedIn } from './features/auth.js';
+import { openLoginView } from './views/Login.js';
+
 export function initRouter() {
     const navLinks = document.querySelectorAll('.nav-link');
-    const views = document.querySelectorAll('.view-section');
 
     // Add click listeners
     navLinks.forEach(link => {
@@ -21,7 +23,12 @@ export function initRouter() {
         });
     });
 
-    // Initialize default view
+    // Initialize default view — 未登入先進登入頁
+    if (!isLoggedIn()) {
+        openLoginView();
+        return;
+    }
+
     const activeLink = document.querySelector('.nav-link.active');
     if (activeLink) {
         switchView(activeLink.dataset.view);
@@ -30,7 +37,13 @@ export function initRouter() {
     }
 }
 
-function switchView(viewName) {
+export function switchView(viewName) {
+    // 路由守衛：未登入一律導向登入頁
+    if (!isLoggedIn()) {
+        openLoginView();
+        return;
+    }
+
     const viewId = `view-${viewName}`;
 
     // Hide all views

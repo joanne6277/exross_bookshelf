@@ -8,6 +8,9 @@ export function createFooterHTML() {
                     <a href="https://www.ebookxross.com" target="_blank" rel="noopener noreferrer" class="text-sm text-text-secondary hover:text-blue-600 transition-colors">
                         關於我們
                     </a>
+                    <button id="footer-faq-btn" class="text-sm text-text-secondary hover:text-blue-600 transition-colors cursor-pointer outline-none">
+                        常見問題
+                    </button>
                     <button data-modal-target="issue-report-modal" class="text-sm text-text-secondary hover:text-blue-600 transition-colors cursor-pointer outline-none">
                         問題回報
                     </button>
