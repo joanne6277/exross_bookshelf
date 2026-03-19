@@ -254,7 +254,13 @@ export function updateHeaderLoginMode(authState) {
         `;
     } else if (authState.loginMethod === 'single' && authState.linkedStores.length > 0) {
         // 取第一個作為主要顯示
-        const primaryStoreStr = authState.linkedStores[0];
+        let primaryStoreStr = authState.linkedStores[0];
+
+        // [正名兼容層] 確保若 LocalStorage 存有舊名稱時，顯示為正確的新名稱
+        if (primaryStoreStr === 'iRead 灰熊' || primaryStoreStr === '灰熊') {
+            primaryStoreStr = '灰熊愛讀書';
+        }
+
         tagHtml = `
             <div id="desktop-login-mode-tag" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-100 rounded-full">
                 <i data-lucide="store" class="w-4 h-4 text-green-500"></i>

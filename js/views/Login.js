@@ -138,9 +138,6 @@ export function createLoginHTML() {
                             <p class="text-[11px] text-text-secondary leading-relaxed">初次登入後同步可能需要 1-2 分鐘。若仍未顯示，請確認您已正確連結該書籍所屬的書店帳號。</p>
                         </div>
                     </div>
-                    <div class="p-3 bg-gray-50 text-center">
-                        <button class="text-[11px] font-medium text-blue-600 hover:underline">前往完整常見問題</button>
-                    </div>
                 </div>
             </div>
 
@@ -274,21 +271,6 @@ export function initLoginEvents() {
         helpModal.addEventListener('click', (e) => {
             if (e.target === helpModal) hideModal();
         });
-
-        if (goToFaqBtn) {
-            goToFaqBtn.addEventListener('click', () => {
-                hideModal();
-                // 還原 Header 顯示，因為 PersonalCenter 需要它
-                const desktopHeader = document.getElementById('desktop-header');
-                const mobileHeader = document.getElementById('mobile-header');
-                const mobileBottomNav = document.getElementById('mobile-bottom-nav');
-                if (desktopHeader) desktopHeader.style.display = 'flex';
-                if (mobileHeader) mobileHeader.style.display = 'flex';
-                if (mobileBottomNav) mobileBottomNav.style.display = 'flex';
-                
-                openPersonalCenter('faq');
-            });
-        }
     }
 
     // 啟動頁面時若登入頁面顯示，應該啟動倒數

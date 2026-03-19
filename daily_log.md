@@ -1,5 +1,29 @@
 # Daily Log
 
+## 2026-03-19
+
+### 帳號管理與書櫃品牌正名修復
+
+**1. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [UIUX] 簡化單一書店模式下的目前登入方式卡片，移除多餘的「已連結：書店名稱」文字，提升介面簡潔度。
+- [Fix] 在 `createSingleModeHTML` 與 `createLinkedStoreTagsHTML` 中加入正名兼容層，確保即使資料中含有舊名稱（如「iRead 灰熊」），在帳號管理介面中也會正確顯示為「灰熊愛讀書」。
+
+**2. [MODIFY] [bookshelf.js](file:///d:/Projects/the-fictional-train/js/features/bookshelf.js)**
+- [Clean] 修正書櫃過濾邏輯中的舊名稱殘留，將原本轉譯為 `iRead` 的邏輯修正為統一使用 `灰熊愛讀書`。
+
+### Header 品牌正名修復
+
+**1. [MODIFY] [Header.js](file:///d:/Projects/the-fictional-train/js/components/Header.js)**
+- [Fix] 在 `updateHeaderLoginMode` 函式中加入正名兼容層，確保若 LocalStorage 存有舊名稱（如「iRead 灰熊」或「灰熊」）時，Header 登入模式標籤仍會正確顯示為「灰熊愛讀書登入」。
+
+### 登入幫助彈窗優化
+
+**1. [MODIFY] [Login.js](file:///d:/Projects/the-fictional-train/js/views/Login.js)**
+- [UIUX] 移除登入幫助彈窗（login-help-modal）底部的「前往完整常見問題」按鈕及其容器，簡化幫助資訊呈現。
+- [Clean] 同步移除 `initLoginEvents` 中針對 `goToFaqBtn` 的事件監聽與相關頁面跳轉邏輯，確保程式碼乾淨且無冗餘引用。
+
+---
+
 ## 2026-03-16
 
 ### 品牌正名：iRead 灰熊更名為「灰熊愛讀書」

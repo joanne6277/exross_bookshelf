@@ -14,9 +14,7 @@ const QR_COUNTDOWN_SECONDS = 90;
 /** 所有可切換的書店清單 */
 const ALL_STORES = [
     { name: '三民書局',   initial: 'S', colorClass: 'bg-green-100 text-green-700 border-green-200 hover:border-green-400' },
-    { name: '讀冊生活',   initial: 'T', colorClass: 'bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-400' },
     { name: '灰熊愛讀書', initial: 'i', colorClass: 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:border-yellow-400' },
-    { name: 'HyRead',     initial: 'H', colorClass: 'bg-purple-100 text-purple-700 border-purple-200 hover:border-purple-400' },
 ];
 
 // ──────────────────────────────────────────────────
@@ -102,7 +100,7 @@ function createQrBlockHTML() {
                 <h3 class="text-base font-bold text-text-primary">同步多家書櫃</h3>
             </div>
             <p class="text-xs text-text-secondary mb-5 max-w-sm mx-auto leading-relaxed">
-                使用書紐 App 掃描下方 QR Code，即可一鍵升級為裝置登入模式，同步您在各書店購買的所有藏書。
+                掃描下方 QR Code，即可一鍵升級為裝置登入模式，同步您在各書店購買的所有藏書。
             </p>
 
             <!-- QR Code 本體 -->
@@ -155,12 +153,12 @@ function createLinkedStoreTagsHTML(linkedStores) {
         '三民書局':   'bg-green-100 text-green-700 border-green-200',
         '讀冊生活':   'bg-blue-100 text-blue-700 border-blue-200',
         '灰熊愛讀書': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        'HyRead':     'bg-purple-100 text-purple-700 border-purple-200',
     };
 
     return `
         <div class="flex flex-wrap gap-2">
-            ${linkedStores.map(name => {
+            ${linkedStores.map(n => {
+                const name = (n === 'iRead 灰熊' || n === '灰熊') ? '灰熊愛讀書' : n;
                 const color = tagColors[name] || 'bg-gray-100 text-gray-700 border-gray-200';
                 return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border ${color}">
                     <i data-lucide="check" class="w-3.5 h-3.5"></i>${name}
@@ -257,8 +255,16 @@ function createLoggedOutHTML() {
  * @param {Object} authState
  */
 function createSingleModeHTML(authState) {
-    const primaryStore = authState.linkedStores[0] || '書店';
-    const linkedList   = authState.linkedStores.join('、');
+    let primaryStore = authState.linkedStores[0] || '書店';
+
+    // [正名兼容層] 確保若 LocalStorage 存有舊名稱時，顯示為正確的新名稱
+    if (primaryStore === 'iRead 灰熊' || primaryStore === '灰熊') {
+        primaryStore = '灰熊愛讀書';
+    }
+
+    const linkedList = authState.linkedStores.map(name => {
+        return (name === 'iRead 灰熊' || name === '灰熊') ? '灰熊愛讀書' : name;
+    }).join('、');
 
     return `
         <div class="acct-view-single animate-fade-in-up space-y-6">
@@ -271,7 +277,6 @@ function createSingleModeHTML(authState) {
                 <div>
                     <p class="text-sm font-medium text-text-secondary">目前登入方式</p>
                     <p class="text-base font-bold text-text-primary">透過 ${primaryStore} 帳號登入</p>
-                    ${linkedList ? `<p class="text-xs text-green-700 mt-0.5">已連結：${linkedList}</p>` : ''}
                 </div>
             </div>
 
