@@ -1,5 +1,13 @@
 # Daily Log
 
+## 2026-03-25
+
+### 常見問題擴充與分類功能
+
+**1. [MODIFY] [FaqSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/FaqSection.js)**
+- [Feature] 在常見問題清單 `FAQ_DATA` 中新增三個問題（包含更改密碼、支援裝置、QR Code 掃描問題）。
+- [UIUX] 新增 `FAQ_CATEGORIES` 定義分類（全部問題、帳號與同步、功能與操作、障礙排除），並於問題卡片中加上對應的分類標籤。
+- [Feature] 在常見問題標題旁新增「問題分類」下拉選單，並在 `initFaqSectionEvents` 中實裝根據分類即時過濾及重新渲染 FAQ 列表的邏輯（含重新呼叫 `lucide.createIcons()`）。
 ## 2026-03-19
 
 ### 帳號管理與書櫃品牌正名修復
