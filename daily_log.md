@@ -1,5 +1,19 @@
 # Daily Log
 
+## 2026-03-30
+
+### 裝置登入模式新增代碼登入方式
+
+**1. [MODIFY] [Login.js](file:///d:/Projects/the-fictional-train/js/views/Login.js)**
+- [New] 在裝置登入（QR Code 掃描）區域新增「切換為代碼」連結按鈕，並設為藍色以提升點擊提示感。
+- [Feature] 實作代碼登入模式：顯示一組隨機生成的 6 位數暫時性代碼，並提示使用者於 App 中輸入。
+- [Feature] 隨機代碼生成邏輯與現有的 90 秒倒數及重整機制連動。
+
+**2. [MODIFY] [AccountSection.js](file:///d:/Projects/the-fictional-train/js/components/personal-center/AccountSection.js)**
+- [New] 在帳號管理模組的「同步多家書櫃」區域，同步新增代碼登入切換功能。
+- [Feature] 實作與登入頁一致的掃碼與代碼模式切換邏輯，包含隨機代碼生成、計時器連動以及視覺狀態更新（如代碼顯示容器、模式說明文字）。
+- [UIUX] 代碼模式下會隱藏 QR Code 掃描動畫線並淡化 QR Code 容器，確保使用者焦點集中於代碼。
+
 ## 2026-03-25
 
 ### 常見問題擴充與分類功能

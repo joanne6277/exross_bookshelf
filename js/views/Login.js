@@ -53,8 +53,23 @@ export function createLoginHTML() {
                                     </div>
                                 </div>
                                 <!-- 說明文字與狀態 -->
-                                <div class="flex-1 text-center sm:text-left flex flex-col justify-center">
-                                    <p class="text-xs text-text-secondary leading-relaxed mb-3">開啟書紐 eXross App 掃描下方 QR Code，即可同步匯入您在各書店已購買的所有電子書</p>
+                                <div class="flex-1 text-center sm:text-left flex flex-col justify-center" id="login-method-desc">
+                                    <div id="qr-desc-container">
+                                        <p class="text-xs text-text-secondary leading-relaxed mb-1">開啟書紐 eXross App 掃描下方 QR Code，即可同步匯入您在各書店已購買的所有電子書</p>
+                                        <button id="switch-to-code-btn" class="text-[11px] text-blue-600 hover:underline mb-3 block w-full sm:w-auto text-center sm:text-left transition-all">
+                                            裝置無相機? 點我切換為代碼
+                                        </button>
+                                    </div>
+
+                                    <div id="code-desc-container" class="hidden">
+                                        <p class="text-xs text-text-secondary leading-relaxed mb-1">請開啟書紐 App 並在「裝置登入」功能中輸入下方代碼：</p>
+                                        <div id="login-auth-code" class="text-2xl font-black text-accent tracking-widest my-2 font-mono bg-white py-2 px-4 rounded-xl border-2 border-dashed border-accent/30 shadow-inner inline-block mx-auto sm:mx-0">
+                                            000-000
+                                        </div>
+                                        <button id="switch-to-qr-btn" class="text-[11px] text-blue-600 hover:underline mb-3 block w-full sm:w-auto text-center sm:text-left transition-all">
+                                            返回掃碼登入
+                                        </button>
+                                    </div>
                                     
                                     <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
                                         <span id="login-qr-status" class="text-xs font-bold text-gray-500 px-2 py-1 bg-gray-100 rounded-full">等待掃描中...</span>
@@ -105,7 +120,7 @@ export function createLoginHTML() {
 
                     <!-- 登入問題引導 -->
                     <div class="mt-8 text-center">
-                        <button id="login-help-btn" class="text-xs text-text-secondary hover:text-accent hover:underline transition-all flex items-center justify-center gap-1 mx-auto">
+                        <button id="login-help-btn" class="text-xs text-text-secondary hover:text-blue-600 hover:underline transition-all flex items-center justify-center gap-1 mx-auto">
                             <i data-lucide="help-circle" class="w-3 h-3"></i>
                             登入有問題？
                         </button>
@@ -193,19 +208,40 @@ export function initLoginEvents() {
     const qrScanLine = view.querySelector('#login-qr-scan-line');
     const qrExpiredOverlay = view.querySelector('#login-qr-expired-overlay');
 
+    // 代碼登入相關元素
+    const switchToCodeBtn = view.querySelector('#switch-to-code-btn');
+    const switchToQrBtn = view.querySelector('#switch-to-qr-btn');
+    const qrDescContainer = view.querySelector('#qr-desc-container');
+    const codeDescContainer = view.querySelector('#code-desc-container');
+    const authCodeDisplay = view.querySelector('#login-auth-code');
+
     let countdownTimer = null;
     let timeLeft = 90;
+    let currentMode = 'qr'; // 'qr' or 'code'
+
+    const generateAuthCode = () => {
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        return `${code.slice(0, 3)}-${code.slice(3)}`;
+    };
 
     const startCountdown = () => {
         clearInterval(countdownTimer);
         timeLeft = 90;
         qrCountdownSpan.textContent = `${timeLeft} 秒`;
         qrContainer.classList.remove('opacity-50', 'pointer-events-none');
-        qrScanLine.style.display = 'block';
+        qrScanLine.style.display = currentMode === 'qr' ? 'block' : 'none';
         qrExpiredOverlay.classList.add('hidden');
-        qrStatus.textContent = '等待掃描中...';
-        qrStatus.classList.replace('text-red-500', 'text-gray-500');
-        qrStatus.classList.replace('bg-red-50', 'bg-gray-100');
+        
+        // 更新代碼
+        if (authCodeDisplay) {
+            authCodeDisplay.textContent = generateAuthCode();
+        }
+
+        qrStatus.textContent = currentMode === 'qr' ? '等待掃描中...' : '等待輸入代碼...';
+        qrStatus.classList.remove('text-red-500', 'text-green-600');
+        qrStatus.classList.add('text-gray-500');
+        qrStatus.classList.remove('bg-red-50', 'bg-green-100');
+        qrStatus.classList.add('bg-gray-100');
 
         countdownTimer = setInterval(() => {
             timeLeft--;
@@ -222,10 +258,33 @@ export function initLoginEvents() {
         qrContainer.classList.add('opacity-50', 'pointer-events-none');
         qrScanLine.style.display = 'none';
         qrExpiredOverlay.classList.remove('hidden');
-        qrStatus.textContent = '已失效，請重整';
+        qrStatus.textContent = currentMode === 'qr' ? '已失效，請重整' : '代碼已失效';
         qrStatus.classList.replace('text-gray-500', 'text-red-500');
         qrStatus.classList.replace('bg-gray-100', 'bg-red-50');
     };
+
+    // 切換模式邏輯
+    if (switchToCodeBtn) {
+        switchToCodeBtn.addEventListener('click', () => {
+            currentMode = 'code';
+            qrDescContainer.classList.add('hidden');
+            codeDescContainer.classList.remove('hidden');
+            qrContainer.classList.add('opacity-20'); // 讓 QR Code 變淡，強調代碼
+            qrScanLine.style.display = 'none';
+            startCountdown();
+        });
+    }
+
+    if (switchToQrBtn) {
+        switchToQrBtn.addEventListener('click', () => {
+            currentMode = 'qr';
+            qrDescContainer.classList.remove('hidden');
+            codeDescContainer.classList.add('hidden');
+            qrContainer.classList.remove('opacity-20');
+            qrScanLine.style.display = 'block';
+            startCountdown();
+        });
+    }
 
     if (qrRefreshBtn) {
         qrRefreshBtn.addEventListener('click', () => {

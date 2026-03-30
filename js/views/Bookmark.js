@@ -43,7 +43,6 @@ export const bookmarkFilterConfig = {
         hideOnMobile: true,
         options: [
             { value: 'date', label: '依新增時間' },
-            { value: 'title', label: '依書名' },
             { value: 'page', label: '依閱讀位置' }
         ],
         defaultVal: 'date',

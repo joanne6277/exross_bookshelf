@@ -24,12 +24,22 @@ const ALL_STORES = [
 let qrTimerInterval = null;
 let qrTimeLeft = QR_COUNTDOWN_SECONDS;
 let qrExpired = false;
+let qrCurrentMode = 'qr'; // 'qr' or 'code'
+let qrAuthCode = '000-000';
 
 function stopQrTimer() {
     if (qrTimerInterval) {
         clearInterval(qrTimerInterval);
         qrTimerInterval = null;
     }
+}
+
+/**
+ * 隨機生成 6 位數代碼
+ */
+function generateAuthCode() {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    return `${code.slice(0, 3)}-${code.slice(3)}`;
 }
 
 /**
@@ -40,6 +50,10 @@ function startQrTimer(container) {
     stopQrTimer();
     qrTimeLeft = QR_COUNTDOWN_SECONDS;
     qrExpired = false;
+    
+    // 更新代碼
+    qrAuthCode = generateAuthCode();
+    
     updateQrDisplay(container);
 
     qrTimerInterval = setInterval(() => {
@@ -63,25 +77,35 @@ function updateQrDisplay(container) {
     const refreshBtn  = container.querySelector('#acct-qr-refresh-btn');
     const scanLine    = container.querySelector('#acct-qr-scan-line');
     const simulateBtn = container.querySelector('#acct-qr-simulate-btn');
+    const qrContainer = container.querySelector('#acct-qr-container');
+    const authCodeEl  = container.querySelector('#acct-auth-code-display');
 
     if (!countdownEl) return;
 
+    // 更新代碼顯示
+    if (authCodeEl) authCodeEl.textContent = qrAuthCode;
+
     if (qrExpired) {
-        countdownEl.textContent = 'QR Code 已失效';
+        countdownEl.textContent = qrCurrentMode === 'qr' ? 'QR Code 已失效' : '代碼已失效';
         if (statusEl) {
-            statusEl.textContent = 'QR Code 已失效，請重新整理';
+            statusEl.textContent = qrCurrentMode === 'qr' ? 'QR Code 已失效，請重新整理' : '代碼已失效，請重新整理';
             statusEl.className = 'text-xs text-red-500 mt-2 font-medium';
         }
         if (scanLine) scanLine.style.display = 'none';
         if (simulateBtn) simulateBtn.disabled = true;
+        if (qrContainer) qrContainer.classList.add('opacity-50');
     } else {
-        countdownEl.textContent = `QR Code 重整倒數: ${qrTimeLeft} 秒`;
+        countdownEl.textContent = `重整倒數: ${qrTimeLeft} 秒`;
         if (statusEl) {
-            statusEl.textContent = '等待掃描中...'  ;
+            statusEl.textContent = qrCurrentMode === 'qr' ? '等待掃描中...' : '等待輸入代碼...';
             statusEl.className = 'text-xs text-gray-400 mt-2 font-medium';
         }
-        if (scanLine) scanLine.style.display = '';
+        if (scanLine) scanLine.style.display = qrCurrentMode === 'qr' ? '' : 'none';
         if (simulateBtn) simulateBtn.disabled = false;
+        if (qrContainer) {
+            qrContainer.classList.remove('opacity-50');
+            qrContainer.classList.toggle('opacity-20', qrCurrentMode === 'code');
+        }
     }
 }
 
@@ -99,13 +123,32 @@ function createQrBlockHTML() {
                 <i data-lucide="smartphone" class="w-5 h-5 text-[var(--bg-accent)]"></i>
                 <h3 class="text-base font-bold text-text-primary">同步多家書櫃</h3>
             </div>
-            <p class="text-xs text-text-secondary mb-5 max-w-sm mx-auto leading-relaxed">
-                掃描下方 QR Code，即可一鍵升級為裝置登入模式，同步您在各書店購買的所有藏書。
-            </p>
+            
+            <div id="acct-qr-desc">
+                <p class="text-xs text-text-secondary mb-1 max-w-sm mx-auto leading-relaxed">
+                    掃描下方 QR Code，即可一鍵升級為裝置登入模式，同步您在各書店購買的所有藏書。
+                </p>
+                <button id="acct-switch-to-code-btn" class="text-[11px] text-blue-600 hover:underline mb-4 inline-block transition-all">
+                    裝置無相機? 點我切換為代碼
+                </button>
+            </div>
+
+            <div id="acct-code-desc" class="hidden">
+                <p class="text-xs text-text-secondary mb-1 max-w-sm mx-auto leading-relaxed">
+                    請開啟書紐 App 並在「裝置登入」功能中輸入下方代碼：
+                </p>
+                <div id="acct-auth-code-display" class="text-2xl font-black text-[var(--bg-accent)] tracking-widest my-3 font-mono bg-white py-2 px-4 rounded-xl border-2 border-dashed border-blue-200 shadow-inner inline-block mx-auto">
+                    000-000
+                </div>
+                <br>
+                <button id="acct-switch-to-qr-btn" class="text-[11px] text-blue-600 hover:underline mb-4 inline-block transition-all">
+                    返回掃碼模式
+                </button>
+            </div>
 
             <!-- QR Code 本體 -->
             <div class="inline-block relative mb-3">
-                <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 inline-block overflow-hidden relative" style="width:148px; height:148px;">
+                <div id="acct-qr-container" class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 inline-block overflow-hidden relative transition-opacity" style="width:148px; height:148px;">
                     <i data-lucide="qr-code" class="w-full h-full text-gray-800"></i>
                     <!-- 掃描動畫線：與 Login.js 使用相同的 scan keyframe -->
                     <div id="acct-qr-scan-line"
@@ -117,7 +160,7 @@ function createQrBlockHTML() {
 
             <!-- 倒數與狀態 -->
             <p id="acct-qr-countdown" class="text-xs text-gray-400 font-medium">
-                QR Code 重整倒數: ${QR_COUNTDOWN_SECONDS} 秒
+                重整倒數: ${QR_COUNTDOWN_SECONDS} 秒
             </p>
             <p id="acct-qr-status" class="text-xs text-gray-400 mt-2 font-medium">
                 等待掃描中...
@@ -470,6 +513,30 @@ function bindInternalEvents(container) {
         });
     }
 
+    // ---- QR Code：切換模式 ----
+    const switchToCodeBtn = container.querySelector('#acct-switch-to-code-btn');
+    const switchToQrBtn = container.querySelector('#acct-switch-to-qr-btn');
+    const qrDesc = container.querySelector('#acct-qr-desc');
+    const codeDesc = container.querySelector('#acct-code-desc');
+
+    if (switchToCodeBtn) {
+        switchToCodeBtn.addEventListener('click', () => {
+            qrCurrentMode = 'code';
+            qrDesc.classList.add('hidden');
+            codeDesc.classList.remove('hidden');
+            startQrTimer(container);
+        });
+    }
+
+    if (switchToQrBtn) {
+        switchToQrBtn.addEventListener('click', () => {
+            qrCurrentMode = 'qr';
+            qrDesc.classList.remove('hidden');
+            codeDesc.classList.add('hidden');
+            startQrTimer(container);
+        });
+    }
+
     // ---- QR Code：模擬掃描（升級為 device 登入，並跳回首頁）----
     const simulateBtn = container.querySelector('#acct-qr-simulate-btn');
     if (simulateBtn) {
@@ -479,7 +546,7 @@ function bindInternalEvents(container) {
             // 更新掃描中狀態
             const statusEl = container.querySelector('#acct-qr-status');
             if (statusEl) {
-                statusEl.textContent = '掃描成功！驗證裝置授權中...';
+                statusEl.textContent = qrCurrentMode === 'qr' ? '掃描成功！驗證裝置授權中...' : '代碼正確！驗證裝置授權中...';
                 statusEl.className = 'text-xs text-[var(--bg-accent)] mt-2 font-medium';
             }
             simulateBtn.disabled = true;
